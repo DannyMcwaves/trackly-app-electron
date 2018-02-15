@@ -37,7 +37,6 @@ export class DashboardComponent implements OnInit {
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
             // Increase current session
             this.incrementCurrentSession(); // TODO: Fix a bug, isn't reflecting in a view
-
             console.log('tick');
         });
     }
@@ -61,6 +60,11 @@ export class DashboardComponent implements OnInit {
         this.activeProject = project;
         // console.log('project started');
         ipcRenderer.send("timer", {action: "start"});
+    }
+
+    stopTimer(project: any) {
+        alert("stopping timer");
+        ipcRenderer.send("timer", {action: "stop"});
     }
 
     getProjects() {

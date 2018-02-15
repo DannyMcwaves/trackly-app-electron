@@ -12,105 +12,10 @@ import {Observable} from "rxjs/Rx";
 
 class Activity {
 
-    public appendActivity(isActive: boolean) {
-        const activitiesFile = this.getCurrentRecordFile();
-
-        if (isActive !== this.userCurrentActivityStatus) {
-
-            try {
-                fs.readFile(activitiesFile, (err, data: any) => {
-                    const json = JSON.parse(data);
-                    json.records.push({
-                        isActive: this.userCurrentActivityStatus,
-                        timestamp: Date.now(),
-                    });
-
-                    fs.writeFile(activitiesFile, JSON.stringify(json), () => {
-                    });
-                });
-            } catch (e) {
-                logger.error(e.toString());
-            }
-        }
-
-    }
-
-    /*
-     * Get current record file for storing activities or create new if
-     * this one is older than allowed log rotation time span
-     */
-    public getCurrentRecordFile() {
-        let recordFile: string;
-        const cachedTimeStamp = Activity.getUNIXTimestamp();
-
-        Activity.ensureDirExists(this.getActivitiesFolder());
-        const recordFiles = fse.readdirSync(this.getActivitiesFolder());
-
-        if (recordFiles.length) { // Check if any activities already saved
-            recordFiles.forEach((file: any) => {
-                const unixFileName = Activity.convertFileNameToUnixTimestamp(file);
-
-                if ((cachedTimeStamp - unixFileName) < this.config.records.fileRotation) {
-                    recordFile = this.getActivitiesFolder() + unixFileName + ".json";
-                }
-            });
-        } else {
-            const newFile = this.getActivitiesFolder() + cachedTimeStamp.toString() + ".json";
-            this.takeScreenShot(cachedTimeStamp.toString());
-            const blankActivity = {
-                created: cachedTimeStamp,
-                records: [] as any[],
-            };
-            jsonfile.writeFile(newFile, blankActivity, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            });
-
-            recordFile = newFile;
-        }
-
-        console.log(recordFile);
-
-        return recordFile;
-    }
-
-
-    /*
-     * Begin logging user actions with Observables
-     */
-    public startActivity() {
-        ioHook.start(false);
-        ioHook.on("keypress", () => {
-            this.userCurrentActivityStatus = true;
-        });
-        ioHook.on("mousemove", () => {
-            this.userCurrentActivityStatus = true;
-        });
-
-        return Observable
-            .interval(1000)
-            .map(() => {
-                const v = this.userCurrentActivityStatus;
-                this.userCurrentActivityStatus = false;
-                return v;
-            });
-    }
-
-    /*
-     * Stop logging user actions
-     */
-    public stopActivity() {
-        this.timerRunning = false;
-
-        ioHook.unload();
-        ioHook.stop();
-    }
-
-    private static convertFileNameToUnixTimestamp(fileName: string, extension = ".json") {
-        const extensionLength = extension.length;
-        return parseInt(fileName.slice(0, -extensionLength));
-    }
+    private activeFile: string;
+    private timerRunning = false;
+    private timerInterval = 1000;
+    public userIsActive = false; // TODO: Move this to local scope
 
     private static getUTCTimestamp() {
         return new Date().getTime();
@@ -120,75 +25,145 @@ class Activity {
         return Date.now();
     }
 
-    /*
-     * Ensure that directory with all the subdirectories exist on disk
+    /**
+     * Return path to the records folder independent
+     * of the user OS.
      */
-    private static ensureDirExists(dir: string) {
+    private static getRecordsPath() {
+        return app.getPath("userData") + "/records";
+    }
+
+    /**
+     * Get folder with the activities files.
+     */
+    private static getActivitiesFolder() {
+        return Activity.getRecordsPath() + '/activities';
+    }
+
+    /**
+     * Get folder with screenshot files.
+     */
+    private static getScreenshotsFolder() {
+        return Activity.getRecordsPath() + '/screenshots';
+    }
+
+    /**
+     * Generates a new file and puts it into memory.
+     */
+    public openFile(userId: string, project: string) {
+        const dir = Activity.getActivitiesFolder();
         if (!fse.existsSync(dir)) {
             fse.ensureDirSync(dir);
         }
-    }
 
-    private baseDir: string;
-    private userCurrentActivityStatus = false;
-    private timerRunning = false;
+        const timeStamp = Activity.getUNIXTimestamp();
+        this.activeFile = Activity.getActivitiesFolder() + '/' + timeStamp.toString() + ".json";
 
-    private config = {
-        records: {
-            activities: {
-                directory: "activities/",
-                interval: 5000,
-            },
-            fileRotation: 600000,
-            screenshots: {
-                directory: "screenshots/",
-                extension: ".jpg",
-                height: 900,
-                quality: 100,
-            },
-        },
-    };
+        // Add initial skeleton to a file
+        const _ = {
+            userId: userId,
+            createdAt: Activity.getUTCTimestamp(),
+            activity: [] as any[],
+            events: [] as any[]
+        };
 
-
-    constructor() {
-        this.baseDir = app.getPath("userData") + "/records/";
+        jsonfile.writeFile(this.activeFile, _, (err) => {
+            if (err) {
+                console.log(err);
+            }
+        });
     }
 
     /*
-     * Extract timestamp from file name
+     * Append new activity the active file.
      */
+    public appendActivity(active: boolean) {
 
-    private getScreenshotsFolder() {
-        return this.baseDir + this.config.records.screenshots.directory;
-    }
+        if (active !== this.userIsActive) {
+            try {
+                fs.readFile(this.activeFile, (err, data: any) => {
+                    const json = JSON.parse(data);
+                    json.activity.push({
+                        isActive: active,
+                        timestamp: Date.now(),
+                    });
 
-    private getActivitiesFolder() {
-        return this.baseDir + this.config.records.activities.directory;
-    }
-
-    /*
-     * Take a screen shot of user's desktop
-     */
-    private takeScreenShot(imageName: string) {
-        const imageExtension = this.config.records.screenshots.extension;
-        const finalImageName = this.getScreenshotsFolder() + imageName + imageExtension;
-
-        try {
-            Activity.ensureDirExists(this.getScreenshotsFolder());
-        } catch (error) {
-            logger.log(error.toString());
+                    fs.writeFile(this.activeFile, JSON.stringify(json), () => {
+                    });
+                });
+            } catch (e) {
+                logger.error(e.toString());
+            }
         }
-
-        screenshot(finalImageName, {
-                height: this.config.records.screenshots.height,
-                quality: this.config.records.screenshots.quality,
-            },
-            (error: any, complete: any) => {
-                if (error) {
-                    logger.error(error.toString());
-                }
-            });
     }
+
+    /**
+     * Append event to active file.
+     */
+    public appendEvent(event: string) {
+        try {
+            fs.readFile(this.activeFile, (err, data: any) => {
+                const json = JSON.parse(data);
+                json.events.push({
+                    type: event,
+                    timestamp: Date.now(),
+                });
+
+                fs.writeFile(this.activeFile, JSON.stringify(json), () => {
+                });
+            });
+        } catch (e) {
+            logger.error(e.toString());
+        }
+    }
+
+    /**
+     * Start tracking activity for a specific user on a specific project.
+     * @param {string} user
+     * @param {string} projectId
+     * @returns {Observable<boolean>}
+     */
+    public startActivity(user: string, projectId: string) {
+        this.timerRunning = true;
+        this.openFile('test', 'test');
+        this.appendEvent('startLogging');
+
+        console.log(this.activeFile);
+
+        ioHook.start(false); // Disable dev logger
+
+        // Track events
+        ioHook.on("keypress", () => {
+            this.userIsActive = true;
+        });
+        ioHook.on("mousemove", () => {
+            this.userIsActive = true;
+        });
+
+        return Observable.interval(this.timerInterval).map(() => {
+            const _userIsActive = this.userIsActive;
+            this.userIsActive = false;
+            return _userIsActive;
+        });
+    }
+
+    /**
+     * Stop tracking user activity.
+     */
+    public stopActivity() {
+        this.timerRunning = false;
+
+        ioHook.unload();
+        ioHook.stop();
+    }
+
+    /**
+     * Take screenshot of user's desktop.
+     */
+    public takeScreenshot() {
+        // PS
+    }
+
 }
 
 export default new Activity();

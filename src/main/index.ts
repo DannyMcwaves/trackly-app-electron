@@ -93,23 +93,18 @@ ipcMain.on('open:link', (event: any, link: string) => {
 ipcMain.on("timer", (event: any, args: any) => {
     // Start timer, subscribe to activity observer
     if (args.action == 'start') {
-        activityInstance = masterActivity.startActivity().subscribe(
+        activityInstance = masterActivity.startActivity('test', 'test').subscribe(
             (userActive) => {
-                mainWindow.webContents.send("timer:tick", {
-                    data: true,
-                    timer: true,
-                });
-                Activity.appendActivity(userActive);
+                mainWindow.webContents.send("timer:tick", {});
+                masterActivity.appendActivity(userActive);
             },
         );
     }
 
+    // Stop timer
     if (args.action == 'stop') {
         activityInstance.unsubscribe();
         masterActivity.stopActivity();
-        mainWindow.webContents.send("timer:tick", {
-            timer: false,
-        });
     }
 
     if (args.action == 'pause') {

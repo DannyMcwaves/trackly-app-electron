@@ -1,0 +1,26 @@
+<div id="wrapper">
+<header>
+    <img src="../assets/logo.svg" alt="" id="logo">
+    <ul id="user-nav">
+        <li><a (click)="openSignup()" href="#">Sign up</a></li>
+    </ul>
+</header>
+<section id="content">
+
+    <div *ngIf="loginTriedAndFailed" class="alert alert-danger mb-0">
+        Email and password didn't match.
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-control-group">
+            <input formControlName="email" type="email" class="form-control" placeholder="Email">
+        </div>
+        <div class="form-control-group">
+            <input formControlName="password" type="password" class="form-control" placeholder="Password">
+        </div>
+        <div class="form-control-group mt-4 text-right">
+            <button type="submit" class="btn btn-primary btn-block">Log in</button>
+        </div>
+    </form>
+</section>
+</div>

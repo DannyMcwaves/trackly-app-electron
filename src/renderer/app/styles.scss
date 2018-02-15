@@ -1,5 +1,51 @@
+$blue: #125BED;
+$font-size-base: 1rem;
 
-$blue: #72d0eb;
-$family-serif: "Merriweather", "Georgia", serif;
+@import "~bootstrap/scss/bootstrap.scss";
 
-@import "~bulma";
+body {
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;  // Disable user from selecting text
+}
+
+ul {
+    margin-bottom: 0;
+}
+
+.btn {
+    font-weight: 500;
+}
+
+#content {
+    padding: 20px;
+}
+
+.form-control {
+    border-radius: 0;
+    border:none;
+    border-bottom:1px solid #dcecf8;
+    color: #212121;
+    font-size: 12px;
+    font-weight: 500;
+    height: 36px;
+    padding: 0px 5px;
+}
+
+.form-control:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.form-control-group {
+    margin-bottom: 10px;
+}
+
+::-webkit-input-placeholder {
+    color: #727f8c !important;
+}
+
+.alert {
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}

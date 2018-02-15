@@ -1,4 +1,5 @@
 import {Component, ViewEncapsulation} from "@angular/core";
+import {ipcRenderer} from "electron";
 
 import "./styles.scss";
 
@@ -8,5 +9,11 @@ import "./styles.scss";
     encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
+
+    myFunc() {
+        ipcRenderer.send("auth", {
+            token: "test",
+        });
+    }
 
 }

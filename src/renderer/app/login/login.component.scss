@@ -1,0 +1,39 @@
+$t-bg-blue: #f1f9ff;
+
+header {
+    font-size: 12px;
+    height: 60px;
+    line-height: 60px;
+    padding-right: 20px;
+    padding-left: 20px;
+    background-image: -webkit-linear-gradient(180deg, #0074ee, #006ee2);
+
+    #logo {
+        margin-top: 15px;
+        height: 30px;
+        float: left;
+        vertical-align: middle;
+    }
+
+    ul {
+        float: right;
+        padding: 0;
+        list-style-type: none;
+
+        li {
+
+            a{
+                color: $t-bg-blue;
+            }
+
+            a:hover {
+                text-decoration: underline;
+                color: $t-bg-blue;
+            }
+        }
+    }
+}
+
+form {
+    padding: 10px 0;
+}

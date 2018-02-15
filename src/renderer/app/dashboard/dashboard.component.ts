@@ -89,10 +89,6 @@ export class DashboardComponent implements OnInit {
         this.currentSession++;
     }
 
-    uploadActivities() {
-        console.log('upload');
-        ipcRenderer.send('upload', {action: 'start'});
-    };
 
     ngOnInit() {
         // Load in the workspaces

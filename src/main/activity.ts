@@ -9,6 +9,7 @@ import * as fs from "fs";
 import * as ioHook from "iohook";
 import * as jsonfile from "jsonfile";
 import {Observable} from "rxjs/Rx";
+import * as req from "request";
 
 class Activity {
 
@@ -152,6 +153,21 @@ class Activity {
      */
     public stopActivity() {
         this.timerRunning = false;
+
+        const formData = {
+            res: fse.createReadStream(this.activeFile)
+        };
+
+        req.post({
+            //url: 'https://trackly.com/api/eventFiles/upload?access_token=cCOaYmraL6V0Pg6nyd2KeJjYr4mrJV2ph8VzzyA7BtRimFjoEgjZjChS4CFLlebq',
+            //formData: formData
+        },
+        (success => {
+            console.log(success);
+        }),
+        (error => {
+            console.log('error');
+        }));
 
         ioHook.unload();
         ioHook.stop();

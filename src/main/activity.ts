@@ -18,10 +18,6 @@ class Activity {
     private timerInterval = 1000;
     public userIsActive = false; // TODO: Move this to local scope
 
-    private static getUTCTimestamp() {
-        return new Date().getTime();
-    }
-
     private static getUNIXTimestamp() {
         return Date.now();
     }
@@ -63,7 +59,7 @@ class Activity {
         // Add initial skeleton to a file
         const _ = {
             userId: userId,
-            createdAt: Activity.getUTCTimestamp(),
+            createdAt: new Date().getTime(),
             activity: [] as any[],
             events: [] as any[]
         };
@@ -86,7 +82,7 @@ class Activity {
                     const json = JSON.parse(data);
                     json.activity.push({
                         isActive: active,
-                        timestamp: Date.now(),
+                        timestamp: new Date().getTime(),
                     });
 
                     fs.writeFile(this.activeFile, JSON.stringify(json), () => {
@@ -107,7 +103,7 @@ class Activity {
                 const json = JSON.parse(data);
                 json.events.push({
                     type: event,
-                    timestamp: Date.now(),
+                    timestamp: new Date().getTime(),
                 });
 
                 fs.writeFile(this.activeFile, JSON.stringify(json), () => {
@@ -126,7 +122,7 @@ class Activity {
      */
     public startActivity(user: string, projectId: string) {
         this.timerRunning = true;
-        this.openFile('test', 'test');
+        this.openFile(user, projectId);
         this.appendEvent('startLogging');
 
         console.log(this.activeFile);
@@ -158,16 +154,16 @@ class Activity {
             res: fse.createReadStream(this.activeFile)
         };
 
-        req.post({
-            //url: 'https://trackly.com/api/eventFiles/upload?access_token=cCOaYmraL6V0Pg6nyd2KeJjYr4mrJV2ph8VzzyA7BtRimFjoEgjZjChS4CFLlebq',
-            //formData: formData
-        },
-        (success => {
-            console.log(success);
-        }),
-        (error => {
-            console.log('error');
-        }));
+        // /*req.post({
+        //         url: 'https://trackly.com/api/eventFiles/upload?access_token=cCOaYmraL6V0Pg6nyd2KeJjYr4mrJV2ph8VzzyA7BtRimFjoEgjZjChS4CFLlebq',
+        //         formData: formData
+        //     },
+        //     (success => {
+        //         console.log(success);
+        //     }),
+        //     (error => {
+        //         console.log('error');
+        //     }));*/
 
         ioHook.unload();
         ioHook.stop();

@@ -18,7 +18,7 @@
         <div id="timer">
             <!-- Timer clock -->
             <div class="timer-clock">
-                <h3>00:00:00</h3>
+                <h3>00:00:{{currentSession}}</h3>
                 <small>Total time today</small>
             </div>
             <!-- / Timer clock -->
@@ -28,10 +28,12 @@
                 <button (click)="stopTimer('test')" class="btn btn-sm btn-outline-primary">Stop</button>
                 <div ngbDropdown class="d-inline-block">
                     <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
-                    {{ activeWorkspace.title }}</button>
+                        {{ activeWorkspace.title }}
+                    </button>
                     <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right">
-                        <button (click)="changeWorkspace(ws)" *ngFor="let ws of workspaces" 
-                                class="dropdown-item btn-sm">{{ws.title}}</button>
+                        <button (click)="changeWorkspace(ws)" *ngFor="let ws of workspaces"
+                                class="dropdown-item btn-sm">{{ws.title}}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -41,8 +43,8 @@
         <!-- Projects -->
         <div id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
-                <i  (click)="startTimer(project)"
-                    [ngClass]="'fa fa-play-circle project-button'">
+                <i (click)="startTimer(project)"
+                   [ngClass]="'fa fa-play-circle project-button'">
                 </i>
                 <h3 class="project-title">{{project.title}}</h3>
                 <h3 class="project-timer">00:00:00</h3>
@@ -51,7 +53,7 @@
         <!-- / Projects -->
     </section>
     <!-- / Content -->
-    
+
     <!-- Footer -->
     <footer>
         <div class="footer-sync">

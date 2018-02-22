@@ -16,7 +16,7 @@ export class DashboardComponent implements OnInit {
     private user: any;
     private projects: any;
     private workspaces: any;
-    private activeWorkspace = {title: 'Choose a workspace', id: 0};
+    private activeWorkspace: any;
     private activeProject: Object;
     private currentSession = 0;
     private lastSynced: any;
@@ -29,10 +29,6 @@ export class DashboardComponent implements OnInit {
      * @param {HttpClient} http
      */
     constructor(private userService: UserService, private router: Router, private http: HttpClient) {
-        if (!localStorage.getItem("token")) {
-            this.router.navigate(["login"]);
-        }
-
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
             // Increase current session
@@ -90,6 +86,10 @@ export class DashboardComponent implements OnInit {
     }
 
 
+    logOut() {
+        this.router.navigate(['login']);
+    }
+
     ngOnInit() {
         // Load in the workspaces
         this.getWorkspaces().subscribe(response => {
@@ -97,6 +97,10 @@ export class DashboardComponent implements OnInit {
             if (!this.activeWorkspace) {
                 this.activeWorkspace = this.workspaces[0];
             }
+
+            this.getProjects().subscribe(response => {
+                this.projects = response;
+            });
         });
     }
 }

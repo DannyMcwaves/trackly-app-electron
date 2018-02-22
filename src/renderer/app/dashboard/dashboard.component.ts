@@ -53,9 +53,13 @@ export class DashboardComponent implements OnInit {
     }
 
     startTimer(project: any) {
-        this.activeProject = project;
-        // console.log('project started');
-        ipcRenderer.send("timer", {action: "start"});
+        if (project == this.activeProject) {
+            ipcRenderer.send("timer", {action: "stop"});
+        } else {
+            this.activeProject = project;
+            ipcRenderer.send("timer", {action: "start"});
+        }
+
     }
 
     stopTimer(project: any) {
@@ -74,10 +78,16 @@ export class DashboardComponent implements OnInit {
         return this.http.get(`https://trackly.com/api/users/${uath.userId}/workspaces?access_token=${uath.authToken}`);
     }
 
+    /**
+     * Change workspace from dropdown toggle.
+     * @param workspace
+     */
     changeWorkspace(workspace: any) {
         this.activeWorkspace = workspace;
         this.getProjects().subscribe(response => {
             this.projects = response;
+        }, error => {
+            alert("There was an error changing the workspace!")
         });
     }
 
@@ -85,11 +95,16 @@ export class DashboardComponent implements OnInit {
         this.currentSession++;
     }
 
-
+    /**
+     * Log user out of the application
+     */
     logOut() {
         this.router.navigate(['login']);
     }
 
+    /**
+     * Load initial projects
+     */
     ngOnInit() {
         // Load in the workspaces
         this.getWorkspaces().subscribe(response => {

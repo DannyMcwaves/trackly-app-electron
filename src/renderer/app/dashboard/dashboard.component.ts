@@ -1,4 +1,4 @@
-import {Component, ViewEncapsulation} from "@angular/core";
+import {Component, ViewEncapsulation, NgZone} from "@angular/core";
 import {ipcRenderer} from "electron";
 
 import "./dashboard.component.scss";
@@ -28,12 +28,12 @@ export class DashboardComponent implements OnInit {
      * @param {Router} router
      * @param {HttpClient} http
      */
-    constructor(private userService: UserService, private router: Router, private http: HttpClient) {
+    constructor(private userService: UserService, private router: Router, 
+                private http: HttpClient, public zone: NgZone) {
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
-            // Increase current session
-            this.incrementCurrentSession(); // TODO: Fix a bug, isn't reflecting in a view
-            console.log('tick');
+            this.zone.run(() => this.currentSession = this.currentSession +1);
+            console.log(this.currentSession);
         });
     }
 

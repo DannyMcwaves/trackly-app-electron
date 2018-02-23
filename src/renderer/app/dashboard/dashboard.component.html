@@ -27,7 +27,7 @@
             <div class="timer-button">
                 <div ngbDropdown class="d-inline-block">
                     <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
-                        {{ activeWorkspace.title }}
+                        {{ activeWorkspace?.title }}
                     </button>
                     <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right">
                         <button (click)="changeWorkspace(ws)" *ngFor="let ws of workspaces"

@@ -2,11 +2,12 @@
 const screenshot = require("desktop-screenshot");
 // tslint:disable-next-line:no-var-requires
 const fse = require("fs-extra");
+// tslint:disable-next-line:no-var-requires
+const ioHook = require('iohook');
 import { app } from "electron";
 
 import * as logger from "electron-log";
 import * as fs from "fs";
-import * as ioHook from "iohook";
 import * as jsonfile from "jsonfile";
 import { Observable } from "rxjs/Rx";
 import * as req from "request";
@@ -66,7 +67,7 @@ class Activity {
 
     jsonfile.writeFile(this.activeFile, _, err => {
       if (err) {
-        console.log(err);
+        logger.error("File upload failed: " + this.activeFile);
       }
     });
   }
@@ -122,7 +123,7 @@ class Activity {
     this.openFile(user, projectId);
     this.appendEvent("startLogging");
 
-    console.log(this.activeFile);
+    logger.info("New activity file created: " + this.activeFile);
 
     ioHook.start(false); // Disable dev logger
 
@@ -135,6 +136,7 @@ class Activity {
     });
 
     return Observable.interval(this.timerInterval).map(() => {
+      console.log(this.userIsActive);
       const _userIsActive = this.userIsActive;
       this.userIsActive = false;
       return _userIsActive;

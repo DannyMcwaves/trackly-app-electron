@@ -81,6 +81,7 @@ class Activity {
   public appendActivity(active: boolean) {
 
     console.log('is active: ' + active + " - - - - " + this.lastUserActivity);
+    console.log(this.userActivityDuration);
 
     if (active !== this.lastUserActivity) {
 
@@ -91,12 +92,13 @@ class Activity {
           const json = JSON.parse(data);
           json.activity.push({
             userActive: active,
-            duration: new Date().getTime()
+            duration: this.userActivityDuration
           });
 
           fs.writeFile(this.activeFile, JSON.stringify(json), () => {});
 
           this.lastUserActivity = active;
+          this.userActivityDuration = 0;
         });
       } catch (e) {
         logger.error(e.toString());
@@ -150,6 +152,7 @@ class Activity {
 
     return Observable.interval(this.timerInterval).map(() => {
       let _cachable = cachable;
+      this.userActivityDuration++;
       cachable = false;
       return _cachable;
     });
@@ -161,7 +164,7 @@ class Activity {
   public stopActivity() {
     this.timerRunning = false;
 
-    this.appendEvent("startLogging");
+    this.appendEvent("stopLogging");
 
     const formData = {
       res: fse.createReadStream(this.activeFile)

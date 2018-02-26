@@ -93,7 +93,8 @@ ipcMain.on('open:link', (event: any, link: string) => {
 ipcMain.on("timer", (event: any, args: any) => {
     // Start timer, subscribe to activity observer
     if (args.action == 'start') {
-        activityInstance = masterActivity.startActivity('test', 'test').subscribe(
+
+        activityInstance = masterActivity.startActivity(args.user, 'test').subscribe(
             (userActive) => {
                 mainWindow.webContents.send("timer:tick", {});
                 masterActivity.appendActivity(userActive);

@@ -16,7 +16,10 @@ class Activity {
   private activeFile: string;
   private timerRunning = false;
   private timerInterval = 1000;
-  public userIsActive = false; // TODO: Move this to local scope
+
+  // User activity
+  public lastUserActivity = false;
+  private userActivityDuration = 0;
 
   private static getUNIXTimestamp() {
     return Date.now();
@@ -76,16 +79,24 @@ class Activity {
      * Append new activity the active file.
      */
   public appendActivity(active: boolean) {
-    if (active !== this.userIsActive) {
+
+    console.log('is active: ' + active + " - - - - " + this.lastUserActivity);
+
+    if (active !== this.lastUserActivity) {
+
+      console.log('writing');
+
       try {
         fs.readFile(this.activeFile, (err, data: any) => {
           const json = JSON.parse(data);
           json.activity.push({
-            isActive: active,
-            timestamp: new Date().getTime()
+            userActive: active,
+            duration: new Date().getTime()
           });
 
           fs.writeFile(this.activeFile, JSON.stringify(json), () => {});
+
+          this.lastUserActivity = active;
         });
       } catch (e) {
         logger.error(e.toString());
@@ -127,19 +138,20 @@ class Activity {
 
     ioHook.start(false); // Disable dev logger
 
+    let cachable = false;
+
     // Track events
     ioHook.on("keypress", () => {
-      this.userIsActive = true;
+      cachable = true;
     });
     ioHook.on("mousemove", () => {
-      this.userIsActive = true;
+      cachable = true;
     });
 
     return Observable.interval(this.timerInterval).map(() => {
-      console.log(this.userIsActive);
-      const _userIsActive = this.userIsActive;
-      this.userIsActive = false;
-      return _userIsActive;
+      let _cachable = cachable;
+      cachable = false;
+      return _cachable;
     });
   }
 
@@ -148,6 +160,8 @@ class Activity {
    */
   public stopActivity() {
     this.timerRunning = false;
+
+    this.appendEvent("startLogging");
 
     const formData = {
       res: fse.createReadStream(this.activeFile)

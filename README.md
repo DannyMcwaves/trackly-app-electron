@@ -20,3 +20,12 @@ You can find these files under respective folders.
  
 ### Updates
 Updates are done through `electron-updater` package and are baked into executables itself. Updates should be automatically checked and applied when application is run.
+
+### Activity schema
+This is an example of a json document that is sent to a server for parsing.
+````
+{
+    "userId": <string>,
+    "createdAt": <string>
+}
+```

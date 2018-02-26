@@ -9,7 +9,6 @@ import {UserService} from "./services/user.service";
 import {HttpClientModule} from "@angular/common/http";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
-import { ProjectsComponent } from "./components/projects/projects.component";
 
 @NgModule({
     imports: [
@@ -33,8 +32,7 @@ import { ProjectsComponent } from "./components/projects/projects.component";
     ],
     declarations: [
         AppComponent, 
-        LoginComponent, 
-        ProjectsComponent,
+        LoginComponent,
         DashboardComponent],
     providers: [UserService],
     bootstrap: [AppComponent]

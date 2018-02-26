@@ -19,6 +19,11 @@ NgbTooltip.prototype.ngOnDestroy = function () {
   encapsulation: ViewEncapsulation.None
 })
 export class LoginComponent implements OnInit{
+  ngOnInit(): void {
+    let element = document.getElementsByTagName("html")[0]
+    let positionInfo = element.getBoundingClientRect();
+    console.log(positionInfo.height);
+  }
   loginTriedAndFailed = false;
 
   constructor (private userService: UserService, private router: Router){}
@@ -34,14 +39,6 @@ export class LoginComponent implements OnInit{
 
   get password() {
     return this.form.get("password");
-  }
-
-  ngOnInit() {
-    const winSize = document.getElementById("wrapper").clientHeight;
-    ipcRenderer.send('win:resize', {
-        height: winSize
-    });
-    ipcRenderer.send('win:show', true);
   }
 
   /**

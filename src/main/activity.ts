@@ -11,6 +11,7 @@ import * as fs from "fs";
 import * as jsonfile from "jsonfile";
 import { Observable } from "rxjs/Rx";
 import * as req from "request";
+import * as moment from "moment";
 
 class Activity {
   private activeFile: string;
@@ -63,7 +64,7 @@ class Activity {
     // Add initial skeleton to a file
     const _ = {
       userId: userId,
-      createdAt: new Date().getTime(),
+      createdAt: moment().toISOString(),
       activity: [] as any[],
       events: [] as any[]
     };
@@ -116,7 +117,7 @@ class Activity {
         json.events.push({
           type: event,
           projectId: project,
-          timestamp: new Date().getTime()
+          timestamp: moment().toISOString()
         });
 
         fs.writeFile(this.activeFile, JSON.stringify(json), () => {});

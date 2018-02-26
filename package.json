@@ -14,7 +14,7 @@
       "electron-54"
     ],
     "platforms": [
-      "win32",      
+      "win32",
       "darwin"
     ],
     "arches": [
@@ -43,6 +43,7 @@
     "electron-log": "^2.2.14",
     "iohook": "^0.1.13",
     "jsonfile": "^4.0.0",
+    "moment": "^2.20.1",
     "request": "^2.83.0",
     "rxjs": "^5.5.0",
     "source-map-support": "^0.5.0",

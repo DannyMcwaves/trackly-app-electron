@@ -59,7 +59,8 @@ export class DashboardComponent implements OnInit {
             this.activeProject = project;
             ipcRenderer.send("timer",
                 {
-                    action: "start", 
+                    action: "start",
+                    projectId: project.id,
                     user: DashboardComponent._getUserAuth().userId
                 }
             );

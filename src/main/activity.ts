@@ -109,12 +109,13 @@ class Activity {
   /**
    * Append event to active file.
    */
-  public appendEvent(event: string) {
+  public appendEvent(event: string, project: string) {
     try {
       fs.readFile(this.activeFile, (err, data: any) => {
         const json = JSON.parse(data);
         json.events.push({
           type: event,
+          projectId: project,
           timestamp: new Date().getTime()
         });
 
@@ -134,7 +135,7 @@ class Activity {
   public startActivity(user: string, projectId: string) {
     this.timerRunning = true;
     this.openFile(user, projectId);
-    this.appendEvent("startLogging");
+    this.appendEvent("startLogging", projectId);
 
     logger.info("New activity file created: " + this.activeFile);
 
@@ -164,7 +165,7 @@ class Activity {
   public stopActivity() {
     this.timerRunning = false;
 
-    this.appendEvent("stopLogging");
+    this.appendEvent("stopLogging", null);
 
     const formData = {
       res: fse.createReadStream(this.activeFile)

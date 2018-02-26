@@ -30,7 +30,8 @@ This is an example of a json document that is sent to a server for parsing.
     "events":[
        {
           "type": <string>,
-          "timestamp": <string>
+          "timestamp": <string>,
+          "projectId": <string>
        }
     ],
     "activity":[
@@ -47,6 +48,8 @@ This is an example of a json document that is sent to a server for parsing.
 **events:** Array of events that happen in an application. At the moment there are two events possible, `startLogging` and `stopLogging` with respective timestamps in UTC format.
 
 `startLogging` occurs when user presses the tracking button and `stopLogging` when pause/stop button is pressed.
+
+**projectID** is the ID of currently tracked project.
 
 **activity:** Array of activities tracked for user. `userActive` is a boolean that denotes whether the user was active or not. `duration` is an integer that denotes for how long that stauts was maintained.
 

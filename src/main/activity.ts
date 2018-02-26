@@ -14,17 +14,22 @@ import * as req from "request";
 import * as moment from "moment";
 
 class Activity {
+  /**
+   * Activity class for tracking mouse, keyboard movements. Taking screenshots and
+   * uploading them to the server's backend.
+   */
+
   private activeFile: string;
+
+  // Timer-related properties
   private timerRunning = false;
   private timerInterval = 1000;
 
-  // User activity
+  // User-related properties
   public lastUserActivity = false;
   private userActivityDuration = 0;
 
-  private static getUNIXTimestamp() {
-    return Date.now();
-  }
+  constructor () {}
 
   /**
    * Return path to the records folder independent
@@ -57,7 +62,7 @@ class Activity {
       fse.ensureDirSync(dir);
     }
 
-    const timeStamp = Activity.getUNIXTimestamp();
+    const timeStamp = Date.now();
     this.activeFile =
       Activity.getActivitiesFolder() + "/" + timeStamp.toString() + ".json";
       this.takeScreenshot(timeStamp.toString());
@@ -234,7 +239,7 @@ class Activity {
 
         screenshot(finalImageName, {
                 height: 900,
-                quality: 100,
+                quality: 50,
             },
             (error: any, complete: any) => {
                 if (error) {

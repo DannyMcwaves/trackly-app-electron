@@ -61,5 +61,6 @@ export class LoginComponent implements OnInit{
       };
 
       let v = this.userService.login(data);
+      this.router.navigate(['dash']);
   }
 }

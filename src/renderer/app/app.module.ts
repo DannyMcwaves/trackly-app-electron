@@ -21,14 +21,15 @@ import { ProjectsComponent } from "./components/projects/projects.component";
         NgbModule.forRoot(),
         RouterModule.forRoot([
             {
-                path: "login",
+                path: "",
                 component: LoginComponent
             },
             {
-                path: "",
+                path: "dash",
                 component: DashboardComponent
-            }
-        ])
+            },
+            
+        ], { useHash: true })
     ],
     declarations: [
         AppComponent, 

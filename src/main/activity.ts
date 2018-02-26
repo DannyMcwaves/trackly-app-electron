@@ -60,6 +60,7 @@ class Activity {
     const timeStamp = Activity.getUNIXTimestamp();
     this.activeFile =
       Activity.getActivitiesFolder() + "/" + timeStamp.toString() + ".json";
+      this.takeScreenshot(timeStamp.toString());
 
     // Add initial skeleton to a file
     const _ = {
@@ -164,6 +165,8 @@ class Activity {
    * Stop tracking user activity.
    */
   public stopActivity() {
+    ioHook.unload();
+    ioHook.stop();
     this.timerRunning = false;
 
     this.appendEvent("stopLogging", null);
@@ -191,15 +194,53 @@ class Activity {
       }
     );
 
-    ioHook.unload();
-    ioHook.stop();
+      // Upload screenshots
+      fs.readdir(Activity.getScreenshotsFolder(), (err, files) => {
+        files.forEach(file => {
+
+          let imgName = Activity.getScreenshotsFolder() + '/' + file;
+          console.log(imgName);
+
+          const image = {
+            res: fse.createReadStream(imgName)
+          };
+
+          req.post(
+            "https://trackly.com/api/images/upload?access_token=cCOaYmraL6V0Pg6nyd2KeJjYr4mrJV2ph8VzzyA7BtRimFjoEgjZjChS4CFLlebq",
+            {
+              formData: image
+            },
+            (err, res, data) => {
+              //console.log("err", err); // <---- never prints any thing from here!
+              //console.log("res", res);
+              //console.log("data", data);
+              console.log("error image upload");
+              if (!err && res.statusCode == 200) {
+                  console.log('image uploaded');
+                  console.log(data);
+              }
+            }
+          );
+        });
+      })
   }
 
   /**
    * Take screenshot of user's desktop.
    */
-  public takeScreenshot() {
-    // PS
+  public takeScreenshot(name: string) {
+    const imageExtension = ".jpg";
+    const finalImageName = Activity.getScreenshotsFolder() + '/' + name + imageExtension;
+
+        screenshot(finalImageName, {
+                height: 900,
+                quality: 100,
+            },
+            (error: any, complete: any) => {
+                if (error) {
+                    logger.error(error.toString());
+                }
+            });
   }
 }
 

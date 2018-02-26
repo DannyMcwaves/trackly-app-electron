@@ -45,7 +45,7 @@ This is an example of a json document that is sent to a server for parsing.
 
 **userId:** ID of a currently logged in user to the desktop application  
 **createA:** UTC representation of a timestamp, when the activity file was created.  
-**events:** Array of events that happen in an application. At the moment there are two events possible, `startLogging` and `stopLogging` with respective timestamps in UTC format.
+**events:** Array of events that happen in an application. At the moment there are two events possible, `startLogging` and `stopLogging` with respective URC timestamps in ISO format.
 
 `startLogging` occurs when user presses the tracking button and `stopLogging` when pause/stop button is pressed.
 

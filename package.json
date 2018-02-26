@@ -14,6 +14,7 @@
       "electron-54"
     ],
     "platforms": [
+      "win32",      
       "darwin"
     ],
     "arches": [

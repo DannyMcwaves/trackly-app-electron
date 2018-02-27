@@ -20,9 +20,11 @@ export class DashboardComponent implements OnInit {
     private projects: any;
     private workspaces: any;
     private activeWorkspace: any;
-    private activeProject: Object;
+    private activeProject: any;
     public currentSession = 0;
     private lastSynced: any;
+
+    public perProject = {};
 
     private store: any;
 
@@ -45,8 +47,11 @@ export class DashboardComponent implements OnInit {
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
-            this.zone.run(() => this.currentSession = this.currentSession +1);
-            console.log(this.currentSession);
+            this.zone.run(() => {
+                this.perProject[this.activeProject.id] += 1;
+                this.currentSession += 1;
+            });
+            console.log(this.perProject);
         });
     }
 
@@ -78,6 +83,7 @@ export class DashboardComponent implements OnInit {
             ipcRenderer.send("timer", {action: "stop"});
         } else {
             this.activeProject = project;
+
             ipcRenderer.send("timer",
                 {
                     action: "start",
@@ -143,6 +149,9 @@ export class DashboardComponent implements OnInit {
             this.getProjects().subscribe(response => {
                 this.projects = response;
                 this._resizeFrame(); // Resize frame after projects have been loaded.
+                this.projects.forEach((element: any) => {
+                    this.perProject[element.id] = 0;
+                });
             });
         });
     }

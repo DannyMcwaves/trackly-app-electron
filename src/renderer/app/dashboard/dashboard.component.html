@@ -4,7 +4,7 @@
         <img src="../assets/logo.svg" alt="Trackly" id="logo">
         <ul class="list-inline" id="user-nav">
             <li class="list-inline-item">
-                <img src="../assets/avatar.png" height="30" alt="">
+                <img style="border-radius:50%; margin-top:-2px;" src="../assets/avatar.jpg" height="30" alt="">
             </li>
             <li class="list-inline-item">
                 <a href="#" (click)="logOut()">Log out</a>
@@ -18,7 +18,7 @@
         <div id="timer">
             <!-- Timer clock -->
             <div class="timer-clock">
-                <h3>00:00:{{currentSession}}</h3>
+                <h3>{{currentSession|timeDuration}}</h3>
                 <small>Total time today</small>
             </div>
             <!-- / Timer clock -->
@@ -46,7 +46,7 @@
                    [ngClass]="'fa fa-play-circle project-button'">
                 </i>
                 <h3 class="project-title">{{project.title}}</h3>
-                <h3 class="project-timer">00:00</h3>
+                <h3 class="project-timer">{{perProject[project.id] | timeDuration}}</h3>
             </div>
         </div>
         <!-- / Projects -->
@@ -58,7 +58,7 @@
         <div class="footer-sync">
             <i class="fa fa-fw fa-refresh"></i> Updated sometime ago bruh
         </div>
-        <div *ngIf="currentSession" class="footer-session">
+        <div class="footer-session">
             <i class="fa fa-fw fa-clock-o"></i> Current session ({{currentSession}})
         </div>
     </footer>

@@ -6,11 +6,6 @@
     </ul>
 </header>
 <section id="content">
-
-    <div *ngIf="loginTriedAndFailed" class="alert alert-danger mb-0">
-        Email and password didn't match.
-    </div>
-
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-control-group">
             <input formControlName="email" type="email" class="form-control" placeholder="Email">

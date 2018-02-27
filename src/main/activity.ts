@@ -4,6 +4,8 @@ const screenshot = require("desktop-screenshot");
 const fse = require("fs-extra");
 // tslint:disable-next-line:no-var-requires
 const ioHook = require('iohook');
+// tslint:disable-next-line:no-var-requires
+const Store = require("electron-store");
 import { app } from "electron";
 
 import * as logger from "electron-log";
@@ -20,6 +22,7 @@ class Activity {
    */
 
   private activeFile: string;
+  private store: any;
 
   // Timer-related properties
   private timerRunning = false;
@@ -29,7 +32,9 @@ class Activity {
   public lastUserActivity = false;
   private userActivityDuration = 0;
 
-  constructor () {}
+  constructor () {
+    this.store = new Store();
+  }
 
   /**
    * Return path to the records folder independent
@@ -182,8 +187,10 @@ class Activity {
 
     console.log("stopped tracking");
 
+    let token = this.store.get('token');
+
     req.post(
-      "https://trackly.com/api/eventFiles/upload?access_token=cCOaYmraL6V0Pg6nyd2KeJjYr4mrJV2ph8VzzyA7BtRimFjoEgjZjChS4CFLlebq",
+      "https://trackly.com/api/eventFiles/upload?access_token=" + token,
       {
         formData: formData
       },
@@ -211,7 +218,7 @@ class Activity {
           };
 
           req.post(
-            "https://trackly.com/api/images/upload?access_token=cCOaYmraL6V0Pg6nyd2KeJjYr4mrJV2ph8VzzyA7BtRimFjoEgjZjChS4CFLlebq",
+            "https://trackly.com/api/images/upload?access_token=" + token,
             {
               formData: image
             },

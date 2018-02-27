@@ -1,19 +1,25 @@
 import {app, BrowserWindow, ipcMain, shell} from 'electron';
 import Activity from "./activity";
 
+// Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-let mainWindow: BrowserWindow;
+// Globals
 const masterActivity = Activity;
+let appWindow: BrowserWindow;
 let activityInstance: any;
 
-function createMainWindow() {
+/**
+ * Create application wind
+ */
+function crateApplicationWindow() {
     const window = new BrowserWindow({
-        height: 400,
+        height: 0,
         width: 400,
+        minWidth: 400,
         title: "Trackly Desktop",
         center: true,
-        show: true,
+        show: false,
         resizable: true, // Only for dev
         movable: true,
         webPreferences: {
@@ -34,7 +40,7 @@ function createMainWindow() {
     window.loadURL(url);
 
     window.on('closed', () => {
-        mainWindow = null;
+        appWindow = null;
     });
 
     return window;
@@ -49,12 +55,12 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
     // On macOS it is common to re-create a window
     // even after all windows have been closed
-    if (mainWindow === null) mainWindow = createMainWindow();
+    if (appWindow === null) appWindow = crateApplicationWindow();
 });
 
 // Create main BrowserWindow when electron is ready
 app.on('ready', () => {
-    mainWindow = createMainWindow();
+    appWindow = crateApplicationWindow();
 });
 
 /**
@@ -64,10 +70,13 @@ ipcMain.on('open:link', (event: any, link: string) => {
     shell.openExternal(link);
 });
 
+/**
+ * Set a specific window height.
+ */
 ipcMain.on('win:height', (event: any, height: number) => {
-    mainWindow.setSize(400, height);
+    appWindow.setSize(400, height);
+    appWindow.show();
 });
-
 
 /**
  * Main activity timer logic and observable
@@ -78,7 +87,7 @@ ipcMain.on("timer", (event: any, args: any) => {
 
         activityInstance = masterActivity.startActivity(args.user, args.projectId).subscribe(
             (userActive) => {
-                mainWindow.webContents.send("timer:tick", {});
+                appWindow.webContents.send("timer:tick", {});
                 masterActivity.appendActivity(userActive);
             },
         );
@@ -89,15 +98,4 @@ ipcMain.on("timer", (event: any, args: any) => {
         activityInstance.unsubscribe();
         masterActivity.stopActivity();
     }
-
-    if (args.action == 'pause') {
-        // Not yet implemented
-    }
-});
-
-/**
- * Upload files to the server
- */
-ipcMain.on('upload', (event: any, args: any) => {
-    console.log('Upload started');
 });

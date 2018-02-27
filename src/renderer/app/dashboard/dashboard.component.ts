@@ -1,3 +1,6 @@
+// tslint:disable-next-line:no-var-requires
+const Store = require("electron-store");
+
 import {Component, ViewEncapsulation, NgZone} from "@angular/core";
 import {ipcRenderer} from "electron";
 
@@ -21,6 +24,8 @@ export class DashboardComponent implements OnInit {
     public currentSession = 0;
     private lastSynced: any;
 
+    private store: any;
+
     // Frame height & Sizes
     private baseFrameHeight = 178;
     private baseProjectHeight = 60;
@@ -35,6 +40,8 @@ export class DashboardComponent implements OnInit {
      */
     constructor(private userService: UserService, private router: Router, 
                 private http: HttpClient, public zone: NgZone) {
+
+        this.store = new Store();
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
@@ -56,9 +63,9 @@ export class DashboardComponent implements OnInit {
      * @returns {{userId: string | null; authToken: string | null}}
      * @private
      */
-    static _getUserAuth() {
-        const authToken = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
+    _getUserAuth() {
+        const authToken = this.store.get("token");
+        const userId = this.store.get("userId");
 
         return {
             userId: userId,
@@ -75,7 +82,7 @@ export class DashboardComponent implements OnInit {
                 {
                     action: "start",
                     projectId: project.id,
-                    user: DashboardComponent._getUserAuth().userId
+                    user: this._getUserAuth().userId
                 }
             );
         }
@@ -88,13 +95,13 @@ export class DashboardComponent implements OnInit {
     }
 
     getProjects() {
-        const uath = DashboardComponent._getUserAuth();
+        const uath = this._getUserAuth();
         const req = `https://trackly.com/api/workspaces/${this.activeWorkspace.id}/projects?access_token=${uath.authToken}`;
         return this.http.get(req);
     }
 
     getWorkspaces() {
-        const uath = DashboardComponent._getUserAuth();
+        const uath = this._getUserAuth();
         return this.http.get(`https://trackly.com/api/users/${uath.userId}/workspaces?access_token=${uath.authToken}`);
     }
 

@@ -1,33 +1,31 @@
-import { Component, ViewEncapsulation, OnInit } from "@angular/core";
+// tslint:disable-next-line:no-var-requires
+const Store = require("electron-store");
 
+import { Component, ViewEncapsulation, OnInit } from "@angular/core";
 import "./login.component.scss";
 import { FormGroup, FormControl } from "@angular/forms";
 import { UserService } from "../services/user.service";
 import { Router } from "@angular/router";
 import { ipcRenderer } from "electron";
-import { NgbTooltip } from "@ng-bootstrap/ng-bootstrap";
-
-NgbTooltip.prototype.ngOnDestroy = function () {
-  this.close();
-  //this._unregisterListenersFn();
-  this._zoneSubscription.unsubscribe();
-};
 
 @Component({
   selector: "#app",
   templateUrl: "/login.component.html",
   encapsulation: ViewEncapsulation.None
 })
-export class LoginComponent implements OnInit{
-  ngOnInit(): void {
-    let element = document.getElementsByTagName("html")[0]
-    let positionInfo = element.getBoundingClientRect();
-    console.log(positionInfo.height);
-    ipcRenderer.send('win:height', positionInfo.height);
-  }
-  loginTriedAndFailed = false;
+export class LoginComponent implements OnInit {
 
-  constructor (private userService: UserService, private router: Router){}
+  private store: any;
+
+  ngOnInit(): void {
+    let element = document.getElementsByTagName("html")[0];
+    let positionInfo = element.getBoundingClientRect();
+    ipcRenderer.send("win:height", positionInfo.height);
+  }
+
+  constructor(private userService: UserService, private router: Router) {
+    this.store = new Store();
+  }
 
   form = new FormGroup({
     email: new FormControl(),
@@ -46,7 +44,7 @@ export class LoginComponent implements OnInit{
    * Open signup link in an external window.
    */
   openSignup() {
-    ipcRenderer.send('open:link', 'https://trackly.com/app');
+    ipcRenderer.send("open:link", "https://trackly.com/app");
   }
 
   /**
@@ -54,11 +52,17 @@ export class LoginComponent implements OnInit{
    */
   onSubmit() {
     let data = {
-        'email':this.email.value,
-        'password': this.password.value
-      };
+      email: this.email.value,
+      password: this.password.value
+    };
 
-      let v = this.userService.login(data);
-      this.router.navigate(['dash']);
+    this.userService.login(data).subscribe(res => {
+      this.store.set('token', res['id']);
+      this.store.set('userId', res['userId']);
+      this.router.navigate(["dash"]);
+    }, err => {
+      alert("Login failed");
+    });
+
   }
 }

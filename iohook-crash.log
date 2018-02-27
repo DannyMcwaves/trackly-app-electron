@@ -1,8 +1,8 @@
-PID 12442 received SIGSEGV for address: 0x20
-0   segfault-handler.node               0x000000010fda0168 _ZL16segfault_handleriP9__siginfoPv + 280
+PID 13908 received SIGSEGV for address: 0x20
+0   segfault-handler.node               0x000000010cff8168 _ZL16segfault_handleriP9__siginfoPv + 280
 1   libsystem_platform.dylib            0x00007fffafd05b3a _sigtramp + 26
-2   ???                                 0x000000010fe04978 0x0 + 4561324408
-3   iohook.node                         0x000000010fdadc90 hook_event_proc + 2000
+2   ???                                 0x00000000000000c3 0x0 + 195
+3   iohook.node                         0x0000000110641c90 hook_event_proc + 2000
 4   SkyLight                            0x00007fffabe15c80 processDecodedEventRef + 204
 5   SkyLight                            0x00007fffabe1546a processEventTapData + 544
 6   SkyLight                            0x00007fffabeeace1 _XPostEventTapData + 280
@@ -13,8 +13,8 @@ PID 12442 received SIGSEGV for address: 0x20
 11  CoreFoundation                      0x00007fff9a36ccc5 __CFRunLoopRun + 2389
 12  CoreFoundation                      0x00007fff9a36c114 CFRunLoopRunSpecific + 420
 13  CoreFoundation                      0x00007fff9a3abb91 CFRunLoopRun + 97
-14  iohook.node                         0x000000010fdaee15 hook_run + 1749
-15  iohook.node                         0x000000010fdaa55e _Z16hook_thread_procPv + 14
+14  iohook.node                         0x0000000110642e15 hook_run + 1749
+15  iohook.node                         0x000000011063e55e _Z16hook_thread_procPv + 14
 16  libsystem_pthread.dylib             0x00007fffafd0f93b _pthread_body + 180
 17  libsystem_pthread.dylib             0x00007fffafd0f887 _pthread_body + 0
 18  libsystem_pthread.dylib             0x00007fffafd0f08d thread_start + 13

@@ -23,6 +23,7 @@ export class LoginComponent implements OnInit{
     let element = document.getElementsByTagName("html")[0]
     let positionInfo = element.getBoundingClientRect();
     console.log(positionInfo.height);
+    ipcRenderer.send('win:height', positionInfo.height);
   }
   loginTriedAndFailed = false;
 

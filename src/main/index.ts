@@ -15,14 +15,12 @@ function createMainWindow() {
         center: true,
         show: true,
         resizable: true, // Only for dev
-        useContentSize: true,
         movable: true,
         webPreferences: {
             webSecurity: false // TODO: Remove in production!
         }
     });
 
-    // Set url for `win`
     // points to `webpack-dev-server` in development
     // points to `index.html` in production
     const url = isDevelopment
@@ -65,6 +63,11 @@ app.on('ready', () => {
 ipcMain.on('open:link', (event: any, link: string) => {
     shell.openExternal(link);
 });
+
+ipcMain.on('win:height', (event: any, height: number) => {
+    mainWindow.setSize(400, height);
+});
+
 
 /**
  * Main activity timer logic and observable

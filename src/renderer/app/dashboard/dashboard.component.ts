@@ -18,8 +18,13 @@ export class DashboardComponent implements OnInit {
     private workspaces: any;
     private activeWorkspace: any;
     private activeProject: Object;
-    private currentSession = 0;
+    public currentSession = 0;
     private lastSynced: any;
+
+    // Frame height & Sizes
+    private baseFrameHeight = 178;
+    private baseProjectHeight = 60;
+    private maxProjectsLength = 5;
 
     /**
      * Dashboard component constructor with added protection
@@ -30,11 +35,20 @@ export class DashboardComponent implements OnInit {
      */
     constructor(private userService: UserService, private router: Router, 
                 private http: HttpClient, public zone: NgZone) {
+
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
             this.zone.run(() => this.currentSession = this.currentSession +1);
             console.log(this.currentSession);
         });
+    }
+
+    /**
+     *  Resize application frame to an appropriate height.
+     */
+    private _resizeFrame() {
+        const height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
+        ipcRenderer.send('win:height', height);
     }
 
     /**
@@ -105,7 +119,7 @@ export class DashboardComponent implements OnInit {
      * Log user out of the application
      */
     logOut() {
-        this.router.navigate(['login']);
+        this.router.navigate(['']);
     }
 
     /**
@@ -121,6 +135,7 @@ export class DashboardComponent implements OnInit {
 
             this.getProjects().subscribe(response => {
                 this.projects = response;
+                this._resizeFrame(); // Resize frame after projects have been loaded.
             });
         });
     }

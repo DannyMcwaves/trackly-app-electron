@@ -21,11 +21,11 @@ import { TimeDurationPipe } from "./pipes/duration.pipe";
         NgbModule.forRoot(),
         RouterModule.forRoot([
             {
-                path: "",
+                path: "login",
                 component: LoginComponent
             },
             {
-                path: "dash",
+                path: "",
                 component: DashboardComponent
             },
             

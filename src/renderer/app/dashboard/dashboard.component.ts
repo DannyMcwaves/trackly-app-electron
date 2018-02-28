@@ -45,6 +45,10 @@ export class DashboardComponent implements OnInit {
 
         this.store = new Store();
 
+        if (!this.store.has('token') && !this.store.has('userId')) {
+            this.router.navigate(['login']);
+        }
+
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, data: any) => {
             this.zone.run(() => {
@@ -132,7 +136,9 @@ export class DashboardComponent implements OnInit {
      * Log user out of the application
      */
     logOut() {
-        this.router.navigate(['']);
+        this.store.delete('userId');
+        this.store.delete('token');
+        this.router.navigate(['login']);
     }
 
     /**

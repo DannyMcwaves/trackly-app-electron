@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit {
     this.userService.login(data).subscribe(res => {
       this.store.set('token', res['id']);
       this.store.set('userId', res['userId']);
-      this.router.navigate(["dash"]);
+      this.router.navigate([""]);
     }, err => {
       alert("Login failed");
     });

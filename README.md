@@ -6,6 +6,8 @@ Trackly desktop is an [Electron application](https://electronjs.org/) built for 
 ### Development
 To run a development copy of the application install dependencies with `yarn install` and then start the application with `yarn dev`.
 
+**WINDOWS:** If you're getting a `MSBuildToolsPath` exception, reinstall Node.js. Sometimes these errors are caused when there was a Visual Studio install on computer but was later removed.
+
 ### Log files
 Log files in production environment and development environments are save to the operating sistem's default log directory.
 - on Windows: `%USERPROFILE%\AppData\Roaming\Trackly\log.log`  

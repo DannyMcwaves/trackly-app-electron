@@ -1,12 +1,12 @@
 # Trackly Desktop
 
 ### What is Trackly Desktop
-Trackly desktop is an [Electron application](https://electronjs.org/) built for tracking user's activity and communicating with backend server. It's still under active development and thus subject to constant changes. 
+Trackly desktop is an [Electron application](https://electronjs.org/) built for tracking user's activity and communicating with backend server. It's still under active development and thus subject to constant change. 
 
 ### Development
 To run a development copy of the application install dependencies with `yarn install` and then start the application with `yarn dev`.
 
-**WINDOWS:** If you're getting a `MSBuildToolsPath` exception, reinstall Node.js. Sometimes these errors are caused when there was a Visual Studio install on computer but was later removed.
+> If you're getting a `MSBuildToolsPath` exception on Widndows, reinstall Node.js. Sometimes these errors are caused when there was a Visual Studio install on computer but was later removed.
 
 ### Log files
 Log files in production environment and development environments are save to the operating sistem's default log directory.
@@ -15,45 +15,47 @@ Log files in production environment and development environments are save to the
 - on Linux: `~/.config/Trackly>/log.log` (**not supported**)
 
 ### Recordings
-All recordings are stored in two folders; `activities` for actual mouse and keyboard activity and `screenshots` for desktop screenshots.`
-You can find these files under respective folders.
- - on Windows (`soon`)
+All recordings are stored in two folders; `activities` for actual mouse and keyboard activity and `screenshots` for desktop screenshots. You can find these files under respective folders.
+ - on Windows `C:\Users\<user>\AppData\Roaming\Electron\records`
  - on OSX `/Users/<user>/Library/Application Support/Electron/records/`
- 
+
 ### Updates
 Updates are done through `electron-updater` package and are baked into executables itself. Updates should be automatically checked and applied when application is run.
+
+### Environment variables  
+In order to overwrite any of the environment variables set in the application, one has to add them to the system running the Node.js application.
+
+OSX/Linux  
+`export ENV_VARIALBE="something"`
+Windows
+`set ENV=something`
+
+List of available variables
+* `ELECTRON_WEBPACK_APP_API_URL` (https://trackly.com) [API endpoint]
+* `ELECTRON_WEBPACK_APP_SYNC_INTERVAL` (600) [Sync interval in seconds]
 
 ### Activity schema
 This is an example of a json document that is sent to a server for parsing.
 ````
 {
-    "userId": <string>,
-    "createdAt": <string>,
+    "userId": <string>[Id of user tracked],
+    "workspaceId": <string> [Id of workspace tracked],
+    "projectId": <string> [Id of project tracked],
+    "createdAt": <UTC timestamp, ISO> [Timestamp of file creation]
     "events":[
        {
-          "type": <string>,
-          "timestamp": <string>,
-          "projectId": <string>
+          "type": <string> [startLogging|stopLogging|continueLoggin],
+          "timestamp": <UTC timestamp, ISO> [Timestamp of event]
        }
     ],
     "activity":[
        {
-          "userActive": <boolean>,
-          "duration": <integer>
+          "userActive": <boolean> [Denotes whether the user was active],
+          "duration": <integer> [Amount in seconds]
        }
     ]
 }
 ```
-
-**userId:** ID of a currently logged in user to the desktop application  
-**createA:** UTC representation of a timestamp, when the activity file was created.  
-**events:** Array of events that happen in an application. At the moment there are two events possible, `startLogging` and `stopLogging` with respective URC timestamps in ISO format.
-
-`startLogging` occurs when user presses the tracking button and `stopLogging` when pause/stop button is pressed.
-
-**projectID** is the ID of currently tracked project.
-
-**activity:** Array of activities tracked for user. `userActive` is a boolean that denotes whether the user was active or not. `duration` is an integer that denotes for how long that stauts was maintained.
 
 For example:
 ```
@@ -64,3 +66,5 @@ For example:
 }
 ```
 means that the user was active for 20 seconds.
+
+If the user has tracked a time on a single project for longer than `ELECTRON_WEBPACK_APP_SYNC_INTERVAL`, the newly generated file has a `continueLogging` event as the first input in events list.

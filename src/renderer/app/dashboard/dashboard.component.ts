@@ -92,7 +92,8 @@ export class DashboardComponent implements OnInit {
                 {
                     action: "start",
                     projectId: project.id,
-                    user: this._getUserAuth().userId
+                    workspaceId: this.activeWorkspace.id,
+                    userId: this._getUserAuth().userId
                 }
             );
         }

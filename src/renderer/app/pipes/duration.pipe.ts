@@ -8,10 +8,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({name: 'timeDuration'})
 export class TimeDurationPipe implements PipeTransform {
   transform(value: number) {
-    if (value == 0) {
-      return "0:00"
-    }
-
+    if (!value) { return "0:00"}
     return moment.duration(value, "seconds").format();
   }
 }

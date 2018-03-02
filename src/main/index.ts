@@ -85,7 +85,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     // Start timer, subscribe to activity observer
     if (args.action == 'start') {
 
-        activityInstance = masterActivity.startActivity(args.user, args.projectId).subscribe(
+        activityInstance = masterActivity.startTimer(args.userId, args.workspaceId, args.projectId).subscribe(
             (userActive) => {
                 appWindow.webContents.send("timer:tick", {});
                 masterActivity.appendActivity(userActive);
@@ -96,6 +96,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     // Stop timer
     if (args.action == 'stop') {
         activityInstance.unsubscribe();
-        masterActivity.stopActivity();
+        masterActivity.stopTimer();
     }
 });

@@ -26,7 +26,7 @@ Updates are done through `electron-updater` package and are baked into executabl
 In order to overwrite any of the environment variables set in the application, one has to add them to the system running the Node.js application.
 
 OSX/Linux  
-`export ENV_VARIALBE="something"`
+`export ENV_VARIALBE="something"`  
 Windows
 `set ENV=something`
 

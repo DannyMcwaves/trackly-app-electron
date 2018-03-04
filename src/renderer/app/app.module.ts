@@ -10,6 +10,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { TimeDurationPipe } from "./pipes/duration.pipe";
+import { sincePipeline } from "./pipes/since.pipe";
 
 @NgModule({
     imports: [
@@ -35,6 +36,7 @@ import { TimeDurationPipe } from "./pipes/duration.pipe";
         AppComponent, 
         LoginComponent,
         TimeDurationPipe,
+        sincePipeline,
         DashboardComponent],
     providers: [UserService],
     bootstrap: [AppComponent]

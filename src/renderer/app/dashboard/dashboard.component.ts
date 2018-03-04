@@ -22,7 +22,7 @@ export class DashboardComponent implements OnInit {
     private activeWorkspace: any;
     private activeProject: any;
     public currentSession = 0;
-    private lastSynced: any;
+    private lastSynced: number;
 
     public perProject = {};
 
@@ -55,7 +55,14 @@ export class DashboardComponent implements OnInit {
                 this.perProject[this.activeProject.id] += 1;
                 this.currentSession += 1;
             });
-            console.log(this.perProject);
+        });
+
+        // Subscribe to sync update
+        ipcRenderer.on("sync:update", (event: any, data: any) => {
+            this.zone.run(() => {
+                console.log('sync update: ', data);
+                this.lastSynced = data;
+            });
         });
     }
 

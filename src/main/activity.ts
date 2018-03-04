@@ -3,7 +3,7 @@ const screenshot = require("desktop-screenshot");
 // tslint:disable-next-line:no-var-requires
 const ioHook = require("iohook");
 
-import { app } from "electron";
+import { app, ipcRenderer } from "electron";
 import { Observable } from "rxjs/Rx";
 import * as logger from "electron-log";
 import * as fs from "fs";
@@ -14,34 +14,48 @@ import * as fse from "fs-extra";
 import { ApiService } from "../renderer/app/services/api.service";
 
 class Activity {
-  /**
-   * Activity class for tracking mouse, keyboard movements. Taking screenshots and
-   * uploading them to the server's backend.
-   */
+  private api: ApiService;
 
-  private api: any;
+  // Activity
   private lastUserActivityStatus = false;
   private currentActivityFile: string;
-  private timerRunningStatus = false;
   private userActivityDuration = 0;
+
+  // Timer
+  private timerRunningStatus = false;
   private timerInterval = 1000;
 
+  // Paths
+  private recordsPath: string;
+  private activitiesPath: string;
+  private sceenshotsPath: string;
+
   constructor() {
+    // Define API service
     this.api = new ApiService();
 
+    // Define paths
+    this.recordsPath = `${app.getPath("userData")}/records`;
+    this.activitiesPath = `${this.recordsPath}/activities`;
+    this.sceenshotsPath = `${this.recordsPath}/screenshots`;
+
     // Ensure records dir exists
-    const dirs = [this.getActivitiesFolder(), this.getScreenshotsFolder()];
-    for (let dir of dirs) {
-      if (!fse.existsSync(dir)) {
+    for (let dir of [this.activitiesPath, this.sceenshotsPath]) {
+      try {
         fse.ensureDirSync(dir);
+      } catch (e) {
+        logger.warn(`Error creating dirs: ${e.toString()}`);
       }
     }
   }
 
   /**
-   * Returns a blank blueprint of an activity file.
+   * Creates a blank activity file skeleton.
+   * @param userId
+   * @param workspaceId
+   * @param projectId
    */
-  private getActivityFileBP(
+  private static getActivityFileBP(
     userId: string,
     workspaceId: string,
     projectId: string
@@ -57,142 +71,65 @@ class Activity {
   }
 
   /**
-   * Return path to the records folder independent
-   * of the user OS.
+   * Insert a node into an object, then writes it to a file.
+   * @param target
+   * @param node
+   * @param value
    */
-  private getRecordsPath() {
-    return app.getPath("userData") + "/records";
-  }
-
-  /**
-   * Get folder with the activities files.
-   */
-  private getActivitiesFolder() {
-    return this.getRecordsPath() + "/activities";
-  }
-
-  /**
-   * Get folder with screenshot files.
-   */
-  private getScreenshotsFolder() {
-    return this.getRecordsPath() + "/screenshots";
-  }
-
-  /**
-   * Insert JSON node into a json file.
-   */
-  private insertJsonNode(targetFile: string, node: string, value: any) {
-    fs.readFile(targetFile, (err, data: any) => {
+  private insertJsonNode(target: string, node: string, value: any) {
+    fs.readFile(target, (err, data: any) => {
       const json = JSON.parse(data);
-      json[node].push(value);
-      fs.writeFile(targetFile, JSON.stringify(json), () => {});
+      JSON.parse(data)[node].push(value);
+      fs.writeFile(target, JSON.stringify(json), () => {});
     });
   }
 
   /**
-   * Emmit last synced signal to the renderer.
+   * Sync files inside directory to a backend server.
+   * @param dir
+   * @param url
    */
-  private emmitLastSynced() {}
+  public sync(dir: string, url: string) {
+    fs.readdir(dir, (err, files) => {
+      files.forEach(file => {
+        // Skip current file if the timer is up and running.
+        if (
+          this.timerRunningStatus &&
+          `${dir}/${file}` == this.currentActivityFile
+        ) {
+          return;
+        }
 
-  /**
-   * Sync both screeshots and activities to the backend server.
-   * Emmit a `lastSync` signal upon successfull sync.
-   */
-  public syncAll() {
-    this.syncActivities();
-    this.syncScreenshots();
+        const data = {
+          res: fse.createReadStream(`${dir}/${file}`)
+        };
+
+        req.post(url, { formData: data }, (err, res, data) => {
+          if (!err && res.statusCode == 200) {
+            fs.unlink(`${dir}/${file}`, () => {});
+            logger.log(`File synced and deleted: ${file}`);
+          } else {
+            logger.warn(`File upload failed: ${file}`);
+          }
+        });
+      });
+    });
+
+    return Date.now();
   }
 
   /**
-   * Syncs every activities file found on computer and tries to upload it to the
-   * remote server. Upon successful upload remove the activity file from the disk.
+   * Sync activities to server.
    */
   private syncActivities() {
-    try {
-      fs.readdir(this.getActivitiesFolder(), (err, files) => {
-        files.forEach(file => {
-          const data = {
-            res: fse.createReadStream(this.getActivitiesFolder() + "/" + file)
-          };
-
-          req.post(
-            this.api.uploadActivitiesURL(),
-            {
-              formData: data
-            },
-            (err, res, data) => {
-              if (!err && res.statusCode == 200) {
-                // We can remove the file from the disk
-                try {
-                  fs.unlink(this.getActivitiesFolder() + "/" + file, () => {});
-                  logger.log(
-                    "Activity file synced and deleted: " + file.toString()
-                  );
-                } catch (e) {
-                  logger.warn("Activity file was not deleted: " + e.toString());
-                }
-                // and emmit a succesful sync
-              } else {
-                logger.warn(
-                  "Activity file couldn't be uploaded: " + err.toString()
-                );
-              }
-            }
-          );
-        });
-      });
-    } catch (e) {
-      logger.log(
-        "There was a problem syncing activity file with server: " + e.toString()
-      );
-    }
+    this.sync(this.activitiesPath, this.api.uploadActivitiesURL());
   }
 
   /**
-   * Syncs every screenshot file found on computer and tries to uploda it to image storage.
-   * Upon successful upload, removes the original screenshot file from the disk.
+   * Sync screenshots to server.
    */
   private syncScreenshots() {
-    try {
-      fs.readdir(this.getScreenshotsFolder(), (err, files) => {
-        files.forEach(file => {
-          const data = {
-            res: fse.createReadStream(this.getScreenshotsFolder() + "/" + file)
-          };
-
-          req.post(
-            this.api.uploadScreenshotsURL(),
-            {
-              formData: data
-            },
-            (err, res, data) => {
-              console.log(res);
-              console.log(err);
-              if (!err && res.statusCode == 200) {
-                // We can remove the file from the disk
-                try {
-                  fs.unlink(this.getScreenshotsFolder() + "/" + file, () => {});
-                  logger.log(
-                    "Screenshot file synced and deleted: " + file.toString()
-                  );
-                } catch (e) {
-                  logger.warn("Screenshot file was not deleted: " + e.toString());
-                }
-                // and emmit a succesful sync
-              } else {
-                logger.warn(
-                  "Screenshot file couldn't be uploaded: " + err.toString()
-                );
-              }
-            }
-          );
-        });
-      });
-    } catch (e) {
-      logger.log(
-        "There was a problem syncing activity file with server: " + e.toString()
-      );
-    }
+    this.sync(this.sceenshotsPath, this.api.uploadScreenshotsURL());
   }
 
   /**
@@ -201,12 +138,30 @@ class Activity {
    * and marks it as continue logging.
    */
   public rotateActivityFile() {
-    // Stop timer
-    // Append `stopLogging` event to current file
-    // Create a new file
-    // Append `continueLogging` event to the new file
-    // Start the timer
-    // Sync files to the server
+    if (!this.currentActivityFile) {
+      logger.log('Rotation skipped due to no activity file');
+      return;
+    }
+
+    const fTitle = Date.now();
+    const currentACFile = this.currentActivityFile;
+    const fData = jsonfile.readFileSync(currentACFile);
+    const newFile = this.createActivityFile(
+      fData.userId,
+      fData.workspaceId,
+      fData.projectId,
+      fTitle
+    );
+
+    this.appendEvent('continueLogging', newFile);
+    this.currentActivityFile = newFile;
+
+    this.syncActivities();
+    this.syncScreenshots();
+    logger.log('Rotation w/ syncing succesfully completed');
+
+    // TODO: Refactor to use inside sync method
+    return Date.now();
   }
 
   /**
@@ -222,21 +177,18 @@ class Activity {
     projectId: string,
     name: number
   ) {
-    const fileDir = this.getActivitiesFolder();
-    const fileName = fileDir + "/" + name.toString() + ".json";
+    // Generate file name.
+    const fileName = `${this.activitiesPath}/${name.toString()}.json`;
 
     // Get initial file skeleton
-    const skeleton = this.getActivityFileBP(userId, workspaceId, projectId);
+    const skeleton = Activity.getActivityFileBP(userId, workspaceId, projectId);
 
     try {
       jsonfile.writeFileSync(fileName, skeleton);
+      return fileName;
     } catch (e) {
-      logger.error(
-        "There was an error creating activity file: " + e.toString()
-      );
+      logger.error(`Error creating a file: ${e.toString()}`);
     }
-
-    return fileName;
   }
 
   /**
@@ -249,7 +201,7 @@ class Activity {
     }
 
     if (userStatus != this.lastUserActivityStatus) {
-      console.log("different!");
+      logger.log("User status has changed");
       try {
         this.insertJsonNode(this.currentActivityFile, "activities", {
           userActive: userStatus,
@@ -265,17 +217,17 @@ class Activity {
   }
 
   /**
-   * Append new event atom to a current file.
+   * Append new event atom to a file.
    * @param event
    * @param project
    */
-  public appendEvent(evt: string) {
-    if (!this.currentActivityFile) {
-      throw new TypeError("Activity file not found");
+  public appendEvent(evt: string, file: string) {
+    if (!file) {
+      throw new TypeError("Activity file not specified");
     }
 
     try {
-      this.insertJsonNode(this.currentActivityFile, "events", {
+      this.insertJsonNode(file, "events", {
         type: evt,
         timestamp: moment().toISOString()
       });
@@ -301,7 +253,7 @@ class Activity {
     );
 
     // Start logging
-    this.appendEvent("startLogging");
+    this.appendEvent("startLogging", this.currentActivityFile);
     this.takeScreenshot(timestamp);
 
     // Start a timer
@@ -334,10 +286,12 @@ class Activity {
     this.timerRunningStatus = false;
 
     // Append stop logging
-    this.appendEvent("stopLogging");
+    this.appendEvent("stopLogging", this.currentActivityFile);
+    this.currentActivityFile = '';
 
     // Sync everything to the server.
-    this.syncAll();
+    this.syncActivities();
+    this.syncScreenshots();
   }
 
   /**
@@ -346,7 +300,7 @@ class Activity {
    */
   public takeScreenshot(name: number) {
     const imageName = name.toString() + ".jpg";
-    const finalImageName = this.getScreenshotsFolder() + "/" + imageName;
+    const finalImageName = this.sceenshotsPath + "/" + imageName;
 
     screenshot(
       finalImageName,

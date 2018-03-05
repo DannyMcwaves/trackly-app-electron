@@ -8,6 +8,13 @@
     "build": "yarn compile && electron-builder",
     "postinstall": "electron-rebuild"
   },
+  "build": {
+    "appId":"com.trackly.app",
+    "productName": "Trackly",
+    "mac": {
+      "icon":"build/icon.icns"
+    }
+  },
   "iohook": {
     "targets": [
       "node-59",

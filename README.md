@@ -44,7 +44,7 @@ This is an example of a json document that is sent to a server for parsing.
     "createdAt": <UTC timestamp, ISO> [Timestamp of file creation]
     "events":[
        {
-          "type": <string> [startLogging|stopLogging|continueLoggin],
+          "type": <string> [startLogging|stopLogging|continueLogging],
           "timestamp": <UTC timestamp, ISO> [Timestamp of event]
        }
     ],
@@ -68,3 +68,5 @@ For example:
 means that the user was active for 20 seconds.
 
 If the user has tracked a time on a single project for longer than `ELECTRON_WEBPACK_APP_SYNC_INTERVAL`, the newly generated file has a `continueLogging` event as the first input in events list.
+
+Possible combinations of event types in activity files are: [`startLogging`, `stopLogging`], [`startLogging`],  [`continueLogging`] and [`continueLogging`, `stopLogging`]

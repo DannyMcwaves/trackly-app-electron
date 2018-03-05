@@ -42,5 +42,4 @@ import { sincePipeline } from "./pipes/since.pipe";
     bootstrap: [AppComponent]
 })
 
-export class AppModule {
-}
+export class AppModule {}

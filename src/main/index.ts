@@ -32,10 +32,10 @@ function crateApplicationWindow() {
   // points to `index.html` in production
   const url = isDevelopment
     ? `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`
-    : `file://${__dirname}/dist/renderer/index.html`;
+    : `file://${__dirname}/index.html`;
 
   if (isDevelopment) {
-    // window.webContents.openDevTools();
+    //window.webContents.openDevTools();
   }
 
   window.loadURL(url);

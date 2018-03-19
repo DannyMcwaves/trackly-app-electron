@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 import Activity from "./activity";
+import { autoUpdater } from "electron-updater";
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -62,6 +63,10 @@ app.on("activate", () => {
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
   appWindow = crateApplicationWindow();
+
+  // Updater
+  autoUpdater.checkForUpdatesAndNotify();
+
   setInterval(function() {
     const timeStamp = masterActivity.rotateActivityFile();
     if (timeStamp) {

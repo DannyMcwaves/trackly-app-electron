@@ -25,7 +25,8 @@
 
             <!-- Wokspaces button -->
             <div class="timer-button">
-                <div ngbDropdown placement="bottom-right" class="d-inline-block">
+                <button *ngIf="workspaces.length == 1" class="btn btn-sm btn-outline-primary">{{workspaces[0].title}}</button>
+                <div *ngIf="workspaces.length > 1"  ngbDropdown placement="bottom-right" class="d-inline-block">
                     <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
                         {{ activeWorkspace?.title }}
                     </button>

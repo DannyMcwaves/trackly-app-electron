@@ -28,7 +28,7 @@ class Activity {
   // Paths
   private recordsPath: string;
   private activitiesPath: string;
-  private sceenshotsPath: string;
+  private screenshotsPath: string;
 
   constructor() {
     // Define API service
@@ -37,10 +37,10 @@ class Activity {
     // Define paths
     this.recordsPath = `${app.getPath("userData")}/records`;
     this.activitiesPath = `${this.recordsPath}/activities`;
-    this.sceenshotsPath = `${this.recordsPath}/screenshots`;
+    this.screenshotsPath = `${this.recordsPath}/screenshots`;
 
     // Ensure records dir exists
-    for (let dir of [this.activitiesPath, this.sceenshotsPath]) {
+    for (let dir of [this.activitiesPath, this.screenshotsPath]) {
       try {
         fse.ensureDirSync(dir);
       } catch (e) {
@@ -129,7 +129,7 @@ class Activity {
    * Sync screenshots to server.
    */
   private syncScreenshots() {
-    this.sync(this.sceenshotsPath, this.api.uploadScreenshotsURL());
+    this.sync(this.screenshotsPath, this.api.uploadScreenshotsURL());
   }
 
   /**
@@ -139,7 +139,7 @@ class Activity {
    */
   public rotateActivityFile() {
     if (!this.currentActivityFile) {
-      logger.log('Rotation skipped due to no activity file');
+      logger.log("Rotation skipped due to no activity file");
       return;
     }
 
@@ -153,12 +153,12 @@ class Activity {
       fTitle
     );
 
-    this.appendEvent('continueLogging', newFile);
+    this.appendEvent("continueLogging", newFile);
     this.currentActivityFile = newFile;
 
     this.syncActivities();
     this.syncScreenshots();
-    logger.log('Rotation w/ syncing succesfully completed');
+    logger.log("Rotation w/ syncing succesfully completed");
 
     // TODO: Refactor to use inside sync method
     return Date.now();
@@ -287,7 +287,7 @@ class Activity {
 
     // Append stop logging
     this.appendEvent("stopLogging", this.currentActivityFile);
-    this.currentActivityFile = '';
+    this.currentActivityFile = "";
 
     // Sync everything to the server.
     this.syncActivities();
@@ -300,7 +300,20 @@ class Activity {
    */
   public takeScreenshot(name: number) {
     const imageName = name.toString() + ".jpg";
-    const finalImageName = this.sceenshotsPath + "/" + imageName;
+    const finalImageName = this.screenshotsPath + "/" + imageName;
+
+    // Monkey patch OSX jpg
+    // https://github.com/johnvmt/node-desktop-screenshot/blob/master/capture/darwin.js#L9
+    if (process.platform == "darwin") {
+      let refSCapt = screenshot.capture;
+      console.log("outside patch");
+      screenshot.capture = function(output: string, callback: any) {
+        console.log("inside patch");
+        // Override output path of a temp .png file
+        let tempOutput = output.split("/")[-1];
+        refSCapt(this.screenshotsPath + tempOutput, callback);
+      };
+    }
 
     screenshot(
       finalImageName,

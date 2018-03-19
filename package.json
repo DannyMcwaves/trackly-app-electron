@@ -6,14 +6,25 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "build": "yarn compile && electron-builder",
+    "build-win": "yarn compile && electron-builder --win",
     "postinstall": "electron-rebuild"
   },
   "build": {
-    "appId":"com.trackly.app",
+    "appId": "com.trackly.app",
     "productName": "Trackly",
     "mac": {
-      "icon":"build/icon.icns"
-    }
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": "msi",
+      "icon": "build/icon.ico"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://trackly.com/desktop-application"
+      }
+    ]
   },
   "iohook": {
     "targets": [
@@ -50,6 +61,7 @@
     "desktop-screenshot": "^0.1.1",
     "electron-log": "^2.2.14",
     "electron-store": "^1.3.0",
+    "electron-updater": "^2.21.0",
     "iohook": "^0.1.13",
     "jsonfile": "^4.0.0",
     "moment": "^2.20.1",

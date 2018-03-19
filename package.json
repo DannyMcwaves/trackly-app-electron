@@ -2,6 +2,7 @@
   "name": "trackly-desktop",
   "version": "1.0.0",
   "homepage": "https://trackly.com",
+  "author": "Trackly",
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
@@ -16,7 +17,7 @@
       "icon": "build/icon.icns"
     },
     "win": {
-      "target": "msi",
+      "target": "nsis",
       "icon": "build/icon.ico"
     },
     "publish": [

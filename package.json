@@ -14,18 +14,24 @@
     "appId": "com.trackly.app",
     "productName": "Trackly",
     "mac": {
-      "icon": "build/icon.icns"
+      "icon": "build/icon.icns",
+      "publish": [
+        {
+          "provider": "generic",
+          "url": "https://trackly.com/desktop-application/osx/"
+        }
+      ]
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
-    },
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://trackly.com/desktop-application"
-      }
-    ]
+      "icon": "build/icon.ico",
+      "publish": [
+        {
+          "provider": "generic",
+          "url": "https://trackly.com/desktop-application/windows/"
+        }
+      ]
+    }
   },
   "iohook": {
     "targets": [

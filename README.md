@@ -8,6 +8,9 @@ To run a development copy of the application install dependencies with `yarn ins
 
 > If you're getting a `MSBuildToolsPath` exception on Widndows, reinstall Node.js. Sometimes these errors are caused when there was a Visual Studio install on computer but was later removed.
 
+You might also need to install build tools.
+> `npm install --global --production windows-build-tools`
+
 ### Log files
 Log files in production environment and development environments are save to the operating sistem's default log directory.
 - on Windows: `%USERPROFILE%\AppData\Roaming\Trackly\log.log`  

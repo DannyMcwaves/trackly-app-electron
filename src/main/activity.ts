@@ -78,8 +78,9 @@ class Activity {
    */
   private insertJsonNode(target: string, node: string, value: any) {
     fs.readFile(target, (err, data: any) => {
-      const json = JSON.parse(data);
-      JSON.parse(data)[node].push(value);
+      let json = JSON.parse(data);
+      json[node].push(value);
+
       fs.writeFile(target, JSON.stringify(json), () => {});
     });
   }

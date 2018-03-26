@@ -254,7 +254,7 @@ class Activity {
 
     // Start logging
     this.appendEvent("startLogging", this.currentActivityFile);
-    this.takeScreenshot(timestamp);
+    //this.takeScreenshot(timestamp);
 
     // Start a timer
     this.timerRunningStatus = true;

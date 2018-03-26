@@ -41,7 +41,7 @@
         </div>
 
         <!-- Projects -->
-        <div id="projects">
+        <div *ngIf="projects.length" id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
                 <i  (click)="trackProject(project)"
                     class="fa project-button"
@@ -53,6 +53,12 @@
             </div>
         </div>
         <!-- / Projects -->
+        <!-- Blank -->
+        <div *ngIf="!projects.length" id="blank" class="p-4">
+            <div>No projects found!</div>
+            <small class="text-muted"><span (click)="addProject()" class="text-primary">Click here</span> to add your first project</small>
+        </div>
+        <!-- / Blank -->
     </section>
     <!-- / Content -->
 

@@ -6,6 +6,7 @@
   align-items: center;
   padding: 0 20px;
   justify-content: space-between;
+  box-sizing: border-box;
 
   .timer-clock {
     h3 {
@@ -26,6 +27,7 @@
 }
 
 #projects {
+  box-sizing: border-box;
   .project {
     padding: 0 20px;
     height: 60px;
@@ -81,6 +83,7 @@
 }
 
 footer {
+  box-sizing: border-box;
   height: 36px;
   color: #769ebb;
   display: flex;
@@ -96,4 +99,10 @@ footer {
     display: block;
     line-height: 36px;
   }
+}
+
+#blank {
+  border-top: 1px solid #dcecf8;
+  height: 120px;
+  box-sizing: border-box;
 }

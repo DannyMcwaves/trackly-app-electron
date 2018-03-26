@@ -8,44 +8,43 @@ let syncInterval = process.env.ELECTRON_WEBPACK_APP_SYNC_INTERVAL || "600";
 
 // Globals
 const masterActivity = Activity;
-let appWindow: BrowserWindow;
 let activityObservable: any;
+let appWindow: BrowserWindow;
+let windowURL: string;
+let windowDefaults = {
+  height: 0,
+  width: 400,
+  minWidth: 400,
+  title: "Trackly",
+  center: true,
+  show: false,
+  resizable: true,
+  movable: true,
+  webPreferences: {
+    webSecurity: false // TODO: Remove in production!
+  }
+};
+
+// Dev & Production settings
+if (isDevelopment) {
+  windowURL = `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`;
+} else {
+  windowURL = `file://${__dirname}/index.html`;
+  windowDefaults.resizable = false;
+}
 
 /**
  * Create application wind
  */
-function crateApplicationWindow() {
-  const window = new BrowserWindow({
-    height: 0,
-    width: 400,
-    minWidth: 400,
-    title: "Trackly Desktop",
-    center: true,
-    show: false,
-    resizable: true, // Only for dev
-    movable: true,
-    webPreferences: {
-      webSecurity: false // TODO: Remove in production!
-    }
-  });
+function createApplicationWindow() {
+  let windowFrame = new BrowserWindow(windowDefaults);
+  windowFrame.loadURL(windowURL);
 
-  // points to `webpack-dev-server` in development
-  // points to `index.html` in production
-  const url = isDevelopment
-    ? `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`
-    : `file://${__dirname}/index.html`;
-
-  if (isDevelopment) {
-    //window.webContents.openDevTools();
-  }
-
-  window.loadURL(url);
-
-  window.on("closed", () => {
+  windowFrame.on("closed", () => {
     appWindow = null;
   });
 
-  return window;
+  return windowFrame;
 }
 
 app.on("window-all-closed", () => {
@@ -57,12 +56,12 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   // On macOS it is common to re-create a window
   // even after all windows have been closed
-  if (appWindow === null) appWindow = crateApplicationWindow();
+  if (appWindow === null) appWindow = createApplicationWindow();
 });
 
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
-  appWindow = crateApplicationWindow();
+  appWindow = createApplicationWindow();
 
   // Updater
   autoUpdater.checkForUpdatesAndNotify();
@@ -85,7 +84,8 @@ ipcMain.on("open:link", (event: any, link: string) => {
  * Set a specific window height.
  */
 ipcMain.on("win:height", (event: any, height: number) => {
-  appWindow.setSize(400, height);
+  const toolBar = appWindow.getSize()[1] - appWindow.getContentSize()[1]
+  appWindow.setSize(windowDefaults.width, height + toolBar);
   appWindow.show();
 });
 

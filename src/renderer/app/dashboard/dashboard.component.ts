@@ -16,21 +16,21 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
-    private user: any;
-    private projects: any;
+    public projects: any;
+    public perProject = {};
+    public currentSession = 0;
+    public activeProject: any;
+    public user: any;
+    
     private workspaces: any;
     private activeWorkspace: any;
-    public activeProject: any;
-    public currentSession = 0;
     private lastSynced: number;
-
-    public perProject = {};
-
     private store: any;
 
     // Frame height & Sizes
-    private baseFrameHeight = 178;
+    private baseFrameHeight = 36 + 120;
     private baseProjectHeight = 60;
+    private baseBlankHeight = 120;
     private maxProjectsLength = 5;
 
     /**
@@ -60,7 +60,6 @@ export class DashboardComponent implements OnInit {
         // Subscribe to sync update
         ipcRenderer.on("sync:update", (event: any, data: any) => {
             this.zone.run(() => {
-                console.log('sync update: ', data);
                 this.lastSynced = data;
             });
         });
@@ -70,7 +69,13 @@ export class DashboardComponent implements OnInit {
      *  Resize application frame to an appropriate height.
      */
     private _resizeFrame() {
-        const height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
+        let height: number;
+
+        if (this.projects.length) {
+            height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
+        } else {
+            height = this.baseFrameHeight + 120;
+        }
         ipcRenderer.send('win:height', height);
     }
 
@@ -149,6 +154,10 @@ export class DashboardComponent implements OnInit {
         this.currentSession++;
     }
 
+    addProject() {
+        ipcRenderer.send("open:link", "https://trackly.com/app/projects");
+    }
+
     /**
      * Log user out of the application
      */
@@ -178,7 +187,7 @@ export class DashboardComponent implements OnInit {
 
             this.getProjects().subscribe(response => {
                 this.projects = response;
-                this._resizeFrame(); // Resize frame after projects have been loaded.
+                this._resizeFrame();
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = 0;
                 });

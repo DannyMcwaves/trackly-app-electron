@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit {
     private projects: any;
     private workspaces: any;
     private activeWorkspace: any;
-    private activeProject: any;
+    public activeProject: any;
     public currentSession = 0;
     private lastSynced: number;
 
@@ -89,12 +89,19 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    startTimer(project: any) {
+    trackProject(project: any) {
+        // Clicked on running project
         if (project == this.activeProject) {
+            console.log('same');
             ipcRenderer.send("timer", {action: "stop"});
-        } else {
-            this.activeProject = project;
+            this.activeProject = null;
+            return;
+        }
 
+        // Clicked on new project
+        if (project != this.activeProject) {
+            console.log('new');
+            this.activeProject = project;
             ipcRenderer.send("timer",
                 {
                     action: "start",
@@ -104,20 +111,22 @@ export class DashboardComponent implements OnInit {
                 }
             );
         }
-
     }
 
-    stopTimer(project: any) {
-        alert("stopping timer");
-        ipcRenderer.send("timer", {action: "stop"});
-    }
-
+    /**
+     * Get all projects
+     * TODO: Move to a service
+     */
     getProjects() {
         const uath = this._getUserAuth();
         const req = `https://trackly.com/api/workspaces/${this.activeWorkspace.id}/projects?access_token=${uath.authToken}`;
         return this.http.get(req);
     }
 
+    /**
+     * Get all workspaces
+     * TODO: Move to a service
+     */
     getWorkspaces() {
         const uath = this._getUserAuth();
         return this.http.get(`https://trackly.com/api/users/${uath.userId}/workspaces?access_token=${uath.authToken}`);
@@ -147,6 +156,13 @@ export class DashboardComponent implements OnInit {
         this.store.delete('userId');
         this.store.delete('token');
         this.router.navigate(['login']);
+    }
+
+    /**
+     * Open dashboard
+     */
+    openDashboard() {
+        ipcRenderer.send("open:link", "https://trackly.com/app/dashboard");
     }
 
     /**

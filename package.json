@@ -34,18 +34,9 @@
     }
   },
   "iohook": {
-    "targets": [
-      "node-59",
-      "electron-54"
-    ],
-    "platforms": [
-      "win32",
-      "darwin"
-    ],
-    "arches": [
-      "x64",
-      "ia32"
-    ]
+    "targets": ["node-59", "electron-54"],
+    "platforms": ["win32", "darwin"],
+    "arches": ["x64", "ia32"]
   },
   "cmake-js": {
     "runtime": "electron",

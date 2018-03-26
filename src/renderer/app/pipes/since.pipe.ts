@@ -8,9 +8,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({name: 'sincePipeline'})
 export class sincePipeline implements PipeTransform {
   transform(value: number) {
-    console.log('val: ' + value);
-
-    if (!value) { return "Hasn't been synced yet"}
+    if (!value) { return 'Never synced'}
     return moment(value).fromNow();
   }
 }

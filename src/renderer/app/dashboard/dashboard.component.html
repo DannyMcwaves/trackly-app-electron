@@ -25,6 +25,7 @@
 
             <!-- Wokspaces button -->
             <div class="timer-button">
+                <button (click)="openDashboard()" class="btn btn-primary btn-sm"><i class="fa fa-home"></i></button>
                 <button *ngIf="workspaces.length == 1" class="btn btn-sm btn-outline-primary">{{workspaces[0].title}}</button>
                 <div *ngIf="workspaces.length > 1" ngbDropdown placement="bottom-right" class="d-inline-block">
                     <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
@@ -42,10 +43,13 @@
         <!-- Projects -->
         <div id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
-                <i (click)="startTimer(project)" [ngClass]="'fa fa-play-circle project-button'">
+                <i  (click)="trackProject(project)"
+                    class="fa project-button"
+                    [ngClass]="{'fa-play-circle':project != activeProject,
+                                'fa-stop-circle': project == activeProject}">
                 </i>
                 <h3 class="project-title">{{project.title}}</h3>
-                <h3 class="project-timer">{{perProject[project.id] | timeDuration}}</h3>
+                <h3 class="project-timer">{{perProject[project.id]|timeDuration}}</h3>
             </div>
         </div>
         <!-- / Projects -->
@@ -55,10 +59,10 @@
     <!-- Footer -->
     <footer>
         <div class="footer-sync">
-            <i class="fa fa-fw fa-refresh"></i> {{lastSynced|sincePipeline}}
+            <i class="fa fa-fw fa-refresh"></i>{{lastSynced|sincePipeline}}
         </div>
         <div class="footer-session">
-            <i class="fa fa-fw fa-clock-o"></i> Current session ({{currentSession}})
+            <i class="fa fa-fw fa-clock-o"></i> Session: {{currentSession|timeDuration}}
         </div>
     </footer>
     <!-- / Footer -->

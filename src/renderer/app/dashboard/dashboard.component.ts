@@ -30,7 +30,6 @@ export class DashboardComponent implements OnInit {
     // Frame height & Sizes
     private baseFrameHeight = 36 + 120;
     private baseProjectHeight = 60;
-    private baseBlankHeight = 120;
     private maxProjectsLength = 5;
 
     /**
@@ -70,12 +69,7 @@ export class DashboardComponent implements OnInit {
      */
     private _resizeFrame() {
         let height: number;
-
-        if (this.projects.length) {
-            height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
-        } else {
-            height = this.baseFrameHeight + 120;
-        }
+        height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
         ipcRenderer.send('win:height', height);
     }
 

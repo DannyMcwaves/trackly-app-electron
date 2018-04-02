@@ -187,6 +187,18 @@ export class DashboardComponent implements OnInit {
 
             this.getProjects().subscribe(response => {
                 this.projects = response;
+                
+                // Empty response
+                if (!this.projects.length) {
+                    this.projects = [];
+                    this.projects.push({
+                        archived: false,
+                        description: "My new projec's description",
+                        id: 0,
+                        title: "My new project",
+                        workspaceId: this.activeWorkspace.id
+                    });
+                }
 
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {

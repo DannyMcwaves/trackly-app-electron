@@ -43,7 +43,7 @@ This is an example of a json document that is sent to a server for parsing.
 {
     "userId": <string>[Id of user tracked],
     "workspaceId": <string> [Id of workspace tracked],
-    "projectId": <string> [Id of project tracked],
+    "projectId": <string> [Id of project tracked] or 0,
     "createdAt": <UTC timestamp, ISO> [Timestamp of file creation]
     "events":[
        {
@@ -73,3 +73,7 @@ means that the user was active for 20 seconds.
 If the user has tracked a time on a single project for longer than `ELECTRON_WEBPACK_APP_SYNC_INTERVAL`, the newly generated file has a `continueLogging` event as the first input in events list.
 
 Possible combinations of event types in activity files are: [`startLogging`, `stopLogging`], [`startLogging`],  [`continueLogging`] and [`continueLogging`, `stopLogging`]
+
+### Tracking time without projects in the backend
+In case there are no projects in the backend, we still want to allow users to start tracking time on a project, so
+the initial project get an id of `-1`

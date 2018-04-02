@@ -26,8 +26,8 @@
             <!-- Wokspaces button -->
             <div class="timer-button">
                 <button (click)="openDashboard()" class="btn btn-primary btn-sm"><i class="fa fa-home"></i></button>
-                <button *ngIf="workspaces.length == 1" class="btn btn-sm btn-outline-primary">{{workspaces[0].title}}</button>
-                <div *ngIf="workspaces.length > 1" ngbDropdown placement="bottom-right" class="d-inline-block">
+                <button *ngIf="workspaces?.length == 1" class="btn btn-sm btn-outline-primary">{{workspaces[0].title}}</button>
+                <div *ngIf="workspaces?.length > 1" ngbDropdown placement="bottom-right" class="d-inline-block">
                     <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
                         {{ activeWorkspace?.title }}
                     </button>
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Projects -->
-        <div *ngIf="projects.length" id="projects">
+        <div *ngIf="projects?.length" id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
                 <i  (click)="trackProject(project)"
                     class="fa project-button"
@@ -53,22 +53,16 @@
             </div>
         </div>
         <!-- / Projects -->
-        <!-- Blank -->
-        <div *ngIf="!projects.length" id="blank" class="p-4">
-            <div>No projects found!</div>
-            <small class="text-muted"><span (click)="addProject()" class="text-primary">Click here</span> to add your first project</small>
-        </div>
-        <!-- / Blank -->
     </section>
     <!-- / Content -->
 
     <!-- Footer -->
     <footer>
         <div class="footer-sync">
-            <i class="fa fa-fw fa-refresh"></i>{{lastSynced|sincePipeline}}
+            <i class="fa fa-fw fa-refresh mr-1"></i>{{lastSynced|sincePipeline}}
         </div>
         <div class="footer-session">
-            <i class="fa fa-fw fa-clock-o"></i> Session: {{currentSession|timeDuration}}
+            <i class="fa fa-fw fa-clock-o mr-1"></i>Session &mdash; {{currentSession|timeDuration}}
         </div>
     </footer>
     <!-- / Footer -->

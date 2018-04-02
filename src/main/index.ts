@@ -25,6 +25,18 @@ let windowDefaults = {
   }
 };
 
+// Ensure only one instance of the application gets run
+const isSecondInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
+  if (appWindow) {
+    if (appWindow.isMinimized()) appWindow.restore()
+    appWindow.focus()
+  }
+})
+
+if (isSecondInstance) {
+  app.quit()
+}
+
 // Dev & Production settings
 if (isDevelopment) {
   windowURL = `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`;

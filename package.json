@@ -1,14 +1,14 @@
 {
   "name": "trackly-desktop",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "https://trackly.com",
   "author": "Trackly",
   "private": true,
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
-    "build": "yarn compile && electron-builder",
-    "build-win": "yarn compile && electron-builder --win",
+    "build-mac": "yarn compile && electron-builder --mac",
+    "build-win": "yarn compile && electron-builder --win --x64 --ia32",
     "postinstall": "electron-rebuild"
   },
   "build": {

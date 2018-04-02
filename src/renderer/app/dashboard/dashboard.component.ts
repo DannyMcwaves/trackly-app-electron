@@ -187,6 +187,7 @@ export class DashboardComponent implements OnInit {
 
             this.getProjects().subscribe(response => {
                 this.projects = response;
+
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = 0;

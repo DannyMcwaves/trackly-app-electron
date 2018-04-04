@@ -25,6 +25,7 @@
     },
     "win": {
       "target": "nsis",
+      "perMachine": true,
       "icon": "build/icon.ico"
     }
   },

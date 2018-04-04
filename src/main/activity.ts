@@ -156,6 +156,7 @@ class Activity {
 
     this.appendEvent("continueLogging", newFile);
     this.currentActivityFile = newFile;
+    this.takeScreenshot(fTitle);
 
     this.syncActivities();
     this.syncScreenshots();
@@ -255,7 +256,7 @@ class Activity {
 
     // Start logging
     this.appendEvent("startLogging", this.currentActivityFile);
-    //this.takeScreenshot(timestamp);
+    this.takeScreenshot(timestamp);
 
     // Start a timer
     this.timerRunningStatus = true;
@@ -303,31 +304,34 @@ class Activity {
     const imageName = name.toString() + ".jpg";
     const finalImageName = this.screenshotsPath + "/" + imageName;
 
-    // Monkey patch OSX jpg
-    // https://github.com/johnvmt/node-desktop-screenshot/blob/master/capture/darwin.js#L9
-    if (process.platform == "darwin") {
-      let refSCapt = screenshot.capture;
-      console.log("outside patch");
-      screenshot.capture = function(output: string, callback: any) {
-        console.log("inside patch");
-        // Override output path of a temp .png file
-        let tempOutput = output.split("/")[-1];
-        refSCapt(this.screenshotsPath + tempOutput, callback);
-      };
-    }
+    // // Monkey patch OSX jpg
+    // // https://github.com/johnvmt/node-desktop-screenshot/blob/master/capture/darwin.js#L9
+    // if (process.platform == "darwin") {
+    //   let refSCapt = screenshot.capture;
+    //   console.log("outside patch");
+    //   screenshot.capture = function(output: string, callback: any) {
+    //     console.log("inside patch");
+    //     // Override output path of a temp .png file
+    //     let tempOutput = output.split("/")[-1];
+    //     refSCapt(this.screenshotsPath + tempOutput, callback);
+    //   };
+    // }
 
-    screenshot(
-      finalImageName,
-      {
-        height: 900,
-        quality: 50
-      },
-      (error: any, complete: any) => {
-        if (error) {
-          logger.error("Screenshot failed: " + error.toString());
+    // There's a bug with screenshots on darwin at the moment - April 2018
+    if (process.platform !== "darwin") {
+      screenshot(
+        finalImageName,
+        {
+          height: 900,
+          quality: 50
+        },
+        (error: any, complete: any) => {
+          if (error) {
+            logger.error("Screenshot failed: " + error.toString());
+          }
         }
-      }
-    );
+      );
+    }
   }
 }
 

@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
-    "build-mac": "yarn compile && electron-builder --mac",
+    "build-mac": "yarn compile && electron-builder --mac --publish 'always'",
     "build-win": "yarn compile && electron-builder --win --x64 --ia32 --publish 'always'",
     "postinstall": "electron-rebuild"
   },

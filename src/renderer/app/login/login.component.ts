@@ -1,5 +1,6 @@
 // tslint:disable-next-line:no-var-requires
 const Store = require("electron-store");
+const app = require('electron').remote.app;
 
 import { Component, ViewEncapsulation, OnInit } from "@angular/core";
 import "./login.component.scss";
@@ -16,6 +17,7 @@ import { ipcRenderer } from "electron";
 export class LoginComponent implements OnInit {
 
   private store: any;
+  public appVersion = app.getVersion();
 
   ngOnInit(): void {
     let element = document.getElementsByTagName("html")[0];

@@ -76,3 +76,6 @@ Possible combinations of event types in activity files are: [`startLogging`, `st
 ### Tracking time without projects in the backend
 In case there are no projects in the backend, we still want to allow users to start tracking time on a project, so
 the initial project get an id of `0`
+
+### Quirks
+- Sometimes application won't display a window. If that happens delete `trackly-desktop` folder and try again.

@@ -8,29 +8,28 @@ To run a development copy of the application install dependencies with `yarn ins
 
 > If you're getting a `MSBuildToolsPath` exception on Widndows, reinstall Node.js. Sometimes these errors are caused when there was a Visual Studio install on computer but was later removed.
 
-You might also need to install build tools.
-> `npm install --global --production windows-build-tools`
+> You might also need to install build tools with `npm install --global --production windows-build-tools`
 
 ### Log files
 Log files in production environment and development environments are save to the operating sistem's default log directory.
-- on Windows: `%USERPROFILE%\AppData\Roaming\Trackly\log.log`  
-- on OS X: `~/Library/Logs/Trackly/log.log`
-- on Linux: `~/.config/Trackly>/log.log` (**not supported**)
+- on Windows: `C:\Users\<user>\AppData\Roaming\trackly-desktop\log.log`  
+- on OS X: `~/Library/Logs/trackly-desktop/log.log`
+- on Linux: `~/.config/trackly-desktop>/log.log` (**not supported**)
 
 ### Recordings
 All recordings are stored in two folders; `activities` for actual mouse and keyboard activity and `screenshots` for desktop screenshots. You can find these files under respective folders.
- - on Windows `C:\Users\<user>\AppData\Roaming\Electron\records`
- - on OSX `/Users/<user>/Library/Application Support/Electron/records/`
+ - on Windows `C:\Users\<user>\AppData\Roaming\trackly-desktop\records`
+ - on OSX `/Users/<user>/Library/Application Support/trackly-desktop/records/`
 
 ### Updates
-Updates are done through `electron-updater` package and are baked into executables itself. Updates should be automatically checked and applied when application is run.
+Updates are done through `electron-updater` package and are baked into executables itself. Updates should be automatically checked and applied when application is run. Updates are downloaded in the background without the need for user intervention. Once downloaded, the updates are installed on next run.
 
 ### Environment variables  
-In order to overwrite any of the environment variables set in the application, one has to add them to the system running the Node.js application.
+In order to overwrite any of the environment variables set in the application, one has to add them to the system running the `Node.js` application.
 
-OSX/Linux  
+> OSX/Linux  
 `export ENV_VARIALBE="something"`  
-Windows
+> Windows
 `set ENV=something`
 
 List of available variables

@@ -14,10 +14,12 @@
     "postinstall": "electron-rebuild"
   },
   "build": {
-    "publish": {
-      "provider": "generic",
-      "url": "https://trackly.com/desktop-application/"
-    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://trackly.com/desktop-application/"
+      }
+    ],
     "appId": "com.trackly.app",
     "productName": "Trackly",
     "mac": {

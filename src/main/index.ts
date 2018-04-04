@@ -1,9 +1,13 @@
+const log = require("electron-log");
+
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 import Activity from "./activity";
 import { autoUpdater } from "electron-updater";
 
+
 // Logger
-autoUpdater.logger = require("electron-log");
+log.transports.file.level = "debug";
+autoUpdater.logger = log;
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";

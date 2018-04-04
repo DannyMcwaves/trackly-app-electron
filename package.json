@@ -10,30 +10,22 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "build-mac": "yarn compile && electron-builder --mac",
-    "build-win": "yarn compile && electron-builder --win --x64 --ia32",
+    "build-win": "yarn compile && electron-builder --win --x64 --ia32 --publish 'always'",
     "postinstall": "electron-rebuild"
   },
   "build": {
+    "publish": {
+      "provider": "generic",
+      "url": "https://trackly.com/desktop-application/"
+    },
     "appId": "com.trackly.app",
     "productName": "Trackly",
     "mac": {
-      "icon": "build/icon.icns",
-      "publish": [
-        {
-          "provider": "generic",
-          "url": "https://trackly.com/desktop-application/osx/"
-        }
-      ]
+      "icon": "build/icon.icns"
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico",
-      "publish": [
-        {
-          "provider": "generic",
-          "url": "https://trackly.com/desktop-application/windows/"
-        }
-      ]
+      "icon": "build/icon.ico"
     }
   },
   "iohook": {

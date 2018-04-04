@@ -2,6 +2,9 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import Activity from "./activity";
 import { autoUpdater } from "electron-updater";
 
+// Logger
+autoUpdater.logger = require("electron-log");
+
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
 let syncInterval = process.env.ELECTRON_WEBPACK_APP_SYNC_INTERVAL || "600";

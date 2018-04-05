@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
-    "build-mac": "yarn compile && electron-builder --mac --publish 'always'",
-    "build-win": "yarn compile && electron-builder --win --x64 --ia32 --publish 'always'",
+    "build": "yarn build-mac && yarn build-win",
+    "build-mac": "yarn compile && electron-builder --mac --p always",
+    "build-win": "yarn compile && electron-builder --win --x64 --ia32 --p always",
     "postinstall": "electron-rebuild"
   },
   "build": {
@@ -30,13 +31,23 @@
       "icon": "build/icon.ico"
     },
     "nsis": {
-      "perMachine": true
+      "perMachine": true,
+      "installerLanguages": "en_US"
     }
   },
   "iohook": {
-    "targets": ["node-59", "electron-54"],
-    "platforms": ["win32", "darwin"],
-    "arches": ["x64", "ia32"]
+    "targets": [
+      "node-59",
+      "electron-54"
+    ],
+    "platforms": [
+      "win32",
+      "darwin"
+    ],
+    "arches": [
+      "x64",
+      "ia32"
+    ]
   },
   "cmake-js": {
     "runtime": "electron",
@@ -84,6 +95,7 @@
     "node-cypher": "^0.1.4",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
+    "spectron": "^3.8.0",
     "typescript": "^2.5.3",
     "webpack": "^3.8.1",
     "webpack-sources": "1.0.1"

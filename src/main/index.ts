@@ -125,6 +125,7 @@ ipcMain.on("timer", (event: any, args: any) => {
   // Stop timer
   if (args.action == "stop") {
     activityObservable.unsubscribe();
-    masterActivity.stopTimer();
+    const stopped = masterActivity.stopTimer();
+    appWindow.webContents.send("sync:update", stopped);
   }
 });

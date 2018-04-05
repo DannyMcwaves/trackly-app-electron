@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [1.0.7] - 2018-04-XX
 ### Added
 - Enable screenshots on Windows machines
+- Sync timer is now updated everytime files are pushed to a server
+
+### Changed
+- Force installer to always be in english
 
 ## [1.0.6] - 2018-04-04
 ### Added

@@ -294,6 +294,8 @@ class Activity {
     // Sync everything to the server.
     this.syncActivities();
     this.syncScreenshots();
+
+    return Date.now();
   }
 
   /**

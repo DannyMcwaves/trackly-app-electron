@@ -117,7 +117,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     activityObservable = masterActivity
       .startTimer(args.userId, args.workspaceId, args.projectId)
       .subscribe(userActive => {
-        appWindow.webContents.send("timer:tick", {});
+        appWindow.webContents.send("timer:tick", {'projectId':args.projectId});
         masterActivity.appendActivity(userActive);
       });
   }

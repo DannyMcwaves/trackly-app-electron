@@ -292,7 +292,9 @@ class Activity {
     this.currentActivityFile = "";
 
     // Sync everything to the server.
-    this.syncActivities();
+    // adding timeout to allow files to be written to a file
+    // TODO: Make it a callback
+    setTimeout(() => { this.syncActivities(); }, 5000);
     this.syncScreenshots();
 
     return Date.now();

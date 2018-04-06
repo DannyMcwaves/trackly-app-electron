@@ -77,5 +77,7 @@ Possible combinations of event types in activity files are: [`startLogging`, `st
 In case there are no projects in the backend, we still want to allow users to start tracking time on a project, so
 the initial project get an id of `0`
 
-### Quirks
-- Sometimes application won't display a window. If that happens delete `trackly-desktop` folder and try again.
+### Note on screenshots
+The screenshot node module used is downloaded from github repo instead of npm. This is because the original package hasn't been updated in years and some critical fixes had to be done in order to get the application to work.
+
+The repo used is https://github.com/jhotujec/node-desktop-screenshot.

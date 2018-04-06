@@ -1,3 +1,5 @@
+// tslint:disable-next-line:no-var-requires
+const screenshot = require("desktop-screenshot");
 import { app } from "electron";
 import * as fse from "fs-extra";
 import * as logger from "electron-log";
@@ -168,6 +170,31 @@ export class Fscs {
       workspaceId: args.workspaceId,
       projectId: args.projectId 
     });
+  }
+
+  /**
+   * Method responsible for taking a screenshot of client's desktop.
+   * @param name 
+   */
+  public takeScreenshot() {
+      const name = Date.now();
+      const imageName = name.toString() + ".jpg";
+      const finalImageName = this.screenshotsPath + "/" + imageName;
+  
+      screenshot(
+        finalImageName,
+        {
+          height: 900,
+          quality: 50
+        },
+        (error: any, complete: any) => {
+          if (error) {
+            logger.error("Screenshot failed: " + error.toString());
+          }
+        }
+      );
+
+      logger.log("Screenshot taken");
   }
 
 }

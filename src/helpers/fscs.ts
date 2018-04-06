@@ -60,6 +60,13 @@ export class Fscs {
   }
 
   /**
+   * Method responsible for returning path to the activities folder.
+   */
+  public getActivitiesPath() {
+    return this.activitiesPath;
+  }
+
+  /**
    * Method responsible for creating activity file from blueprint.
    * @param blueprint 
    */

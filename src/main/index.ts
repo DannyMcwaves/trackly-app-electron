@@ -4,6 +4,7 @@ import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
 import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
+import { Uploader } from "../helpers/uploader";
 
 // Logger
 logger.transports.file.level = "debug";
@@ -13,6 +14,7 @@ autoUpdater.logger = logger;
 const fscs = new Fscs();
 const timer = new Timer();
 const activity = new Activity(fscs);
+const uploader = new Uploader(fscs);
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -139,11 +141,11 @@ ipcMain.on("timer", (event: any, args: any) => {
       },
       () => {
         activity.stop();
-        logger.debug("Timer stopped..");
+        logger.log("Timer stopped..");
         fscs.appendEvent("stopLogging", fscs.getActFile());
         fscs.unloadActFile();
         
-        // Sync stuff to server
+        uploader.uploadActivities();
       }
     );
   }

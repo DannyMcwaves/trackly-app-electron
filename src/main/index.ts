@@ -145,7 +145,9 @@ ipcMain.on("timer", (event: any, args: any) => {
         fscs.appendEvent("stopLogging", fscs.getActFile());
         fscs.unloadActFile();
         
-        uploader.uploadActivities();
+        uploader.upload(() => {
+          appWindow.webContents.send("sync:update", Date.now());
+        });
       }
     );
   }

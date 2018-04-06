@@ -7,9 +7,18 @@ import { Fscs } from "./fscs";
 export class Uploader {
   private store: any;
   private api: any;
+  private uploadTimeout = 5000;
 
   constructor(private fscs: Fscs) {
     this.api = new ApiService();
+  }
+
+  public upload(callback: any) {
+    logger.log('Upload started');
+    setTimeout(() => {
+      this.uploadActivities();
+      callback();
+    }, this.uploadTimeout);
   }
   
   public uploadActivities() {
@@ -30,8 +39,8 @@ export class Uploader {
 
         req.post(this.api.uploadActivitiesURL(), { formData: data }, (err, res, data) => {
           if (!err && res.statusCode == 200) {
-            //fse.unlink(`${dir}/${file}`, () => {});
-            logger.log(`File synced and deleted: ${file}`);
+            fse.unlink(`${dir}/${file}`, () => {});
+            logger.log(`File ${file} uploader to ${this.api.uploadActivitiesURL()}: ${file}`);
           } else {
             logger.warn(`File upload failed: ${file}`);
           }

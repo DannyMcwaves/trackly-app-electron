@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.0.7] - 2018-04-XX
+## [1.0.7-1.0.8] - 2018-04-07
 ### Added
 - Enable screenshots on Windows machines
 - Sync timer is now updated everytime files are pushed to a server
@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Force installer to always be in english
 - Total rewrite of the timer and activity code
 - Splitted code across multiple files
+- Fixes for screenshots on Windows and Mac
 
 ## [1.0.6] - 2018-04-04
 ### Added

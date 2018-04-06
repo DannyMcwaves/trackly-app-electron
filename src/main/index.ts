@@ -115,7 +115,7 @@ ipcMain.on("open:link", (event: any, link: string) => {
  */
 ipcMain.on("win:height", (event: any, height: number) => {
   const toolBar = appWindow.getSize()[1] - appWindow.getContentSize()[1];
-  appWindow.setSize(windowDefaults.width, height + toolBar);
+  appWindow.setSize(windowDefaults.width, Math.round(height + toolBar));
   appWindow.show();
 });
 

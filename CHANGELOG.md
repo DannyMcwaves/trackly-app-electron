@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Force installer to always be in english
+- Total rewrite of the timer and activity code
+- Splitted code across multiple files
 
 ## [1.0.6] - 2018-04-04
 ### Added

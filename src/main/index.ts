@@ -1,21 +1,24 @@
-const log = require("electron-log");
-
+import * as logger from "electron-log";
 import { app, BrowserWindow, ipcMain, shell } from "electron";
-import Activity from "./activity";
 import { autoUpdater } from "electron-updater";
-
+import { Timer } from "../helpers/timer";
+import { Activity } from "../helpers/activity";
+import { Fscs } from "../helpers/fscs";
 
 // Logger
-log.transports.file.level = "debug";
-autoUpdater.logger = log;
+logger.transports.file.level = "debug";
+autoUpdater.logger = logger;
+
+// Helpers
+const fscs = new Fscs();
+const timer = new Timer();
+const activity = new Activity(fscs);
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
 let syncInterval = process.env.ELECTRON_WEBPACK_APP_SYNC_INTERVAL || "600";
 
 // Globals
-const masterActivity = Activity;
-let activityObservable: any;
 let appWindow: BrowserWindow;
 let windowURL: string;
 let windowDefaults = {
@@ -33,15 +36,17 @@ let windowDefaults = {
 };
 
 // Ensure only one instance of the application gets run
-const isSecondInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
-  if (appWindow) {
-    if (appWindow.isMinimized()) appWindow.restore()
-    appWindow.focus()
+const isSecondInstance = app.makeSingleInstance(
+  (commandLine, workingDirectory) => {
+    if (appWindow) {
+      if (appWindow.isMinimized()) appWindow.restore();
+      appWindow.focus();
+    }
   }
-})
+);
 
 if (isSecondInstance) {
-  app.quit()
+  app.quit();
 }
 
 // Dev & Production settings
@@ -85,47 +90,66 @@ app.on("ready", () => {
   // Updater
   autoUpdater.checkForUpdatesAndNotify();
 
+  // Start file rotation
   setInterval(function() {
-    const timeStamp = masterActivity.rotateActivityFile();
-    if (timeStamp) {
-      appWindow.webContents.send("sync:update", timeStamp);
-    }
-  }, parseInt(syncInterval) * 1000);
+    fscs.rotate();
+  }, 20000);
+
 });
+
 /**
- * Open link in an external browser window.
+ * ===============
+ * == OPEN LINK ==
+ * ===============
  */
 ipcMain.on("open:link", (event: any, link: string) => {
   shell.openExternal(link);
 });
 
 /**
- * Set a specific window height.
+ * ===================
+ * == WINDOW HEIGHT ==
+ * ===================
  */
 ipcMain.on("win:height", (event: any, height: number) => {
-  const toolBar = appWindow.getSize()[1] - appWindow.getContentSize()[1]
+  const toolBar = appWindow.getSize()[1] - appWindow.getContentSize()[1];
   appWindow.setSize(windowDefaults.width, height + toolBar);
   appWindow.show();
 });
 
 /**
- * Main activity timer logic and observable
+ * ===========
+ * == TIMER ==
+ * ===========
  */
 ipcMain.on("timer", (event: any, args: any) => {
-  // Start timer, subscribe to activity observer
+  // Start timer
   if (args.action == "start") {
-    activityObservable = masterActivity
-      .startTimer(args.userId, args.workspaceId, args.projectId)
-      .subscribe(userActive => {
-        appWindow.webContents.send("timer:tick", {'projectId':args.projectId});
-        masterActivity.appendActivity(userActive);
-      });
+    // Get a file
+    fscs.newActivityFile(args);
+    fscs.appendEvent("startLogging", fscs.getActFile());
+
+    timer.ticker.subscribe(
+      async tick => {
+        activity.measure(tick);
+        appWindow.webContents.send("timer:tick");
+      },
+      err => {
+        logger.error("Failed to start the timer");
+      },
+      () => {
+        activity.stop();
+        logger.debug("Timer stopped..");
+        fscs.appendEvent("stopLogging", fscs.getActFile());
+        fscs.unloadActFile();
+        
+        // Sync stuff to server
+      }
+    );
   }
 
   // Stop timer
   if (args.action == "stop") {
-    activityObservable.unsubscribe();
-    const stopped = masterActivity.stopTimer();
-    appWindow.webContents.send("sync:update", stopped);
+    timer.complete();
   }
 });

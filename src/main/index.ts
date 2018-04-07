@@ -95,7 +95,7 @@ app.on("ready", () => {
   // Start file rotation
   setInterval(function() {
     fscs.rotate();
-  }, 20000);
+  }, 600000);
 
 });
 

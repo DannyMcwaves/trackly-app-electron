@@ -49,9 +49,9 @@ export class DashboardComponent implements OnInit {
         }
 
         // Subscribe to main timer
-        ipcRenderer.on("timer:tick", (event: any, data: any) => {
+        ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
             this.zone.run(() => {
-                this.perProject[this.activeProject.id] += 1;
+                this.perProject[projectId] += 1;
                 this.currentSession += 1;
             });
         });

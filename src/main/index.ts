@@ -137,7 +137,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     timer.ticker.subscribe(
       async tick => {
         activity.measure(tick);
-        appWindow.webContents.send("timer:tick");
+        appWindow.webContents.send("timer:tick", args.projectId);
       },
       err => {
         logger.error("Failed to start the timer");

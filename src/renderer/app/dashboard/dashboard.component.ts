@@ -199,6 +199,10 @@ export class DashboardComponent implements OnInit {
                     this.perProject[element.id] = 0;
                 });
             });
+        }, error => {
+            this.store.delete('userId');
+            this.store.delete('token');
+            this.router.navigate(['login']);
         });
     }
 }

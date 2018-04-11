@@ -183,7 +183,7 @@ export class DashboardComponent implements OnInit {
 
             this.getProjects().subscribe(response => {
                 this.projects = response;
-                
+
                 // Empty response
                 if (!this.projects.length) {
                     this.projects = [];
@@ -198,7 +198,7 @@ export class DashboardComponent implements OnInit {
 
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {
-                    this.perProject[element.id] = 0;
+                    this.perProject[element.id] = element.timeTracked;
                 });
             });
         }, error => {

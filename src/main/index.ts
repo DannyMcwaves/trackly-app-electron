@@ -132,7 +132,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     fscs.appendEvent("startLogging", fscs.getActFile());
 
     // Take screenshot
-    fscs.takeScreenshot();
+    fscs.takeScreenshot(args.timestamp);
 
     timer.ticker.subscribe(
       async tick => {

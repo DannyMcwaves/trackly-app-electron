@@ -16,7 +16,7 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
-    private baseURL = 'https://tracky.com/api'
+    private baseURL = 'https://trackly.com/api'
     public projects: any;
     public perProject = {};
     public currentSession = 0;
@@ -108,7 +108,8 @@ export class DashboardComponent implements OnInit {
                     action: "start",
                     projectId: project.id,
                     workspaceId: this.activeWorkspace.id,
-                    userId: this._getUserAuth().userId
+                    userId: this._getUserAuth().userId,
+                    timestamp: Date.now()
                 }
             );
         }

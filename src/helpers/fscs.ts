@@ -161,11 +161,9 @@ export class Fscs {
    * @param args 
    */
   newActivityFile(args: any) {
-    const ts = Date.now();
-
     // Generate an actual file
     this.currentActivityFile = this.generateActivityFile({
-      timestamp: ts,
+      timestamp: args.timestamp,
       userId: args.userId,
       workspaceId: args.workspaceId,
       projectId: args.projectId 
@@ -176,9 +174,8 @@ export class Fscs {
    * Method responsible for taking a screenshot of client's desktop.
    * @param name 
    */
-  public takeScreenshot() {
-      const name = Date.now();
-      const imageName = name.toString() + ".jpg";
+  public takeScreenshot(timestamp: number) {
+      const imageName = timestamp.toString() + ".jpg";
       const finalImageName = this.screenshotsPath + "/" + imageName;
   
       screenshot(

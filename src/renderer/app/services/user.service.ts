@@ -1,3 +1,5 @@
+const Store = require("electron-store");
+
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
@@ -6,10 +8,13 @@ import 'rxjs/add/operator/map';
 
 @Injectable()
 export class UserService {
-  private apiURL = "https://trackly.com/api/users";
+  private apiURL = 'https://trackly.com/api';
   private user: Object|null;
+  private store: any;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {
+    this.store = new Store();
+  }
 
   /**
    * Login user to the application.
@@ -22,8 +27,8 @@ export class UserService {
    * Logout user from the application and remove the token.
    */
   logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    this.router.navigate(['']);
+    this.store.delete("token");
+    this.store.delete("userId");
+    this.router.navigate(['login']);
   }
 }

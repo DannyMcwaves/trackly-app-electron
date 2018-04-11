@@ -16,7 +16,7 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
-    private baseURL = 'https://trackly.com/api'
+    private baseURL = 'https://trackly.com/api';
     public projects: any;
     public perProject = {};
     public currentSession = 0;
@@ -159,9 +159,8 @@ export class DashboardComponent implements OnInit {
      * Log user out of the application
      */
     logOut() {
-        this.store.delete('userId');
-        this.store.delete('token');
-        this.router.navigate(['login']);
+        ipcRenderer.send("timer", {action: "stop"});
+        this.userService.logout();
     }
 
     /**
@@ -203,9 +202,7 @@ export class DashboardComponent implements OnInit {
                 });
             });
         }, error => {
-            this.store.delete('userId');
-            this.store.delete('token');
-            this.router.navigate(['login']);
+            this.logOut();
         });
     }
 }

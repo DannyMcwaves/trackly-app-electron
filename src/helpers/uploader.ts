@@ -7,7 +7,7 @@ import { Fscs } from "./fscs";
 export class Uploader {
   private store: any;
   private api: any;
-  private uploadTimeout = 5000;
+  private uploadTimeout = 3000;
 
   constructor(private fscs: Fscs) {
     this.api = new ApiService();
@@ -17,10 +17,11 @@ export class Uploader {
     logger.log('Upload started');
     setTimeout(() => {
       this.uploadActivities();
+      this.uploadScreenshots();
       callback();
     }, this.uploadTimeout);
   }
-  
+
   public uploadActivities() {
 
     const dir = this.fscs.getActivitiesPath();
@@ -39,8 +40,8 @@ export class Uploader {
 
         req.post(this.api.uploadActivitiesURL(), { formData: data }, (err, res, data) => {
           if (!err && res.statusCode == 200) {
-            fse.unlink(`${dir}/${file}`, () => {});
-            logger.log(`File ${file} uploader to ${this.api.uploadActivitiesURL()}: ${file}`);
+            fse.unlink(`${dir}/${file}`, () => { });
+            logger.log(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
           } else {
             logger.warn(`File upload failed: ${file}`);
           }
@@ -48,4 +49,27 @@ export class Uploader {
       });
     });
   }
+
+  public uploadScreenshots() {
+
+    const dir = this.fscs.getScreenshotsPath();
+
+    fse.readdir(dir, (err, files) => {
+      files.forEach(file => {
+        const data = {
+          res: fse.createReadStream(`${dir}/${file}`)
+        };
+
+        req.post(this.api.uploadScreenshotsURL(), { formData: data }, (err, res, data) => {
+          if (!err && res.statusCode == 200) {
+            fse.unlink(`${dir}/${file}`, () => { });
+            logger.log(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
+          } else {
+            logger.warn(`File upload failed: ${file}`);
+          }
+        });
+      });
+    });
+  }
+
 }

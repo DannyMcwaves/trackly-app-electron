@@ -171,6 +171,13 @@ export class Fscs {
   }
 
   /**
+   * Method responsible for returning path to the activities folder.
+   */
+  public getScreenshotsPath() {
+    return this.screenshotsPath;
+  }
+
+  /**
    * Method responsible for taking a screenshot of client's desktop.
    * @param name 
    */

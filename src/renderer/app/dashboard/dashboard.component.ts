@@ -16,6 +16,7 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
+    private baseURL = 'https://tracky.com/api'
     public projects: any;
     public perProject = {};
     public currentSession = 0;
@@ -99,7 +100,8 @@ export class DashboardComponent implements OnInit {
 
         // Clicked on new project
         if (project != this.activeProject) {
-            console.log('new');
+            console.log('new');       
+            ipcRenderer.send("timer", {action: "stop"});
             this.activeProject = project;
             ipcRenderer.send("timer",
                 {
@@ -118,7 +120,7 @@ export class DashboardComponent implements OnInit {
      */
     getProjects() {
         const uath = this._getUserAuth();
-        const req = `https://trackly.com/api/workspaces/${this.activeWorkspace.id}/projects?access_token=${uath.authToken}`;
+        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?access_token=${uath.authToken}`;
         return this.http.get(req);
     }
 
@@ -128,7 +130,7 @@ export class DashboardComponent implements OnInit {
      */
     getWorkspaces() {
         const uath = this._getUserAuth();
-        return this.http.get(`https://trackly.com/api/users/${uath.userId}/workspaces?access_token=${uath.authToken}`);
+        return this.http.get(`${this.baseURL}/users/${uath.userId}/workspaces?access_token=${uath.authToken}`);
     }
 
     /**

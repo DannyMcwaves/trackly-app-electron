@@ -7,7 +7,7 @@ import { Fscs } from "./fscs";
 export class Uploader {
   private store: any;
   private api: any;
-  private uploadTimeout = 3000;
+  private uploadTimeout = 500;
 
   constructor(private fscs: Fscs) {
     this.api = new ApiService();

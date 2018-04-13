@@ -74,9 +74,13 @@ function createApplicationWindow() {
 }
 
 app.on("window-all-closed", () => {
+  timer.complete();
+  
   // On macOS it is common for applications to stay open
   // until the user explicitly quits
-  if (process.platform !== "darwin") app.quit();
+  if (process.platform !== "darwin") {
+    setTimeout(() => { app.quit() }, 1000);
+  }
 });
 
 app.on("activate", () => {
@@ -137,7 +141,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     timer.ticker.subscribe(
       async tick => {
         activity.measure(tick);
-        appWindow.webContents.send("timer:tick", args.projectId);
+        if (appWindow) { appWindow.webContents.send("timer:tick", args.projectId); }
       },
       err => {
         logger.error("Failed to start the timer");
@@ -149,7 +153,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         fscs.unloadActFile();
         
         uploader.upload(() => {
-          appWindow.webContents.send("sync:update", Date.now());
+          if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
         });
       }
     );

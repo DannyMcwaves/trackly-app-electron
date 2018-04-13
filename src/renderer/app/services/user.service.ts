@@ -1,4 +1,5 @@
 const Store = require("electron-store");
+import { ipcRenderer } from "electron";
 
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
@@ -27,8 +28,11 @@ export class UserService {
    * Logout user from the application and remove the token.
    */
   logout() {
-    this.store.delete("token");
-    this.store.delete("userId");
-    this.router.navigate(['login']);
+    ipcRenderer.send("timer", {action: "stop"});
+    setTimeout(() => {
+      this.store.delete("token");
+      this.store.delete("userId");
+      this.router.navigate(['login']);
+    }, 1000);
   }
 }

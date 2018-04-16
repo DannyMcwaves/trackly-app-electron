@@ -16,13 +16,13 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
-    private baseURL = 'https://trackly.com/api';
+    private baseURL = process.env.apiUrl+'/api' || 'https://trackly.com/api';
     public projects: any;
     public perProject = {};
     public currentSession = 0;
     public activeProject: any;
     public user: any;
-    
+
     private workspaces: any;
     private activeWorkspace: any;
     private lastSynced: number;
@@ -40,7 +40,7 @@ export class DashboardComponent implements OnInit {
      * @param {Router} router
      * @param {HttpClient} http
      */
-    constructor(private userService: UserService, private router: Router, 
+    constructor(private userService: UserService, private router: Router,
                 private http: HttpClient, public zone: NgZone) {
 
         this.store = new Store();
@@ -100,7 +100,7 @@ export class DashboardComponent implements OnInit {
 
         // Clicked on new project
         if (project != this.activeProject) {
-            console.log('new');       
+            console.log('new');
             ipcRenderer.send("timer", {action: "stop"});
             this.activeProject = project;
             ipcRenderer.send("timer",

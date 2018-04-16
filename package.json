@@ -83,6 +83,7 @@
     "zone.js": "^0.8.18"
   },
   "devDependencies": {
+    "@types/dotenv": "^4.0.3",
     "@types/fs-extra": "^5.0.1",
     "@types/jsonfile": "^4.0.1",
     "@types/node": "^8.0.46",

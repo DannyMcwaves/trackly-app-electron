@@ -1,7 +1,7 @@
 # Trackly Desktop
 
 ### What is Trackly Desktop
-Trackly desktop is an [Electron application](https://electronjs.org/) built for tracking user's activity and communicating with backend server. It's still under active development and thus subject to constant change. 
+Trackly desktop is an [Electron application](https://electronjs.org/) built for tracking user's activity and communicating with backend server. It's still under active development and thus subject to constant change.
 
 ### Development
 To run a development copy of the application install dependencies with `yarn install` and then start the application with `yarn dev`.
@@ -12,7 +12,7 @@ To run a development copy of the application install dependencies with `yarn ins
 
 ### Log files
 Log files in production environment and development environments are save to the operating sistem's default log directory.
-- on Windows: `C:\Users\<user>\AppData\Roaming\trackly-desktop\log.log`  
+- on Windows: `C:\Users\<user>\AppData\Roaming\trackly-desktop\log.log`
 - on OS X: `~/Library/Logs/trackly-desktop/log.log`
 - on Linux: `~/.config/trackly-desktop>/log.log` (**not supported**)
 
@@ -24,11 +24,11 @@ All recordings are stored in two folders; `activities` for actual mouse and keyb
 ### Updates
 Updates are done through `electron-updater` package and are baked into executables itself. Updates should be automatically checked and applied when application is run. Updates are downloaded in the background without the need for user intervention. Once downloaded, the updates are installed on next run.
 
-### Environment variables  
+### Environment variables
 In order to overwrite any of the environment variables set in the application, one has to add them to the system running the `Node.js` application.
 
-> OSX/Linux  
-`export ENV_VARIALBE="something"`  
+> OSX/Linux
+`export ENV_VARIALBE="something"`
 > Windows
 `set ENV=something`
 
@@ -38,7 +38,7 @@ List of available variables
 
 ### Activity schema
 This is an example of a json document that is sent to a server for parsing.
-````
+```
 {
     "userId": <string>[Id of user tracked],
     "workspaceId": <string> [Id of workspace tracked],
@@ -81,3 +81,12 @@ the initial project get an id of `0`
 The screenshot node module used is downloaded from github repo instead of npm. This is because the original package hasn't been updated in years and some critical fixes had to be done in order to get the application to work.
 
 The repo used is https://github.com/jhotujec/node-desktop-screenshot.
+
+### Connecting to the API.
+The default API endpoint connection provided is [trackly.com](https://trackly.com/)(https://trackly.com/api). To configure a custom API endpoint, follow the steps below:
+
+Copy and rename the .env.example file to .env
+- `cp .env.example .env`
+
+Provide/change the `apiUrl` property in the `.env` file to the name of the API host.
+- `apiUrl=http://localhost:3000`

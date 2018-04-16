@@ -1,5 +1,6 @@
 import * as logger from "electron-log";
 import { app, BrowserWindow, ipcMain, shell } from "electron";
+import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
 import { Activity } from "../helpers/activity";
@@ -9,6 +10,9 @@ import { Uploader } from "../helpers/uploader";
 // Logger
 logger.transports.file.level = "debug";
 autoUpdater.logger = logger;
+
+// config environment variables in .env
+config();
 
 // Helpers
 const fscs = new Fscs();
@@ -75,7 +79,7 @@ function createApplicationWindow() {
 
 app.on("window-all-closed", () => {
   timer.complete();
-  
+
   // On macOS it is common for applications to stay open
   // until the user explicitly quits
   if (process.platform !== "darwin") {
@@ -151,7 +155,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         logger.log("Timer stopped..");
         fscs.appendEvent("stopLogging", fscs.getActFile());
         fscs.unloadActFile();
-        
+
         uploader.upload(() => {
           if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
         });

@@ -6,9 +6,8 @@ export class ApiService {
     private store: any;
 
     constructor() {
-    this.store = new Store();
-    this.baseURL =
-        process.env.ELECTRON_WEBPACK_APP_API_URL || "https://trackly.com/api";
+        this.store = new Store();
+        this.baseURL = process.env.apiUrl+'/api' || "https://trackly.com/api";
     }
 
     // TODO: Move to decorator

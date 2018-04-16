@@ -3,8 +3,10 @@
     <header>
         <img src="../assets/logo.svg" alt="Trackly" id="logo">
         <ul class="list-inline" id="user-nav">
-            <li class="list-inline-item">
-                <img style="border-radius:50%; margin-top:-2px;" src="../assets/avatar.jpg" height="30" alt="">
+            <li *ngIf="workspaces?.length == 1" class="list-inline-item">
+                <figure class="avatar avatar--sm">
+                    <div class="initials">{{generateInitials()}}</div>
+                </figure>
             </li>
             <li class="list-inline-item">
                 <a href="#" (click)="logOut()">Log out</a>

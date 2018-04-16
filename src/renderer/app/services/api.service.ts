@@ -7,7 +7,7 @@ export class ApiService {
 
     constructor() {
         this.store = new Store();
-        this.baseURL = process.env.apiUrl+'/api' || "https://trackly.com/api";
+        this.baseURL = process.env.apiUrl ? process.env.apiUrl + "/api" : "https://trackly.com/api";
     }
 
     // TODO: Move to decorator

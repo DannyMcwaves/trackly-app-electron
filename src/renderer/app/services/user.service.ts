@@ -9,7 +9,7 @@ import 'rxjs/add/operator/map';
 
 @Injectable()
 export class UserService {
-  private apiURL = process.env.apiUrl+"/api/users" || "https://trackly.com/api/users";
+  private apiURL = process.env.apiUrl ? process.env.apiUrl + "/api/users" : "https://trackly.com/api/users";
   private user: Object|null;
   private store: any;
 

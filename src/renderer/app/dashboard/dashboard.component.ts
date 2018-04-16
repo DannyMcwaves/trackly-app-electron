@@ -16,7 +16,7 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
-    private baseURL = process.env.apiUrl+'/api' || 'https://trackly.com/api';
+    private baseURL = process.env.apiUrl ? process.env.apiUrl + "/api" : 'https://trackly.com/api';
     public projects: any;
     public perProject = {};
     public currentSession = 0;

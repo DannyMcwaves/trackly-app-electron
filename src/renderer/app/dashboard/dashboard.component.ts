@@ -156,6 +156,18 @@ export class DashboardComponent implements OnInit {
     }
 
     /**
+     * generate the initials of the workspace owner
+     * */
+    generateInitials() {
+        let name = this.workspaces[0].title;
+        if (!name) {
+            return false;
+        }
+
+        return name.replace(/\W*(\w)\w*/g, '$1').toUpperCase().substring(0, 2);
+    }
+
+    /**
      * Log user out of the application
      */
     logOut() {

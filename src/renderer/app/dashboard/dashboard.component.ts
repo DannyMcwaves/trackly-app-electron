@@ -102,7 +102,7 @@ export class DashboardComponent implements OnInit {
         if (project != this.activeProject) {
             console.log('new');
             ipcRenderer.send("timer", {action: "stop"});
-            this.activeProject = project;
+            this.activeProject = project;          
             ipcRenderer.send("timer",
                 {
                     action: "start",
@@ -210,7 +210,7 @@ export class DashboardComponent implements OnInit {
 
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {
-                    this.perProject[element.id] = element.timeTracked;
+                    this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
                 });
             });
         }, error => {

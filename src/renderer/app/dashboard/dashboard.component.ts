@@ -202,7 +202,7 @@ export class DashboardComponent implements OnInit {
                     this.projects.push({
                         archived: false,
                         description: "(No desription)",
-                        id: 0,
+                        id: '0',
                         title: "(No project)",
                         workspaceId: this.activeWorkspace.id
                     });

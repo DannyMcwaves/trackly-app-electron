@@ -16,7 +16,7 @@ import {HttpClient} from "@angular/common/http";
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
-    private baseURL = process.env.apiUrl+'/api' || 'https://trackly.com/api';
+    private baseURL = process.env.apiUrl ? process.env.apiUrl + "/api" : 'https://trackly.com/api';
     public projects: any;
     public perProject = {};
     public currentSession = 0;
@@ -153,6 +153,18 @@ export class DashboardComponent implements OnInit {
 
     addProject() {
         ipcRenderer.send("open:link", "https://trackly.com/app/projects");
+    }
+
+    /**
+     * generate the initials of the workspace owner
+     * */
+    generateInitials() {
+        let name = this.workspaces[0].title;
+        if (!name) {
+            return false;
+        }
+
+        return name.replace(/\W*(\w)\w*/g, '$1').toUpperCase().substring(0, 2);
     }
 
     /**

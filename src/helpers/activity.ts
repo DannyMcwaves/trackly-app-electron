@@ -7,7 +7,7 @@ export class Activity {
   private cachedIsActive = false;
   private cachedInterval = 0;
   private isActive = false;
-  private measurementInterval = 5; // seconds
+  private measurementInterval = 2; // seconds
 
   constructor(private fscs: Fscs) { }
 

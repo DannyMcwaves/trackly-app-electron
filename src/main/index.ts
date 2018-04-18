@@ -103,6 +103,8 @@ app.on("ready", () => {
   // Start file rotation
   setInterval(function() {
     fscs.rotate();
+    // upload files within 10min interval after every rotation.
+    uploader.upload(() => {logger.log('successfully upload files')});
   }, 600000);
 
 });

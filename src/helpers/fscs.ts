@@ -5,6 +5,7 @@ import * as fse from "fs-extra";
 import * as logger from "electron-log";
 import * as moment from "moment";
 import * as jsonfile from "jsonfile";
+import {activityStorage} from "./activity";
 
 export class Fscs {
   // Paths
@@ -41,7 +42,7 @@ export class Fscs {
 
   /**
    * Method responsible for loading activity file into memory.
-   * @param file 
+   * @param file
    */
   public loadActFile(file: string) {
     this.currentActivityFile = file;
@@ -70,7 +71,7 @@ export class Fscs {
 
   /**
    * Method responsible for creating activity file from blueprint.
-   * @param blueprint 
+   * @param blueprint
    */
   private generateActivityFile(blueprint: IActivityFileBlueprint) {
     let fileName = `${this.activitiesPath}/${blueprint.timestamp.toString()}.json`;
@@ -89,8 +90,8 @@ export class Fscs {
 
   /**
    * Method responsible for appening event to the activity file.
-   * @param evt 
-   * @param file 
+   * @param evt
+   * @param file
    */
   public appendEvent(evt: string, file: string) {
     this.insertJsonNode(file, 'events', {
@@ -101,8 +102,8 @@ export class Fscs {
 
   /**
    * Method responsible for appending activity to the activity file.
-   * @param userStatus 
-   * @param duration 
+   * @param userStatus
+   * @param duration
    */
   public appendActivity(userStatus: boolean, duration: number) {
     this.insertJsonNode(this.currentActivityFile, 'activities', {
@@ -113,9 +114,9 @@ export class Fscs {
 
   /**
    * Method responsible for appending a node inside json file.
-   * @param target 
-   * @param node 
-   * @param value 
+   * @param target
+   * @param node
+   * @param value
    */
   private insertJsonNode(target: string, node: string, value: any) {
     fse.readFile(target, (err, data: any) => {
@@ -133,8 +134,13 @@ export class Fscs {
     const currentActFile = this.getActFile();
 
     if (!currentActFile) {
-      logger.log("Rotation skipped due to no in-memory file.")
+      logger.log("Rotation skipped due to no in-memory file.");
       return;
+    }
+
+    // append new activities if available before generating new file.
+    if(activityStorage.duration > 0) {
+      this.appendActivity(activityStorage.userStatus, activityStorage.duration);
     }
 
     const ts = Date.now();
@@ -147,7 +153,7 @@ export class Fscs {
       timestamp: ts,
       userId: fp.userId,
       workspaceId: fp.workspaceId,
-      projectId: fp.projectId 
+      projectId: fp.projectId
     });
 
     this.appendEvent("continueLogging", tempFile);
@@ -161,7 +167,7 @@ export class Fscs {
   /**
    * Method responsible for generating activity file, populating it with
    * blueprint data and adding the file to memory.
-   * @param args 
+   * @param args
    */
   newActivityFile(args: any) {
     // Generate an actual file
@@ -169,7 +175,7 @@ export class Fscs {
       timestamp: args.timestamp,
       userId: args.userId,
       workspaceId: args.workspaceId,
-      projectId: args.projectId 
+      projectId: args.projectId
     });
   }
 
@@ -182,12 +188,12 @@ export class Fscs {
 
   /**
    * Method responsible for taking a screenshot of client's desktop.
-   * @param name 
+   * @param name
    */
   public takeScreenshot(timestamp: number) {
       const imageName = timestamp.toString() + ".jpg";
       const finalImageName = this.screenshotsPath + "/" + imageName;
-  
+
       screenshot(
         finalImageName,
         {

@@ -211,6 +211,7 @@ export class DashboardComponent implements OnInit {
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+                    this.currentSession += element.timeTracked ? element.timeTracked : 0;
                 });
             });
         }, error => {

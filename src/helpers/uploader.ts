@@ -30,7 +30,7 @@ export class Uploader {
       files.forEach(file => {
         // Skip current file if the timer is up and running.
         if (`${dir}/${file}` == this.fscs.getActFile()) {
-          logger.log('Skip uploading file in memory.')
+          logger.log('Skip uploading file in memory.');
           return;
         }
 
@@ -56,6 +56,13 @@ export class Uploader {
 
     fse.readdir(dir, (err, files) => {
       files.forEach(file => {
+
+        // do not upload the screenshot if it has same name as the current json file in memory.
+        if (`${dir}/${file}` == this.fscs.getActFile()) {
+            logger.log('Skip uploading screenshot file in memory.');
+            return;
+        }
+
         const data = {
           res: fse.createReadStream(`${dir}/${file}`)
         };

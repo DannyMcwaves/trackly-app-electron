@@ -102,11 +102,14 @@ app.on("ready", () => {
 
   // Start file rotation
   setInterval(function() {
-    fscs.rotate();
-    // upload files within 10min interval after every rotation.
-    uploader.upload(() => {
+    let returnValue = fscs.rotate();
+    // start upload when activity file are successfully rotated.
+    if (returnValue) {
+      // upload files within 10min interval after every rotation.
+      uploader.upload(() => {
         if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-    });
+      });
+    }
   }, 600000);
 
 });

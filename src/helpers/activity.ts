@@ -3,6 +3,8 @@ const ioHook = require("iohook");
 import * as logger from "electron-log";
 import { Fscs } from "./fscs";
 
+export const activityStorage: any = {userStatus: false, duration: 0};
+
 export class Activity {
   private cachedIsActive = false;
   private cachedInterval = 0;
@@ -13,7 +15,7 @@ export class Activity {
 
   /**
    * Do something with results of past n seconds of user activity.
-   * @param isActive 
+   * @param isActive
    */
   result(wasActive: boolean) {
 
@@ -24,6 +26,10 @@ export class Activity {
       this.fscs.appendActivity(wasActive, this.cachedInterval);
       this.cachedIsActive = this.isActive;
       this.cachedInterval = 0;
+      activityStorage.duration = 0;
+    } else {
+      activityStorage.userStatus = wasActive;
+      activityStorage.duration = this.cachedInterval;
     }
     this.cachedInterval += this.measurementInterval;
   }
@@ -54,7 +60,7 @@ export class Activity {
 
   /**
    * Measure user's activity levels.
-   * @param tick 
+   * @param tick
    */
   measure(tick: any) {
     let tickValue = tick["value"];

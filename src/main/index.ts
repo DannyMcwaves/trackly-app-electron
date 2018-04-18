@@ -104,7 +104,9 @@ app.on("ready", () => {
   setInterval(function() {
     fscs.rotate();
     // upload files within 10min interval after every rotation.
-    uploader.upload(() => {logger.log('successfully upload files')});
+    uploader.upload(() => {
+        if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
+    });
   }, 600000);
 
 });

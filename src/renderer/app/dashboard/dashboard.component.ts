@@ -102,7 +102,7 @@ export class DashboardComponent implements OnInit {
         if (project != this.activeProject) {
             console.log('new');
             ipcRenderer.send("timer", {action: "stop"});
-            this.activeProject = project;          
+            this.activeProject = project;
             ipcRenderer.send("timer",
                 {
                     action: "start",
@@ -134,6 +134,15 @@ export class DashboardComponent implements OnInit {
         return this.http.get(`${this.baseURL}/users/${uath.userId}/workspaces?access_token=${uath.authToken}`);
     }
 
+    /*
+    * Get the currently logged in user.
+    * */
+    getUser() {
+        const uath = this._getUserAuth();
+        return this.http.get(`${this.baseURL}/users/${uath.userId}?access_token=${uath.authToken}`)
+    }
+
+
     /**
      * Change workspace from dropdown toggle.
      * @param workspace
@@ -159,7 +168,7 @@ export class DashboardComponent implements OnInit {
      * generate the initials of the workspace owner
      * */
     generateInitials() {
-        let name = this.workspaces[0].title;
+        let name = this.user ? this.user.name : null;
         if (!name) {
             return false;
         }
@@ -193,8 +202,8 @@ export class DashboardComponent implements OnInit {
                 this.activeWorkspace = this.workspaces[0];
             }
 
-            this.getProjects().subscribe(response => {
-                this.projects = response;
+            this.getProjects().subscribe((response: any) => {
+                this.projects = response.filter((item: any) => !item.archived);
 
                 // Empty response
                 if (!this.projects.length) {
@@ -214,6 +223,11 @@ export class DashboardComponent implements OnInit {
                     this.currentSession += element.timeTracked ? element.timeTracked : 0;
                 });
             });
+
+            this.getUser().subscribe(response => {
+                this.user = response;
+            });
+
         }, error => {
             this.logOut();
         });

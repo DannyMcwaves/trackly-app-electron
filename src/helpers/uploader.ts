@@ -16,13 +16,14 @@ export class Uploader {
   public upload(callback: any) {
     logger.log('Upload started');
     setTimeout(() => {
-      this.uploadActivities();
-      this.uploadScreenshots();
+      this.uploadActivities(() => {
+        this.uploadScreenshots();
+      });
       callback();
     }, this.uploadTimeout);
   }
 
-  public uploadActivities() {
+  public uploadActivities(callback: any) {
 
     const dir = this.fscs.getActivitiesPath();
 
@@ -42,6 +43,7 @@ export class Uploader {
           if (!err && res.statusCode == 200) {
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
+            callback();
           } else {
             logger.warn(`File upload failed: ${file}`);
           }

@@ -168,7 +168,7 @@ export class DashboardComponent implements OnInit {
      * generate the initials of the workspace owner
      * */
     generateInitials() {
-        let name = this.user.name;
+        let name = this.user ? this.user.name : null;
         if (!name) {
             return false;
         }
@@ -202,8 +202,8 @@ export class DashboardComponent implements OnInit {
                 this.activeWorkspace = this.workspaces[0];
             }
 
-            this.getProjects().subscribe(response => {
-                this.projects = response;
+            this.getProjects().subscribe((response: any) => {
+                this.projects = response.filter((item: any) => !item.archived);
 
                 // Empty response
                 if (!this.projects.length) {

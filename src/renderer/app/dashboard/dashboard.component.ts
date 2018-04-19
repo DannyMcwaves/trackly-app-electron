@@ -19,9 +19,16 @@ export class DashboardComponent implements OnInit {
     private baseURL = process.env.apiUrl ? process.env.apiUrl + "/api" : 'https://trackly.com/api';
     public projects: any;
     public perProject = {};
+    public perProjectCached = {};
+    public totalIimeToday = 0;
+    public totalIimeTodayCached = 0;
     public currentSession = 0;
+    public currentSessionCached = 0;
     public activeProject: any;
     public user: any;
+
+    public startTime: Date;
+    public endTime: Date;
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -51,9 +58,13 @@ export class DashboardComponent implements OnInit {
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
+            this.endTime = new Date();            
             this.zone.run(() => {
-                this.perProject[projectId] += 1;
-                this.currentSession += 1;
+                console.log(this.startTime);
+                
+                this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
+                this.totalIimeToday = this.getCurrentTime() + this.totalIimeTodayCached;
+                this.currentSession = this.getCurrentTime() + this.currentSessionCached;
             });
         });
 
@@ -89,11 +100,23 @@ export class DashboardComponent implements OnInit {
         }
     }
 
+    // Count time
+    getCurrentTime() {
+        let time = 0;
+        time = this.endTime.getTime() - this.startTime.getTime();
+        return Math.round(time / 1000);
+    }
+
     trackProject(project: any) {
         // Clicked on running project
         if (project == this.activeProject) {
             console.log('same');
             ipcRenderer.send("timer", {action: "stop"});
+            this.currentSessionCached = this.currentSession;
+            this.totalIimeTodayCached = this.totalIimeToday;
+            this.perProjectCached[project.id] = this.perProject[project.id];
+            this.startTime = null;
+            this.endTime = null;
             this.activeProject = null;
             return;
         }
@@ -101,8 +124,9 @@ export class DashboardComponent implements OnInit {
         // Clicked on new project
         if (project != this.activeProject) {
             console.log('new');
+            this.startTime =  new Date();
             ipcRenderer.send("timer", {action: "stop"});
-            this.activeProject = project;
+            this.activeProject = project;          
             ipcRenderer.send("timer",
                 {
                     action: "start",
@@ -180,7 +204,7 @@ export class DashboardComponent implements OnInit {
      * Log user out of the application
      */
     logOut() {
-        ipcRenderer.send("timer", {action: "stop"});
+        ipcRenderer.send("timer", {action: "stop"});        
         this.userService.logout();
     }
 
@@ -220,7 +244,9 @@ export class DashboardComponent implements OnInit {
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
-                    this.currentSession += element.timeTracked ? element.timeTracked : 0;
+                    this.perProjectCached[element.id] = this.perProject[element.id];
+                    this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+                    this.totalIimeTodayCached = this.totalIimeToday;
                 });
             });
 

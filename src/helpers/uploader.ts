@@ -58,9 +58,8 @@ export class Uploader {
 
     fse.readdir(dir, (err, files) => {
       files.forEach(file => {
-
         // do not upload the screenshot if it has same name as the current json file in memory.
-        if (`${dir}/${file}` == this.fscs.getActFile()) {
+        if (file.match(/\d+/)[0] === this.fscs.getActFile().match(/\d+/)[0]) {
             logger.log('Skip uploading screenshot file in memory.');
             return;
         }

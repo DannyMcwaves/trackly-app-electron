@@ -40,6 +40,7 @@ let windowDefaults = {
     webSecurity: false // TODO: Remove in production!
   }
 };
+let interval: any;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -77,6 +78,19 @@ function createApplicationWindow() {
   return windowFrame;
 }
 
+function startInterval() {
+  return setInterval(function() {
+    let returnValue = fscs.rotate();
+    // start upload when activity file are successfully rotated.
+    if (returnValue) {
+        // upload files within 10min interval after every rotation.
+        uploader.upload(() => {
+            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
+        });
+    }
+  }, 600000);
+}
+
 app.on("window-all-closed", () => {
   timer.complete();
 
@@ -99,19 +113,6 @@ app.on("ready", () => {
 
   // Updater
   autoUpdater.checkForUpdatesAndNotify();
-
-  // Start file rotation
-  setInterval(function() {
-    let returnValue = fscs.rotate();
-    // start upload when activity file are successfully rotated.
-    if (returnValue) {
-      // upload files within 10min interval after every rotation.
-      uploader.upload(() => {
-        if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-      });
-    }
-  }, 600000);
-
 });
 
 /**
@@ -168,10 +169,14 @@ ipcMain.on("timer", (event: any, args: any) => {
         });
       }
     );
+
+    // start 10 minutes interval uploads and file rotation.
+    interval = startInterval();
   }
 
-  // Stop timer
+  // Stop timer and clear the uploads interval.
   if (args.action == "stop") {
     timer.complete();
+    clearInterval(interval);
   }
 });

@@ -2,7 +2,7 @@
   "name": "trackly-desktop",
   "description": "Trackly Desktop Application",
   "license": "UNLICENSED",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "homepage": "https://trackly.com",
   "author": "Trackly",
   "private": true,

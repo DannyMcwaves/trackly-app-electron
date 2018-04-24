@@ -69,6 +69,7 @@ if (isDevelopment) {
  */
 function createApplicationWindow() {
   let windowFrame = new BrowserWindow(windowDefaults);
+  windowFrame.webContents.openDevTools();
   windowFrame.loadURL(windowURL);
 
   windowFrame.on("closed", () => {
@@ -112,7 +113,32 @@ app.on("ready", () => {
   appWindow = createApplicationWindow();
 
   // Updater
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
+});
+
+// event listeners for the autoUpdater.
+autoUpdater.on('checking-for-update', () => {
+  logger.log('Checking for update...');
+});
+
+autoUpdater.on('update-available', (ev, info) => {
+  logger.log('Update available.');
+});
+
+autoUpdater.on('update-not-available', (ev, info) => {
+  logger.log('Update not available.');
+});
+
+autoUpdater.on('error', (ev, err) => {
+  logger.log('Error in auto-updater.');
+});
+
+autoUpdater.on('download-progress', (ev, progressObj) => {
+  logger.log('Download progress...');
+});
+
+autoUpdater.on('update-downloaded', (ev, info) => {
+  logger.log('Update downloaded; will install in 5 seconds');
 });
 
 /**

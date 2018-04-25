@@ -1,5 +1,5 @@
 import * as logger from "electron-log";
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
@@ -69,7 +69,7 @@ if (isDevelopment) {
  */
 function createApplicationWindow() {
   let windowFrame = new BrowserWindow(windowDefaults);
-  windowFrame.webContents.openDevTools();
+  // windowFrame.webContents.openDevTools();
   windowFrame.loadURL(windowURL);
 
   windowFrame.on("closed", () => {
@@ -78,6 +78,13 @@ function createApplicationWindow() {
 
   return windowFrame;
 }
+
+
+function sendStatusToWindow(text: any) {
+  logger.info(text);
+  appWindow.webContents.send('message', text);
+}
+
 
 function startInterval() {
   return setInterval(function() {
@@ -112,33 +119,54 @@ app.on("activate", () => {
 app.on("ready", () => {
   appWindow = createApplicationWindow();
 
+  // set autoDownload to true;
+  autoUpdater.autoDownload = true;
+
   // Updater
   autoUpdater.checkForUpdates();
-});
 
-// event listeners for the autoUpdater.
-autoUpdater.on('checking-for-update', () => {
-  logger.log('Checking for update...');
-});
+  // event listeners for the autoUpdater.
+  autoUpdater.on('checking-for-update', () => {
+    logger.log('checking for updates.....');
+    sendStatusToWindow('Checking for updates...');
+  });
 
-autoUpdater.on('update-available', (ev, info) => {
-  logger.log('Update available.');
-});
+  autoUpdater.on('update-available', (ev, info) => {
+    logger.log('Update available.');
+    sendStatusToWindow(info);
+  });
 
-autoUpdater.on('update-not-available', (ev, info) => {
-  logger.log('Update not available.');
-});
+  autoUpdater.on('update-not-available', (ev, info) => {
+    sendStatusToWindow(info);
+    logger.log(info);
+  });
 
-autoUpdater.on('error', (ev, err) => {
-  logger.log('Error in auto-updater.');
-});
+  autoUpdater.on('error', (ev, err) => {
+    logger.log(err);
+    sendStatusToWindow(err);
+  });
 
-autoUpdater.on('download-progress', (ev, progressObj) => {
-  logger.log('Download progress...');
-});
+  autoUpdater.on('download-progress', (ev, progressObj) => {
+    sendStatusToWindow(progressObj);
+    logger.log(progressObj);
+  });
 
-autoUpdater.on('update-downloaded', (ev, info) => {
-  logger.log('Update downloaded; will install in 5 seconds');
+  autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
+    sendStatusToWindow(ev);
+    sendStatusToWindow('Update downloaded; will install in 5 seconds');
+    const dialogOpts = {
+        type: 'info',
+        buttons: ['Restart', 'Later'],
+        title: 'Application Update',
+        message: process.platform === 'win32' ? releaseNotes : releaseName,
+        detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+    };
+
+    dialog.showMessageBox(dialogOpts, (response) => {
+        if (response === 0) autoUpdater.quitAndInstall()
+    });
+  });
+
 });
 
 /**

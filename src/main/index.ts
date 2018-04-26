@@ -128,42 +128,35 @@ app.on("ready", () => {
   // event listeners for the autoUpdater.
   autoUpdater.on('checking-for-update', () => {
     logger.log('checking for updates.....');
-    sendStatusToWindow('Checking for updates...');
   });
 
   autoUpdater.on('update-available', (ev, info) => {
     logger.log('Update available.');
-    sendStatusToWindow(info);
   });
 
   autoUpdater.on('update-not-available', (ev, info) => {
-    sendStatusToWindow(info);
-    logger.log(info);
+    logger.log('No updates available at this time.');
   });
 
   autoUpdater.on('error', (ev, err) => {
     logger.log(err);
-    sendStatusToWindow(err);
   });
 
   autoUpdater.on('download-progress', (ev, progressObj) => {
-    sendStatusToWindow(progressObj);
     logger.log(progressObj);
   });
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
-    sendStatusToWindow(ev);
-    sendStatusToWindow('Update downloaded; will install in 5 seconds');
     const dialogOpts = {
-        type: 'info',
-        buttons: ['Restart', 'Later'],
-        title: 'Application Update',
-        message: process.platform === 'win32' ? releaseNotes : releaseName,
-        detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+      type: 'info',
+      buttons: ['Restart', 'Later'],
+      title: 'Application Update',
+      message: process.platform === 'win32' ? releaseNotes : releaseName,
+      detail: 'A new version has been downloaded. Restart the application to apply the updates.'
     };
 
     dialog.showMessageBox(dialogOpts, (response) => {
-        if (response === 0) autoUpdater.quitAndInstall()
+        if (response === 0) autoUpdater.quitAndInstall();
     });
   });
 

@@ -20,6 +20,7 @@ export class DashboardComponent implements OnInit {
     public projects: any;
     public perProject = {};
     public currentSession = 0;
+    public totalTimeToday = 0;
     public activeProject: any;
     public user: any;
 
@@ -53,6 +54,7 @@ export class DashboardComponent implements OnInit {
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
             this.zone.run(() => {
                 this.perProject[projectId] += 1;
+                this.totalTimeToday += 1;
                 this.currentSession += 1;
             });
         });
@@ -220,7 +222,8 @@ export class DashboardComponent implements OnInit {
                 this._resizeFrame();
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
-                    this.currentSession += element.timeTracked ? element.timeTracked : 0;
+                    this.totalTimeToday += element.timeTracked ? element.timeTracked : 0;
+                    this.currentSession = 0;
                 });
             });
 

@@ -58,10 +58,10 @@ export class DashboardComponent implements OnInit {
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
-            this.endTime = new Date();            
+            this.endTime = new Date();
             this.zone.run(() => {
-                console.log(this.startTime);
-                
+                // console.log(this.startTime);
+
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
                 this.totalIimeToday = this.getCurrentTime() + this.totalIimeTodayCached;
                 this.currentSession = this.getCurrentTime() + this.currentSessionCached;
@@ -103,11 +103,12 @@ export class DashboardComponent implements OnInit {
     // Count time
     getCurrentTime() {
         let time = 0;
-        time = this.endTime.getTime() - this.startTime.getTime();
+        time = this.endTime.getTime() - (this.startTime ? this.startTime.getTime() : 0);
         return Math.round(time / 1000);
     }
 
     trackProject(project: any) {
+        console.log(project, this.activeProject);
         // Clicked on running project
         if (project == this.activeProject) {
             console.log('same');
@@ -126,7 +127,7 @@ export class DashboardComponent implements OnInit {
             console.log('new');
             this.startTime =  new Date();
             ipcRenderer.send("timer", {action: "stop"});
-            this.activeProject = project;          
+            this.activeProject = project;
             ipcRenderer.send("timer",
                 {
                     action: "start",
@@ -204,7 +205,7 @@ export class DashboardComponent implements OnInit {
      * Log user out of the application
      */
     logOut() {
-        ipcRenderer.send("timer", {action: "stop"});        
+        ipcRenderer.send("timer", {action: "stop"});
         this.userService.logout();
     }
 

@@ -9,6 +9,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class TimeDurationPipe implements PipeTransform {
   transform(value: number) {
     if (!value) { return "0:00"}
-    return moment.duration(Math.floor(value), "seconds").format();
+    return moment.duration(Math.round(value), "seconds").format();
   }
 }

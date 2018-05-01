@@ -132,6 +132,16 @@ app.on("ready", () => {
 
   autoUpdater.on('update-available', (ev, info) => {
     logger.log('Update available.');
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['OK'],
+      title: 'Updater',
+      message: 'Trackly is updating...',
+      detail: 'A new version of Trackly is downloading. This should take a couple of seconds.'
+    };
+    dialog.showMessageBox(dialogOpts, (response) => {
+      logger.log(response);
+    });
   });
 
   autoUpdater.on('update-not-available', (ev, info) => {
@@ -147,6 +157,7 @@ app.on("ready", () => {
   });
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
+    console.log('download completed');
     const dialogOpts = {
       type: 'info',
       buttons: ['Restart', 'Later'],

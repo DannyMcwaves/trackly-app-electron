@@ -1,5 +1,5 @@
 import * as logger from "electron-log";
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
@@ -40,6 +40,7 @@ let windowDefaults = {
     webSecurity: false // TODO: Remove in production!
   }
 };
+let interval: any;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -68,6 +69,7 @@ if (isDevelopment) {
  */
 function createApplicationWindow() {
   let windowFrame = new BrowserWindow(windowDefaults);
+  // windowFrame.webContents.openDevTools();
   windowFrame.loadURL(windowURL);
 
   windowFrame.on("closed", () => {
@@ -75,6 +77,26 @@ function createApplicationWindow() {
   });
 
   return windowFrame;
+}
+
+
+function sendStatusToWindow(text: any) {
+  logger.info(text);
+  appWindow.webContents.send('message', text);
+}
+
+
+function startInterval() {
+  return setInterval(function() {
+    let returnValue = fscs.rotate();
+    // start upload when activity file are successfully rotated.
+    if (returnValue) {
+        // upload files within 10min interval after every rotation.
+        uploader.upload(() => {
+            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
+        });
+    }
+  }, 600000);
 }
 
 app.on("window-all-closed", () => {
@@ -97,20 +119,57 @@ app.on("activate", () => {
 app.on("ready", () => {
   appWindow = createApplicationWindow();
 
-  // Updater
-  autoUpdater.checkForUpdatesAndNotify();
+  // set autoDownload to true;
+  autoUpdater.autoDownload = true;
 
-  // Start file rotation
-  setInterval(function() {
-    let returnValue = fscs.rotate();
-    // start upload when activity file are successfully rotated.
-    if (returnValue) {
-      // upload files within 10min interval after every rotation.
-      uploader.upload(() => {
-        if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-      });
-    }
-  }, 600000);
+  // Updater
+  autoUpdater.checkForUpdates();
+
+  // event listeners for the autoUpdater.
+  autoUpdater.on('checking-for-update', () => {
+    logger.log('checking for updates.....');
+  });
+
+  autoUpdater.on('update-available', (ev, info) => {
+    logger.log('Update available.');
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['OK'],
+      title: 'Updater',
+      message: 'Trackly is updating...',
+      detail: 'A new version of Trackly is downloading. This should take a couple of seconds.'
+    };
+    dialog.showMessageBox(dialogOpts, (response) => {
+      logger.log(response);
+    });
+  });
+
+  autoUpdater.on('update-not-available', (ev, info) => {
+    logger.log('No updates available at this time.');
+  });
+
+  autoUpdater.on('error', (ev, err) => {
+    logger.log(err);
+  });
+
+  autoUpdater.on('download-progress', (ev, progressObj) => {
+    logger.log(progressObj);
+  });
+
+  autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
+    console.log('download completed');
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['Restart', 'Later'],
+      title: 'Application Update',
+      message: process.platform === 'win32' ? releaseNotes : releaseName,
+      detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+    };
+
+    dialog.showMessageBox(dialogOpts, (response) => {
+        if (response === 0) autoUpdater.quitAndInstall();
+    });
+  });
 
 });
 
@@ -168,10 +227,14 @@ ipcMain.on("timer", (event: any, args: any) => {
         });
       }
     );
+
+    // start 10 minutes interval uploads and file rotation.
+    interval = startInterval();
   }
 
-  // Stop timer
+  // Stop timer and clear the uploads interval.
   if (args.action == "stop") {
     timer.complete();
+    clearInterval(interval);
   }
 });

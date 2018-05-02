@@ -20,11 +20,12 @@ export class DashboardComponent implements OnInit {
     public projects: any;
     public perProject = {};
     public perProjectCached = {};
+    public previousProject = {};
     public totalIimeToday = 0;
     public totalIimeTodayCached = 0;
     public currentSession = 0;
     public currentSessionCached = 0;
-    public activeProject: any;
+    public activeProject: any = {};
     public user: any;
 
     public startTime: Date;
@@ -60,7 +61,6 @@ export class DashboardComponent implements OnInit {
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
             this.endTime = new Date();
             this.zone.run(() => {
-                // console.log(this.startTime);
 
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
                 this.totalIimeToday = this.getCurrentTime() + this.totalIimeTodayCached;
@@ -108,7 +108,7 @@ export class DashboardComponent implements OnInit {
     }
 
     trackProject(project: any) {
-        console.log(project, this.activeProject);
+        // console.log(project, this.activeProject);
         // Clicked on running project
         if (project == this.activeProject) {
             console.log('same');
@@ -118,7 +118,7 @@ export class DashboardComponent implements OnInit {
             this.perProjectCached[project.id] = this.perProject[project.id];
             this.startTime = null;
             this.endTime = null;
-            this.activeProject = null;
+            this.activeProject = {};
             return;
         }
 
@@ -127,6 +127,9 @@ export class DashboardComponent implements OnInit {
             console.log('new');
             this.startTime =  new Date();
             ipcRenderer.send("timer", {action: "stop"});
+            this.currentSessionCached = this.currentSession;
+            this.totalIimeTodayCached = this.totalIimeToday;
+            this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
             this.activeProject = project;
             ipcRenderer.send("timer",
                 {

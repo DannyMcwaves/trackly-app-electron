@@ -10,6 +10,8 @@ import {OnInit} from "@angular/core/src/metadata/lifecycle_hooks";
 import {Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
 
+import * as moment from "moment";
+
 @Component({
     selector: "#app",
     templateUrl: "/dashboard.component.html",
@@ -28,8 +30,8 @@ export class DashboardComponent implements OnInit {
     public activeProject: any = {};
     public user: any;
 
-    public startTime: Date;
-    public endTime: Date;
+    public startTime: moment.Moment;
+    public endTime: moment.Moment;
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -59,7 +61,7 @@ export class DashboardComponent implements OnInit {
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
-            this.endTime = new Date();
+            this.endTime = moment().milliseconds(0);
             this.zone.run(() => {
 
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
@@ -103,12 +105,12 @@ export class DashboardComponent implements OnInit {
     // Count time
     getCurrentTime() {
         let time = 0;
-        time = this.endTime.getTime() - (this.startTime ? this.startTime.getTime() : 0);
+        time = this.endTime.diff(this.startTime);
+        // time = this.endTime.getTime() - (this.startTime ? this.startTime.getTime() : 0);
         return Math.round(time / 1000);
     }
 
     trackProject(project: any) {
-        // console.log(project, this.activeProject);
         // Clicked on running project
         if (project == this.activeProject) {
             console.log('same');
@@ -125,7 +127,7 @@ export class DashboardComponent implements OnInit {
         // Clicked on new project
         if (project != this.activeProject) {
             console.log('new');
-            this.startTime =  new Date();
+            this.startTime =  moment().milliseconds(0);
             ipcRenderer.send("timer", {action: "stop"});
             this.currentSessionCached = this.currentSession;
             this.totalIimeTodayCached = this.totalIimeToday;

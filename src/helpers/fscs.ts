@@ -79,7 +79,7 @@ export class Fscs {
       userId: blueprint.userId,
       workspaceId: blueprint.workspaceId,
       projectId: blueprint.projectId,
-      createdAt: moment().toISOString(),
+      createdAt: moment().milliseconds(0).toISOString(),
       events: [] as any[],
       activities: [] as any[]
     };
@@ -96,7 +96,7 @@ export class Fscs {
   public appendEvent(evt: string, file: string) {
     this.insertJsonNode(file, 'events', {
       type: evt,
-      timestamp: moment().toISOString()}
+      timestamp: moment().milliseconds(0).toISOString()}
     );
   }
 

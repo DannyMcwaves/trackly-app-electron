@@ -114,7 +114,10 @@ export class DashboardComponent implements OnInit {
         // Clicked on running project
         if (project == this.activeProject) {
             console.log('same');
-            ipcRenderer.send("timer", {action: "stop"});
+            ipcRenderer.send("timer", {
+                action: "stop",
+                date: this.endTime.toISOString()
+            });
             this.currentSessionCached = this.currentSession;
             this.totalIimeTodayCached = this.totalIimeToday;
             this.perProjectCached[project.id] = this.perProject[project.id];
@@ -128,7 +131,10 @@ export class DashboardComponent implements OnInit {
         if (project != this.activeProject) {
             console.log('new');
             this.startTime =  moment().milliseconds(0);
-            ipcRenderer.send("timer", {action: "stop"});
+            ipcRenderer.send("timer", {
+                action: "stop",
+                date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString()
+            });
             this.currentSessionCached = this.currentSession;
             this.totalIimeTodayCached = this.totalIimeToday;
             this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
@@ -139,7 +145,8 @@ export class DashboardComponent implements OnInit {
                     projectId: project.id,
                     workspaceId: this.activeWorkspace.id,
                     userId: this._getUserAuth().userId,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    date: this.startTime.toISOString()
                 }
             );
         }

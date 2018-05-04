@@ -41,6 +41,7 @@ let windowDefaults = {
   }
 };
 let interval: any;
+let stopMoment: string;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -203,7 +204,7 @@ ipcMain.on("timer", (event: any, args: any) => {
   if (args.action == "start") {
     // Get a file
     fscs.newActivityFile(args);
-    fscs.appendEvent("startLogging", fscs.getActFile());
+    fscs.appendEvent("startLogging", fscs.getActFile(), args.date);
 
     // Take screenshot
     fscs.takeScreenshot(args.timestamp);
@@ -218,8 +219,8 @@ ipcMain.on("timer", (event: any, args: any) => {
       },
       () => {
         activity.stop();
-        logger.log("Timer stopped..");
-        fscs.appendEvent("stopLogging", fscs.getActFile());
+        logger.log("Timer stopped..");        
+        fscs.appendEvent("stopLogging", fscs.getActFile(), stopMoment);
         fscs.unloadActFile();
 
         uploader.upload(() => {
@@ -234,6 +235,7 @@ ipcMain.on("timer", (event: any, args: any) => {
 
   // Stop timer and clear the uploads interval.
   if (args.action == "stop") {
+    stopMoment = args.date;
     timer.complete();
     clearInterval(interval);
   }

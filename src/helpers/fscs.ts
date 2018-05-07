@@ -49,6 +49,14 @@ export class Fscs {
   }
 
   /**
+   *
+   */
+  public unLinkFiles(file: string) {
+    fse.unlink(`${this.screenshotsPath}/${file.match(/\d+/)[0]}.jpg`, () => {});
+    fse.unlink(file, () => {});
+  }
+
+  /**
    * Method responsible for unloading activity file from memory.
    */
   public unloadActFile() {

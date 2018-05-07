@@ -6,6 +6,7 @@ import { Timer } from "../helpers/timer";
 import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
+import { Idler } from '../helpers/idle';
 
 // Logger
 logger.transports.file.level = "debug";
@@ -19,6 +20,7 @@ const fscs = new Fscs();
 const timer = new Timer();
 const activity = new Activity(fscs);
 const uploader = new Uploader(fscs);
+const idler = new Idler(fscs);
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -209,9 +211,12 @@ ipcMain.on("timer", (event: any, args: any) => {
     // Take screenshot
     fscs.takeScreenshot(args.timestamp);
 
+    let time = (new Date()).getTime();
+
     timer.ticker.subscribe(
       async tick => {
-        activity.measure(tick);
+        // activity.measure(tick);
+        idler.logTick(tick);
         if (appWindow) { appWindow.webContents.send("timer:tick", args.projectId); }
       },
       err => {
@@ -219,13 +224,23 @@ ipcMain.on("timer", (event: any, args: any) => {
       },
       () => {
         activity.stop();
-        logger.log("Timer stopped..");        
-        fscs.appendEvent("stopLogging", fscs.getActFile(), stopMoment);
+        logger.log("Timer stopped..");
+        let actFile = fscs.getActFile();
+        fscs.appendEvent("stopLogging", actFile, stopMoment);
         fscs.unloadActFile();
 
-        uploader.upload(() => {
-          if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-        });
+        // do not upload file if the time is less than 1min.
+        if((new Date().getTime()) - time > 60000) {
+          uploader.upload(() => {
+            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
+          });
+        } else {
+          // logger.log(actFile);
+          fscs.unLinkFiles(actFile.match(/\d+/)[0]);
+        }
+
+        // reset the time to current.
+        time = (new Date()).getTime();
       }
     );
 

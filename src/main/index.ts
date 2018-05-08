@@ -6,7 +6,7 @@ import { Timer } from "../helpers/timer";
 import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
-import { Idler } from '../helpers/idle';
+// import { Idler } from '../helpers/idle';
 
 // Logger
 logger.transports.file.level = "debug";
@@ -20,7 +20,7 @@ const fscs = new Fscs();
 const timer = new Timer();
 const activity = new Activity(fscs);
 const uploader = new Uploader(fscs);
-const idler = new Idler(fscs);
+// const idler = new Idler(fscs);
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -215,8 +215,8 @@ ipcMain.on("timer", (event: any, args: any) => {
 
     timer.ticker.subscribe(
       async tick => {
-        // activity.measure(tick);
-        idler.logTick(tick);
+        activity.measure(tick);
+        // idler.logTick(tick);
         if (appWindow) { appWindow.webContents.send("timer:tick", args.projectId); }
       },
       err => {

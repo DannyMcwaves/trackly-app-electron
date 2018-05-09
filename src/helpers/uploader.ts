@@ -80,4 +80,23 @@ export class Uploader {
     });
   }
 
+  public uploadErrorReports() {
+    const logFile = this.fscs.currentLogFile;
+    const fileSize = fse.statSync(logFile).size;
+    if (fileSize) {
+      const data = {
+        res: fse.createReadStream(logFile)
+      };
+      req.post(this.api.uploadErrorReportsURL(), {formData: data}, (err, res, data) => {
+        if (!err && res.statusCode == 200) {
+          fse.unlink(`${logFile}`, () => { });
+        } else {
+          logger.error(`Log File upload failed: ${logFile}`);
+        }
+      })
+    } else {
+      fse.unlink(`${logFile}`, () => { });
+    }
+  }
+
 }

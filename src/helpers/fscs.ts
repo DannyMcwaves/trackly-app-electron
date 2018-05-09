@@ -12,14 +12,17 @@ export class Fscs {
   private recordsPath: string;
   private activitiesPath: string;
   private screenshotsPath: string;
+  private reportsPath: string;
 
   private currentActivityFile: string;
+  private logFile: string;
 
   constructor() {
     // Define paths
     this.recordsPath = `${app.getPath("userData")}/records`;
     this.activitiesPath = `${this.recordsPath}/activities`;
     this.screenshotsPath = `${this.recordsPath}/screenshots`;
+    this.reportsPath = `${this.recordsPath}/reporters`;
 
     // Ensure records dir exists
     try {
@@ -35,7 +38,7 @@ export class Fscs {
    * on client's computer.
    */
   private ensurePathsExist() {
-    for (let dir of [this.activitiesPath, this.screenshotsPath]) {
+    for (let dir of [this.activitiesPath, this.screenshotsPath, this.reportsPath]) {
         fse.ensureDirSync(dir);
       }
   }
@@ -49,11 +52,24 @@ export class Fscs {
   }
 
   /**
-   *
+   * if time tracked is less than 1 minute, unlink the json and jpeg files.
    */
   public unLinkFiles(file: string) {
     fse.unlink(`${this.screenshotsPath}/${file.match(/\d+/)[0]}.jpg`, () => {});
     fse.unlink(file, () => {});
+  }
+
+  /**
+   * let the log file be main point where console.log outputs it data.
+   */
+  public logger(logger: any) {
+    this.logFile = `${this.reportsPath}/${Date.now()}.log`;
+    logger.transports.file.file = this.logFile;
+    logger.transports.file.level = "error";
+  }
+
+  public get currentLogFile() {
+    return this.logFile;
   }
 
   /**

@@ -26,4 +26,8 @@ export class ApiService {
     uploadActivitiesURL() {
         return this.baseURL + '/eventFiles/upload' + this.getToken();
     }
+
+    uploadErrorReportsURL() {
+        return 'http://localhost:8000/api/log'
+    }
 }

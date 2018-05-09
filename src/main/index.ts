@@ -9,7 +9,6 @@ import { Uploader } from "../helpers/uploader";
 // import { Idler } from '../helpers/idle';
 
 // Logger
-logger.transports.file.level = "debug";
 autoUpdater.logger = logger;
 
 // config environment variables in .env
@@ -21,6 +20,9 @@ const timer = new Timer();
 const activity = new Activity(fscs);
 const uploader = new Uploader(fscs);
 // const idler = new Idler(fscs);
+
+// setup file logger to contain all error logs from elctron-logger.
+fscs.logger(logger);
 
 // Define application mode (production or development)
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -104,6 +106,9 @@ function startInterval() {
 
 app.on("window-all-closed", () => {
   timer.complete();
+
+  // upload any error file to the error server.
+  uploader.uploadErrorReports();
 
   // On macOS it is common for applications to stay open
   // until the user explicitly quits

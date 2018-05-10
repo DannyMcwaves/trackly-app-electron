@@ -4,10 +4,12 @@ const Store = require("electron-store");
 export class ApiService {
     private baseURL: string;
     private store: any;
+    private reportsUrl: any;
 
     constructor() {
         this.store = new Store();
         this.baseURL = process.env.apiUrl ? process.env.apiUrl + "/api" : "https://trackly.com/api";
+        this.reportsUrl = process.env.reportsUrl ? process.env.reportsUrl : "https://trackly.com/api/logs";
     }
 
     // TODO: Move to decorator
@@ -28,6 +30,6 @@ export class ApiService {
     }
 
     uploadErrorReportsURL() {
-        return 'http://localhost:8000/api/log'
+        return this.reportsUrl;
     }
 }

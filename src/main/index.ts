@@ -213,8 +213,8 @@ ipcMain.on("timer", (event: any, args: any) => {
     fscs.newActivityFile(args);
     fscs.appendEvent("startLogging", fscs.getActFile(), args.date);
 
-    // Take screenshot
-    fscs.takeScreenshot(args.timestamp);
+    // Take screenshot within a random time during the first 60 secs.
+    setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
 
     let time = (new Date()).getTime();
 

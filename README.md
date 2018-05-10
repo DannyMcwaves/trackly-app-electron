@@ -88,5 +88,12 @@ The default API endpoint connection provided is [trackly.com](https://trackly.co
 Copy and rename the .env.example file to .env
 - `cp .env.example .env`
 
+**Api Url**
+
 Provide/change the `apiUrl` property in the `.env` file to the name of the API host.
 - `apiUrl=http://localhost:3000`
+
+**Error Reports**
+
+Provide/change the `reportsUrl` property in the `.env` file to the value of the crash reports url.
+- `reportsUrl=http://localhost:8000/api/log`

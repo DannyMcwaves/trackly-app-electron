@@ -216,8 +216,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     // Take screenshot within a random time during the first 60 secs.
     setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
 
-    let time = (new Date()).getTime();
-
     timer.ticker.subscribe(
       async tick => {
         activity.measure(tick);
@@ -234,18 +232,9 @@ ipcMain.on("timer", (event: any, args: any) => {
         fscs.appendEvent("stopLogging", actFile, stopMoment);
         fscs.unloadActFile();
 
-        // do not upload file if the time is less than 1min.
-        if((new Date().getTime()) - time > 60000) {
-          uploader.upload(() => {
-            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-          });
-        } else {
-          // logger.log(actFile);
-          fscs.unLinkFiles(actFile.match(/\d+/)[0]);
-        }
-
-        // reset the time to current.
-        time = (new Date()).getTime();
+        uploader.upload(() => {
+          if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
+        });
       }
     );
 

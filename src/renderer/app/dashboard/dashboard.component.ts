@@ -8,7 +8,7 @@ import "./dashboard.component.scss";
 import {UserService} from "../services/user.service";
 import {OnInit} from "@angular/core/src/metadata/lifecycle_hooks";
 import {Router} from "@angular/router";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 
 import * as moment from "moment";
 
@@ -106,50 +106,55 @@ export class DashboardComponent implements OnInit {
     getCurrentTime() {
         let time = 0;
         time = this.endTime.diff(this.startTime);
-        // time = this.endTime.getTime() - (this.startTime ? this.startTime.getTime() : 0);
         return Math.round(time / 1000);
     }
 
     trackProject(project: any) {
-        // Clicked on running project
-        if (project == this.activeProject) {
-            console.log('same');
-            ipcRenderer.send("timer", {
-                action: "stop",
-                date: this.endTime.toISOString()
-            });
-            this.currentSessionCached = this.currentSession;
-            this.totalIimeTodayCached = this.totalIimeToday;
-            this.perProjectCached[project.id] = this.perProject[project.id];
-            this.startTime = null;
-            this.endTime = null;
-            this.activeProject = {};
-            return;
-        }
+        // Check if time tracking is enabled for a user
+        if (this.user && this.user.people[0].timeTracking) {
+            // Clicked on running project
+            if (project == this.activeProject) {
+                console.log('same');
+                ipcRenderer.send("timer", {
+                    action: "stop",
+                    date: this.endTime.toISOString()
+                });
+                this.currentSessionCached = this.currentSession;
+                this.totalIimeTodayCached = this.totalIimeToday;
+                this.perProjectCached[project.id] = this.perProject[project.id];
+                this.startTime = null;
+                this.endTime = null;
+                this.activeProject = {};
+                return;
+            }
 
-        // Clicked on new project
-        if (project != this.activeProject) {
-            console.log('new');
-            this.startTime =  moment().milliseconds(0);
-            ipcRenderer.send("timer", {
-                action: "stop",
-                date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString()
-            });
-            this.currentSessionCached = this.currentSession;
-            this.totalIimeTodayCached = this.totalIimeToday;
-            this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
-            this.activeProject = project;
-            ipcRenderer.send("timer",
-                {
-                    action: "start",
-                    projectId: project.id,
-                    workspaceId: this.activeWorkspace.id,
-                    userId: this._getUserAuth().userId,
-                    timestamp: Date.now(),
-                    date: this.startTime.toISOString()
-                }
-            );
+            // Clicked on new project
+            if (project != this.activeProject) {
+                console.log('new');
+                this.startTime =  moment().milliseconds(0);
+                ipcRenderer.send("timer", {
+                    action: "stop",
+                    date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString()
+                });
+                this.currentSessionCached = this.currentSession;
+                this.totalIimeTodayCached = this.totalIimeToday;
+                this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
+                this.activeProject = project;
+                ipcRenderer.send("timer",
+                    {
+                        action: "start",
+                        projectId: project.id,
+                        workspaceId: this.activeWorkspace.id,
+                        userId: this._getUserAuth().userId,
+                        timestamp: Date.now(),
+                        date: this.startTime.toISOString()
+                    }
+                );
+            }
+        } else {
+            alert('Time tracking is not enabled.');
         }
+        
     }
 
     /**
@@ -175,10 +180,10 @@ export class DashboardComponent implements OnInit {
     * Get the currently logged in user.
     * */
     getUser() {
+        const options = { params: new HttpParams().set('filter', '{"include": "people"}') };        
         const uath = this._getUserAuth();
-        return this.http.get(`${this.baseURL}/users/${uath.userId}?access_token=${uath.authToken}`)
+        return this.http.get(`${this.baseURL}/users/${uath.userId}?access_token=${uath.authToken}`, options)
     }
-
 
     /**
      * Change workspace from dropdown toggle.
@@ -264,7 +269,7 @@ export class DashboardComponent implements OnInit {
             });
 
             this.getUser().subscribe(response => {
-                this.user = response;
+                this.user = response;                
             });
 
         }, error => {

@@ -16,7 +16,7 @@
     <!-- / Header -->
 
     <!-- Content -->
-    <section id="content" class="p-0">
+    <section id="content" class="p-0" *ngIf="user">
         <div id="timer">
             <!-- Timer clock -->
             <div class="timer-clock">
@@ -42,10 +42,14 @@
             <!-- / Workspaces button -->
         </div>
 
+        <div id="overlay" *ngIf="!user?.people[0].timeTracking">
+            <div id="overlay-text">Time tracking is not enabled.</div>
+        </div>
+
         <!-- Projects -->
         <div *ngIf="projects?.length" id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
-                <i  (click)="trackProject(project)"
+                <i (click)="trackProject(project)"
                     class="fa project-button"
                     [ngClass]="{'fa-play-circle':project != activeProject,
                                 'fa-stop-circle': project == activeProject}">

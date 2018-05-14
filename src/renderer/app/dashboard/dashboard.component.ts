@@ -154,7 +154,7 @@ export class DashboardComponent implements OnInit {
         } else {
             alert('Time tracking is not enabled.');
         }
-        
+
     }
 
     /**
@@ -180,7 +180,7 @@ export class DashboardComponent implements OnInit {
     * Get the currently logged in user.
     * */
     getUser() {
-        const options = { params: new HttpParams().set('filter', '{"include": "people"}') };        
+        const options = { params: new HttpParams().set('filter', '{"include": "people"}') };
         const uath = this._getUserAuth();
         return this.http.get(`${this.baseURL}/users/${uath.userId}?access_token=${uath.authToken}`, options)
     }
@@ -269,7 +269,7 @@ export class DashboardComponent implements OnInit {
             });
 
             this.getUser().subscribe(response => {
-                this.user = response;                
+                this.user = response;
             });
 
         }, error => {

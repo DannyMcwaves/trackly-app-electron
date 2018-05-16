@@ -1,4 +1,5 @@
 import * as logger from "electron-log";
+const Store = require("electron-store");
 import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
@@ -19,6 +20,7 @@ const fscs = new Fscs();
 const timer = new Timer();
 const activity = new Activity(fscs);
 const uploader = new Uploader(fscs);
+const store = new Store();
 // const idler = new Idler(fscs);
 
 // setup file logger to contain all error logs from elctron-logger.
@@ -175,7 +177,12 @@ app.on("ready", () => {
     };
 
     dialog.showMessageBox(dialogOpts, (response) => {
-        if (response === 0) autoUpdater.quitAndInstall();
+        if (response === 0) {
+          // delete accessToken and userId before installing newer updates.
+          store.delete("token");
+          store.delete("userId");
+          autoUpdater.quitAndInstall();
+        }
     });
   });
 

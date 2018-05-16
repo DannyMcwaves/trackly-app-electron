@@ -245,6 +245,7 @@ export class DashboardComponent implements OnInit {
             }
 
             this.getProjects().subscribe((response: any) => {
+
                 this.projects = response.filter((item: any) => !item.archived);
 
                 // Empty response
@@ -266,10 +267,14 @@ export class DashboardComponent implements OnInit {
                     this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
                     this.totalIimeTodayCached = this.totalIimeToday;
                 });
+            }, error => {
+                this.logOut();
             });
 
             this.getUser().subscribe(response => {
                 this.user = response;
+            }, error => {
+              this.logOut();
             });
 
         }, error => {

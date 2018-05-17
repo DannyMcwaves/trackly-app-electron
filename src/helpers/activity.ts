@@ -11,7 +11,8 @@ export class Activity {
   private isActive = false;
   private measurementInterval = 2; // seconds
 
-  constructor(private fscs: Fscs) { }
+  constructor(private fscs: Fscs) {
+  }
 
   /**
    * Do something with results of past n seconds of user activity.
@@ -46,14 +47,14 @@ export class Activity {
     });
     logger.log("IOHook registered");
     ioHook.load();
-    ioHook.start(false); // disable logger
+    ioHook.start(true); // disable logger
   }
 
   /**
    * Unregister IOHook from the event emmitters.
    */
   unregisterIOHook() {
-    ioHook.unload();
+    // ioHook.unload();
     ioHook.stop();
     logger.debug("IOHook unregistered");
   }

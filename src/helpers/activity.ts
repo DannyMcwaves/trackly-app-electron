@@ -10,9 +10,9 @@ export class Activity {
   private cachedInterval = 0;
   private isActive = false;
   private measurementInterval = 2; // seconds
+  private status = ioHook.getStatus();
 
-  constructor(private fscs: Fscs) {
-  }
+  constructor(private fscs: Fscs) {}
 
   /**
    * Do something with results of past n seconds of user activity.
@@ -47,14 +47,18 @@ export class Activity {
     });
     logger.log("IOHook registered");
     ioHook.load();
-    ioHook.start(true); // disable logger
+    ioHook.start(false); // disable logger
   }
 
   /**
    * Unregister IOHook from the event emmitters.
    */
   unregisterIOHook() {
-    // ioHook.unload();
+    if (process.platform === 'darwin' && this.status !== 64) {
+      ioHook.unload();
+    } else if (process.platform !== 'darwin') {
+      ioHook.unload();
+    }
     ioHook.stop();
     logger.debug("IOHook unregistered");
   }

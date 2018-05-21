@@ -19,9 +19,13 @@ export class LoginComponent implements OnInit {
   private store: any;
   public appVersion = app.getVersion();
   public hidden: boolean = true;
+  public hideReset: boolean = true;
   public positionInfo: number = 0;
   public formHeight: number = 0;
   public resetHeight: number = 0;
+  private regex: any = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  private message: string = "Already have password?";
+  private messageClass: string = "";
 
   ngOnInit(): void {
     let element = document.getElementsByTagName("html")[0];
@@ -52,18 +56,38 @@ export class LoginComponent implements OnInit {
   * Handler for resetting password.
   * **/
   resetClick(data:string) {
-    console.log(data);
-    this.hidden = !this.hidden;
-    ipcRenderer.send("win:height", this.positionInfo - this.resetHeight);
+    let payload = {
+      email: data
+    };
+    this.userService.reset(payload).subscribe(next => {
+      this.message = 'PASSWORD RESET LINK SENT.';
+      this.messageClass = 'text-success';
+    }, err => {
+      this.message = 'EMAIL NOT FOUND.';
+      this.messageClass = 'text-danger';
+    });
     return false;
   }
 
   /*
   * Handler for resetting password.
   * **/
+  emailInput(data:string) {
+    this.hideReset = !this.regex.test(data);
+  }
+
+  /*
+  * Handler for resetting password.
+  * **/
   forgotClick() {
+    if (this.hidden) {
+      ipcRenderer.send("win:height", this.positionInfo - this.formHeight);
+    } else {
+      ipcRenderer.send("win:height", this.positionInfo - this.resetHeight);
+    }
     this.hidden = !this.hidden;
-    ipcRenderer.send("win:height", this.positionInfo - this.formHeight);
+    this.message = "Already have password?";
+    this.messageClass = "";
     return false;
   }
 

@@ -6,7 +6,7 @@
     </ul>
 </header>
 <section id="content">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <form id="form" [hidden]="!hidden" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-control-group">
             <input formControlName="email" type="email" class="form-control" placeholder="Email">
         </div>
@@ -16,7 +16,16 @@
         <div class="form-control-group mt-4 text-right">
             <button type="submit" class="btn btn-primary btn-block">Log in</button>
         </div>
+
+        <div class="text-center reset-link pt-2"><a (click)="forgotClick()" href="#">Forgot Password?</a></div>
+
     </form>
+    <div id="resetForm" class="px-1 py-3" [hidden]="hidden">
+        <input #resetMail type="email" class="form-control" placeholder="Email">
+        <div class="mt-4">
+          <button (click)="resetClick(resetMail.value)" class="btn btn-primary btn-block">Reset</button>
+        </div>
+    </div>
     <div id="version" class="text-muted text-center">Version &mdash; v{{appVersion}}</div>
 </section>
 </div>

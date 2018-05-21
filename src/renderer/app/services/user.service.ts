@@ -25,6 +25,13 @@ export class UserService {
   }
 
   /**
+   * Login user to the application.
+   */
+  reset(email: any) {
+    return this.http.post(this.apiURL + "/reset", email);
+  }
+
+  /**
    * Logout user from the application and remove the token.
    */
   logout() {

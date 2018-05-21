@@ -43,7 +43,13 @@ form {
 }
 
 #resetForm{
-
+  .reset-link {
+    font-size: 0.8em;
+  }
+  .reset-message{
+    font-size: 0.8em;
+    letter-spacing: 1px;
+  }
 }
 
 #version {

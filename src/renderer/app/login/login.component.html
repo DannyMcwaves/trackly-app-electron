@@ -21,10 +21,15 @@
 
     </form>
     <div id="resetForm" class="px-1 py-3" [hidden]="hidden">
-        <input #resetMail type="email" class="form-control" placeholder="Email">
-        <div class="mt-4">
-          <button (click)="resetClick(resetMail.value)" class="btn btn-primary btn-block">Reset</button>
+
+        <input #resetMail (input)="emailInput(resetMail.value)" type="email" class="form-control" placeholder="Email">
+
+        <div class="mt-4 mb-2">
+          <button [disabled]="hideReset" (click)="resetClick(resetMail.value)" class="btn btn-primary btn-block">Reset</button>
         </div>
+
+        <div class="text-center reset-link pt-2" [ngClass]="messageClass">{{message}} &nbsp; <a (click)="forgotClick()" href="#">Sign in</a></div>
+
     </div>
     <div id="version" class="text-muted text-center">Version &mdash; v{{appVersion}}</div>
 </section>

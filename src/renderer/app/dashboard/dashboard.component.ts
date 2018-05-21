@@ -244,6 +244,17 @@ export class DashboardComponent implements OnInit {
                 this.activeWorkspace = this.workspaces[0];
             }
 
+            this.getUser().subscribe(response => {
+              this.user = response;
+              if (!this.user.people[0].timeTracking) {
+                ipcRenderer.send('win:height', this.baseFrameHeight + 120);
+              } else {
+
+              }
+            }, error => {
+              this.logOut();
+            });
+
             this.getProjects().subscribe((response: any) => {
 
                 this.projects = response.filter((item: any) => !item.archived);
@@ -260,7 +271,11 @@ export class DashboardComponent implements OnInit {
                     });
                 }
 
-                this._resizeFrame();
+                console.log(this.user);
+
+                if (this.user.people[0].timeTracking) {
+                  this._resizeFrame();
+                }
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
                     this.perProjectCached[element.id] = this.perProject[element.id];
@@ -269,12 +284,6 @@ export class DashboardComponent implements OnInit {
                 });
             }, error => {
                 this.logOut();
-            });
-
-            this.getUser().subscribe(response => {
-                this.user = response;
-            }, error => {
-              this.logOut();
             });
 
         }, error => {

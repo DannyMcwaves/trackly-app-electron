@@ -30,24 +30,20 @@
                 <button (click)="openDashboard()" class="btn btn-primary btn-sm"><i class="fa fa-home"></i></button>
                 <button *ngIf="workspaces?.length == -1" class="btn btn-sm btn-outline-primary">{{activeWorkspace.title}}</button>
                 <div *ngIf="workspaces?.length > 1" ngbDropdown placement="bottom-right" class="d-inline-block">
-                    <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
-                        {{ activeWorkspace?.title }}
-                    </button>
-                    <div ngbDropdownMenu class="dropdown-menu">
-                        <button (click)="changeWorkspace(ws)" *ngFor="let ws of workspaces" class="dropdown-item btn-sm">{{ws.title}}
-                        </button>
-                    </div>
+                  <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
+                      {{ activeWorkspace?.title }}
+                  </button>
+                  <div ngbDropdownMenu class="dropdown-menu">
+                      <button (click)="changeWorkspace(ws)" *ngFor="let ws of workspaces" class="dropdown-item btn-sm">{{ws.title}}
+                      </button>
+                  </div>
                 </div>
             </div>
             <!-- / Workspaces button -->
         </div>
 
-        <div id="overlay" *ngIf="!user?.people[0].timeTracking">
-            <div id="overlay-text">Time tracking is not enabled.</div>
-        </div>
-
         <!-- Projects -->
-        <div *ngIf="projects?.length" id="projects">
+        <div *ngIf="user?.people[0].timeTracking && projects?.length" id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
                 <i (click)="trackProject(project)"
                     class="fa project-button"
@@ -59,6 +55,11 @@
             </div>
         </div>
         <!-- / Projects -->
+        <div id="noTracking" class="p-4" *ngIf="!user?.people[0].timeTracking">
+          <div>
+              Time tracking is currently not enabled. Please contract the owner of the workspace.
+          </div>
+        </div>
     </section>
     <!-- / Content -->
 

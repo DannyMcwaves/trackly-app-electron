@@ -125,6 +125,7 @@ export class DashboardComponent implements OnInit {
                 this.startTime = null;
                 this.endTime = null;
                 this.activeProject = {};
+                window['timeIsRunning'] = false;
                 return;
             }
 
@@ -140,16 +141,15 @@ export class DashboardComponent implements OnInit {
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
                 this.activeProject = project;
-                ipcRenderer.send("timer",
-                    {
-                        action: "start",
-                        projectId: project.id,
-                        workspaceId: this.activeWorkspace.id,
-                        userId: this._getUserAuth().userId,
-                        timestamp: Date.now(),
-                        date: this.startTime.toISOString()
-                    }
-                );
+                ipcRenderer.send("timer", {
+                  action: "start",
+                  projectId: project.id,
+                  workspaceId: this.activeWorkspace.id,
+                  userId: this._getUserAuth().userId,
+                  timestamp: Date.now(),
+                  date: this.startTime.toISOString()
+                });
+                window['timeIsRunning'] = true;
             }
         } else {
             alert('Time tracking is not enabled.');

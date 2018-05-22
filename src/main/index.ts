@@ -1,6 +1,6 @@
 import * as logger from "electron-log";
 const Store = require("electron-store");
-import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
@@ -48,6 +48,7 @@ let windowDefaults = {
 };
 let interval: any;
 let stopMoment: string;
+let tray: any = null;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -86,13 +87,6 @@ function createApplicationWindow() {
   return windowFrame;
 }
 
-
-function sendStatusToWindow(text: any) {
-  logger.info(text);
-  appWindow.webContents.send('message', text);
-}
-
-
 function startInterval() {
   return setInterval(function() {
     let returnValue = fscs.rotate();
@@ -107,6 +101,8 @@ function startInterval() {
 }
 
 app.on("window-all-closed", () => {
+
+  // before the window is finally closed, complete all timers.
   timer.complete();
 
   // upload any error file to the error server.
@@ -186,6 +182,22 @@ app.on("ready", () => {
     });
   });
 
+  let image = nativeImage.createFromPath('/Users/macbookpro/Trackly/trackly-app-electron/build/icon.ico');
+
+  tray = new Tray(image);
+
+  const contextMenu = Menu.buildFromTemplate([
+    {label: 'Start Time'},
+    {label: 'Stop Time'},
+    {type: 'separator'},
+    {label: 'Dashboard'},
+    {type: 'separator'},
+    {label: 'Quit'}
+  ]);
+
+  tray.setToolTip('Trackly');
+  tray.setContextMenu(contextMenu);
+
 });
 
 /**
@@ -225,20 +237,28 @@ ipcMain.on("timer", (event: any, args: any) => {
 
     timer.ticker.subscribe(
       async tick => {
+        // measure activity
         activity.measure(tick);
-        // idler.logTick(tick);
+
+        // send tick to the web app
         if (appWindow) { appWindow.webContents.send("timer:tick", args.projectId); }
       },
       err => {
         logger.error("Failed to start the timer");
       },
       () => {
+
+        // stop the timer;
         activity.stop();
+
         logger.log("Timer stopped..");
         let actFile = fscs.getActFile();
+
+        // append stopLogging and unload the current activities file.
         fscs.appendEvent("stopLogging", actFile, stopMoment);
         fscs.unloadActFile();
 
+        // upload activity files and screenshots to the backend.
         uploader.upload(() => {
           if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
         });

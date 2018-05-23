@@ -1,12 +1,13 @@
 import * as logger from "electron-log";
 const Store = require("electron-store");
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, Notification } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
 import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
+import { join } from 'path';
 // import { Idler } from '../helpers/idle';
 
 // Logger
@@ -49,6 +50,7 @@ let windowDefaults = {
 let interval: any;
 let stopMoment: string;
 let tray: any = null;
+let timeIsRunning: boolean = true;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -80,51 +82,68 @@ function createApplicationWindow() {
   // windowFrame.webContents.openDevTools();
   windowFrame.loadURL(windowURL);
 
-  windowFrame.on("closed", () => {
+  windowFrame.on("closed", (event: any) => {
     appWindow = null;
   });
 
   return windowFrame;
 }
 
-function startInterval() {
-  return setInterval(function() {
-    let returnValue = fscs.rotate();
-    // start upload when activity file are successfully rotated.
-    if (returnValue) {
-        // upload files within 10min interval after every rotation.
-        uploader.upload(() => {
-            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-        });
+function systemTray() {
+
+  let image = nativeImage.createFromPath(join(__dirname, "../cloudTemplate.png"));
+  // image = image.resize({ width: 22, height: 22 });
+
+  let trayIcon = new Tray(image);
+
+  const trayMenuTemplate = [
+    {
+      label: 'Start Tracking',
+      submenu: [
+        {label: 'List'},
+        {label: 'Of'},
+        {label: 'Projects'},
+      ]
+    },
+
+    {
+      label: 'Stop Tracking',
+      click() {
+        console.log("Clicked on settings")
+      }
+    },
+
+    {
+      type: 'separator'
+    },
+
+    {
+      label: 'Dashboard',
+      click() {
+        shell.openExternal('https://trackly.com/app?token=' + store.get('token'));
+      }
+    },
+
+    {
+      type: 'separator'
+    },
+
+    {
+      label: 'Quit',
+      click() {
+        app.quit();
+      },
+      accelerator: 'CmdOrCtrl+Q',
+      role: 'quit'
     }
-  }, 600000);
+  ];
+
+  let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
+
+  trayIcon.setContextMenu(trayMenu);
 }
 
-app.on("window-all-closed", () => {
-
-  // before the window is finally closed, complete all timers.
-  timer.complete();
-
-  // upload any error file to the error server.
-  uploader.uploadErrorReports();
-
-  // On macOS it is common for applications to stay open
-  // until the user explicitly quits
-  if (process.platform !== "darwin") {
-    setTimeout(() => { app.quit() }, 1000);
-  }
-});
-
-app.on("activate", () => {
-  // On macOS it is common to re-create a window
-  // even after all windows have been closed
-  if (appWindow === null) appWindow = createApplicationWindow();
-});
-
-// Create main BrowserWindow when electron is ready
-app.on("ready", () => {
-  appWindow = createApplicationWindow();
-
+function autoAppUpdater() {
   // set autoDownload to true;
   autoUpdater.autoDownload = true;
 
@@ -173,31 +192,73 @@ app.on("ready", () => {
     };
 
     dialog.showMessageBox(dialogOpts, (response) => {
-        if (response === 0) {
-          // delete accessToken and userId before installing newer updates.
-          store.delete("token");
-          store.delete("userId");
-          autoUpdater.quitAndInstall();
-        }
+      if (response === 0) {
+        // delete accessToken and userId before installing newer updates.
+        store.delete("token");
+        store.delete("userId");
+        autoUpdater.quitAndInstall();
+      }
     });
   });
+}
 
-  let image = nativeImage.createFromPath('/Users/macbookpro/Trackly/trackly-app-electron/build/icon.ico');
+function startInterval() {
+  return setInterval(function() {
+    let returnValue = fscs.rotate();
+    // start upload when activity file are successfully rotated.
+    if (returnValue) {
+        // upload files within 10min interval after every rotation.
+        uploader.upload(() => {
+            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
+        });
+    }
+  }, 600000);
+}
 
-  tray = new Tray(image);
+app.on("window-all-closed", () => {
 
-  const contextMenu = Menu.buildFromTemplate([
-    {label: 'Start Time'},
-    {label: 'Stop Time'},
-    {type: 'separator'},
-    {label: 'Dashboard'},
-    {type: 'separator'},
-    {label: 'Quit'}
-  ]);
+  // before the window is finally closed, complete all timers.
+  timer.complete();
 
-  tray.setToolTip('Trackly');
-  tray.setContextMenu(contextMenu);
+  // upload any error file to the error server.
+  uploader.uploadErrorReports();
 
+  // On macOS it is common for applications to stay open
+  // until the user explicitly quits
+  if (process.platform !== "darwin") {
+    setTimeout(() => { app.quit() }, 1000);
+  }
+});
+
+app.on("activate", () => {
+  // On macOS it is common to re-create a window
+  // even after all windows have been closed
+  if (appWindow === null) appWindow = createApplicationWindow();
+});
+
+app.on('will-quit', (event: any) => {
+  if(timeIsRunning) {
+    event.preventDefault();
+  }
+});
+
+// Create main BrowserWindow when electron is ready
+app.on("ready", () => {
+
+  systemTray();
+
+  appWindow = createApplicationWindow();
+
+  // autoAppUpdater();
+
+});
+
+/*
+ * set the status of the running application
+ */
+ipcMain.on('isrunning', (event: any, status: boolean) => {
+  timeIsRunning = status;
+  logger.log(status);
 });
 
 /**

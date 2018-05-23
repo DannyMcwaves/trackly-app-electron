@@ -119,6 +119,7 @@ export class DashboardComponent implements OnInit {
                     action: "stop",
                     date: this.endTime.toISOString()
                 });
+                ipcRenderer.send("isrunning", false);
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[project.id] = this.perProject[project.id];
@@ -137,6 +138,7 @@ export class DashboardComponent implements OnInit {
                     action: "stop",
                     date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString()
                 });
+                ipcRenderer.send("isrunning", false);
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
@@ -149,6 +151,7 @@ export class DashboardComponent implements OnInit {
                   timestamp: Date.now(),
                   date: this.startTime.toISOString()
                 });
+                ipcRenderer.send("isrunning", true);
                 window['timeIsRunning'] = true;
             }
         } else {

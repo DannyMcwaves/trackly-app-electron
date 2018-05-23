@@ -1,5 +1,7 @@
 // tslint:disable-next-line:no-var-requires
 const screenshot = require("desktop-screenshot");
+import notifier = require('node-notifier');
+
 import { app } from "electron";
 import * as fse from "fs-extra";
 import * as logger from "electron-log";
@@ -227,6 +229,11 @@ export class Fscs {
         (error: any, complete: any) => {
           if (error) {
             logger.error("Screenshot failed: " + error.toString());
+          } else {
+            notifier.notify({
+              title: 'Screenshot',
+              message: 'screenshot was succesfully taken'
+            });
           }
         }
       );

@@ -246,7 +246,7 @@ app.on("ready", () => {
 
   appWindow = createApplicationWindow();
 
-  // autoAppUpdater();
+  autoAppUpdater();
 
 });
 

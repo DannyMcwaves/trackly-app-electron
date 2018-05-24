@@ -46,6 +46,7 @@
         <div *ngIf="user?.people[0].timeTracking && projects?.length" id="projects">
             <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
                 <i (click)="trackProject(project)"
+                   [id]="project.id"
                     class="fa project-button"
                     [ngClass]="{'fa-play-circle':project != activeProject,
                                 'fa-stop-circle': project == activeProject}">

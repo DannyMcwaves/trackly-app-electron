@@ -1,6 +1,6 @@
 import * as logger from "electron-log";
 const Store = require("electron-store");
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, Notification } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, ipcRenderer } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
@@ -22,6 +22,45 @@ const timer = new Timer();
 const activity = new Activity(fscs);
 const uploader = new Uploader(fscs);
 const store = new Store();
+const trayMenuTemplate = [
+  {
+    label: 'Start Tracking',
+    submenu: [
+      {label: 'No Projects'}
+    ]
+  },
+
+  {
+    label: 'Stop Tracking',
+    click() {
+      appWindow.webContents.send("timer:stop");
+    }
+  },
+
+  {
+    type: 'separator'
+  },
+
+  {
+    label: 'Dashboard',
+    click() {
+      shell.openExternal('https://trackly.com/app?token=' + store.get('token'));
+    }
+  },
+
+  {
+    type: 'separator'
+  },
+
+  {
+    label: 'Quit',
+    click() {
+      app.quit();
+    },
+    accelerator: 'CmdOrCtrl+Q',
+    role: 'quit'
+  }
+];
 // const idler = new Idler(fscs);
 
 // setup file logger to contain all error logs from elctron-logger.
@@ -91,56 +130,13 @@ function createApplicationWindow() {
 
 function systemTray() {
 
-  let image = nativeImage.createFromPath(join(__dirname, "../cloudTemplate.png"));
-  // image = image.resize({ width: 22, height: 22 });
+  let image = nativeImage.createFromPath(join(__dirname, "../trackly.png"));
 
-  let trayIcon = new Tray(image);
-
-  const trayMenuTemplate = [
-    {
-      label: 'Start Tracking',
-      submenu: [
-        {label: 'List'},
-        {label: 'Of'},
-        {label: 'Projects'},
-      ]
-    },
-
-    {
-      label: 'Stop Tracking',
-      click() {
-        console.log("Clicked on settings")
-      }
-    },
-
-    {
-      type: 'separator'
-    },
-
-    {
-      label: 'Dashboard',
-      click() {
-        shell.openExternal('https://trackly.com/app?token=' + store.get('token'));
-      }
-    },
-
-    {
-      type: 'separator'
-    },
-
-    {
-      label: 'Quit',
-      click() {
-        app.quit();
-      },
-      accelerator: 'CmdOrCtrl+Q',
-      role: 'quit'
-    }
-  ];
+  tray = new Tray(image);
 
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
-  trayIcon.setContextMenu(trayMenu);
+  tray.setContextMenu(trayMenu);
 }
 
 function autoAppUpdater() {
@@ -237,6 +233,7 @@ app.on("activate", () => {
 });
 
 app.on('will-quit', (event: any) => {
+  // logger.log(timeIsRunning);
   if(timeIsRunning) {
     event.preventDefault();
   }
@@ -258,7 +255,21 @@ app.on("ready", () => {
  */
 ipcMain.on('isrunning', (event: any, status: boolean) => {
   timeIsRunning = status;
-  logger.log(status);
+});
+
+ipcMain.on('projects', (event: any, projects: object) => {
+
+  let submenu = projects.map((item: any) => (
+      {label: item.title, click() {
+        appWindow.webContents.send("timer:click", item.id);
+      }}
+    ));
+
+  trayMenuTemplate[0].submenu = submenu;
+
+  let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
+
+  tray.setContextMenu(trayMenu);
 });
 
 /**

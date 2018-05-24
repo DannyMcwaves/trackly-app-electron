@@ -76,6 +76,18 @@ export class DashboardComponent implements OnInit {
                 this.lastSynced = data;
             });
         });
+
+        ipcRenderer.on("timer:click", (event: any, id: string) => {
+          // so the trick is to get the id of the element and then click on it.
+          document.getElementById(id).click();
+        });
+
+        ipcRenderer.on("timer:stop", (event: any) => {
+          // so the trick is to get the id of the element and then click on it.
+          if (this.activeProject.id) {
+            document.getElementById(this.activeProject.id).click();
+          }
+        });
     }
 
     /**
@@ -262,6 +274,8 @@ export class DashboardComponent implements OnInit {
 
                 this.projects = response.filter((item: any) => !item.archived);
 
+                ipcRenderer.send('projects', this.projects);
+
                 // Empty response
                 if (!this.projects.length) {
                     this.projects = [];
@@ -273,8 +287,6 @@ export class DashboardComponent implements OnInit {
                         workspaceId: this.activeWorkspace.id
                     });
                 }
-
-                console.log(this.user);
 
                 if (this.user.people[0].timeTracking) {
                   this._resizeFrame();

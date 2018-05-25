@@ -230,9 +230,11 @@ export class Fscs {
           if (error) {
             logger.error("Screenshot failed: " + error.toString());
           } else {
+            console.log(notifier);
             notifier.notify({
-              title: 'Screenshot',
-              message: 'screenshot was succesfully taken'
+              title: 'Trackly',
+              message: 'Screenshot taken',
+              timeout: 5
             });
           }
         }

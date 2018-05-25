@@ -30,17 +30,3 @@ base.href = './';
 document.head.appendChild(base);
 
 platformBrowserDynamic().bootstrapModule(AppModule);
-
-
-window.onbeforeunload = (event: any) => {
-  if (window['timeIsRunning']) {
-    if (confirm("You're currently tracking time, are you sure you want to quit?")) {
-      window['timeIsRunning'] = false;
-      console.log('this is real');
-      window.close();
-    } else {
-      console.log('false value is returned');
-      event.returnValue = false;
-    }
-  }
-};

@@ -1,6 +1,6 @@
 // tslint:disable-next-line:no-var-requires
 const screenshot = require("desktop-screenshot");
-import notifier = require('node-notifier');
+const notifier = require('node-notifier');
 
 import { app } from "electron";
 import * as fse from "fs-extra";
@@ -232,9 +232,13 @@ export class Fscs {
           } else {
             console.log(notifier);
             notifier.notify({
+              appName: 'com.trackly.app',
               title: 'Trackly',
               message: 'Screenshot taken',
               timeout: 5
+            }, (err :any, res: any) => {
+              console.log(err);
+              console.log(res);
             });
           }
         }

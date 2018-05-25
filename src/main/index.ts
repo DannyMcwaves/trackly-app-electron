@@ -1,6 +1,11 @@
 import * as logger from "electron-log";
 const Store = require("electron-store");
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, ipcRenderer } from "electron";
+
+// moment addons
+const moment = require('moment');
+const momentDurationFormatSetup = require("moment-duration-format");
+
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, ipcRenderer, MenuItemConstructorOptions } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
@@ -22,7 +27,7 @@ const timer = new Timer();
 const activity = new Activity(fscs);
 const uploader = new Uploader(fscs);
 const store = new Store();
-const trayMenuTemplate = [
+const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Start Tracking',
     submenu: [
@@ -89,7 +94,8 @@ let windowDefaults = {
 let interval: any;
 let stopMoment: string;
 let tray: any = null;
-let timeIsRunning: boolean = true;
+let timeIsRunning: boolean = false;
+let shotOut: any;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -118,11 +124,28 @@ if (isDevelopment) {
  */
 function createApplicationWindow() {
   let windowFrame = new BrowserWindow(windowDefaults);
-  // windowFrame.webContents.openDevTools();
   windowFrame.loadURL(windowURL);
 
-  windowFrame.on("closed", (event: any) => {
+  windowFrame.on("close", (event: any) => {
+    if (timeIsRunning) {
+      event.preventDefault();
+      dialog.showMessageBox({
+        type: 'question',
+        buttons: ['Yes', 'No'],
+        title: 'Confirm',
+        message: 'You\'re currently tracking time, are you sure you want to quit?'
+      }, function (response) {
+        if (response === 0) {
+          timeIsRunning = false;
+          windowFrame.close();
+        }
+      })
+    }
+  });
+
+  windowFrame.on('closed', (event: any) => {
     appWindow = null;
+    clearTimeout(shotOut);
   });
 
   return windowFrame;
@@ -130,13 +153,17 @@ function createApplicationWindow() {
 
 function systemTray() {
 
-  let image = nativeImage.createFromPath(join(__dirname, "../trackly.png"));
+  let dir = join(__static, '/tracklyTemplate.png');
+
+  let image = nativeImage.createFromPath(dir);
 
   tray = new Tray(image);
 
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   tray.setContextMenu(trayMenu);
+
+  tray.setTitle('00:00:00');
 }
 
 function autoAppUpdater() {
@@ -211,6 +238,11 @@ function startInterval() {
   }, 600000);
 }
 
+function transform(value: number) {
+  if (!value) { return "0:00"}
+  return moment.duration(Math.round(value), "seconds").format();
+}
+
 app.on("window-all-closed", () => {
 
   // before the window is finally closed, complete all timers.
@@ -232,13 +264,6 @@ app.on("activate", () => {
   if (appWindow === null) appWindow = createApplicationWindow();
 });
 
-app.on('will-quit', (event: any) => {
-  // logger.log(timeIsRunning);
-  if(timeIsRunning) {
-    event.preventDefault();
-  }
-});
-
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
 
@@ -250,6 +275,21 @@ app.on("ready", () => {
 
 });
 
+/**
+ * when the timer is running and the seconds are getting updated
+ */
+ipcMain.on('time:travel', (event:any, time: any) => {
+  let transformedTime = transform(time),
+    splitTime = transformedTime.split(':');
+  if (splitTime[0].length === 1) {
+    transformedTime = '0' + transformedTime;
+  }
+  if (transformedTime.indexOf(':') === transformedTime.lastIndexOf(':')) {
+    transformedTime = '00:' + transformedTime;
+  }
+  tray.setTitle(transformedTime);
+});
+
 /*
  * set the status of the running application
  */
@@ -257,15 +297,16 @@ ipcMain.on('isrunning', (event: any, status: boolean) => {
   timeIsRunning = status;
 });
 
-ipcMain.on('projects', (event: any, projects: object) => {
+/*
+* when the user logs in and projects are available.
+* */
+ipcMain.on('projects', (event: any, projects: [{}]) => {
 
-  let submenu = projects.map((item: any) => (
+  trayMenuTemplate[0].submenu = projects.map((item: any) => (
       {label: item.title, click() {
         appWindow.webContents.send("timer:click", item.id);
       }}
     ));
-
-  trayMenuTemplate[0].submenu = submenu;
 
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
@@ -305,7 +346,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     fscs.appendEvent("startLogging", fscs.getActFile(), args.date);
 
     // Take screenshot within a random time during the first 60 secs.
-    setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
+    shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
 
     timer.ticker.subscribe(
       async tick => {
@@ -346,5 +387,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     stopMoment = args.date;
     timer.complete();
     clearInterval(interval);
+    clearTimeout(shotOut);
   }
 });

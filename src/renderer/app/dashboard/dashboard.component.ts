@@ -67,6 +67,7 @@ export class DashboardComponent implements OnInit {
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
                 this.totalIimeToday = this.getCurrentTime() + this.totalIimeTodayCached;
                 this.currentSession = this.getCurrentTime() + this.currentSessionCached;
+                ipcRenderer.send("time:travel", this.totalIimeToday);
             });
         });
 
@@ -138,7 +139,6 @@ export class DashboardComponent implements OnInit {
                 this.startTime = null;
                 this.endTime = null;
                 this.activeProject = {};
-                window['timeIsRunning'] = false;
                 return;
             }
 
@@ -164,7 +164,6 @@ export class DashboardComponent implements OnInit {
                   date: this.startTime.toISOString()
                 });
                 ipcRenderer.send("isrunning", true);
-                window['timeIsRunning'] = true;
             }
         } else {
             alert('Time tracking is not enabled.');
@@ -288,6 +287,7 @@ export class DashboardComponent implements OnInit {
                     });
                 }
 
+                // when the user is enabled to track time, resize to the size of the window content.
                 if (this.user.people[0].timeTracking) {
                   this._resizeFrame();
                 }
@@ -296,6 +296,7 @@ export class DashboardComponent implements OnInit {
                     this.perProjectCached[element.id] = this.perProject[element.id];
                     this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
                     this.totalIimeTodayCached = this.totalIimeToday;
+                    ipcRenderer.send("time:travel", this.totalIimeToday);
                 });
             }, error => {
                 this.logOut();

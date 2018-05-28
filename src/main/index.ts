@@ -5,7 +5,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, ipcRenderer, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
 import {config} from 'dotenv';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
@@ -272,6 +272,8 @@ app.on("ready", () => {
   appWindow = createApplicationWindow();
 
   autoAppUpdater();
+
+  idler.createWindow(windowURL);
 
 });
 

@@ -230,7 +230,6 @@ export class Fscs {
           if (error) {
             logger.error("Screenshot failed: " + error.toString());
           } else {
-            console.log(notifier);
             notifier.notify({
               appName: 'com.trackly.app',
               title: 'Trackly',

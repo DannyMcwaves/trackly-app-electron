@@ -4,6 +4,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpModule} from "@angular/http";
 import {AppComponent} from "./app.component";
 import {LoginComponent} from "./login/login.component";
+import {DialogComponent} from "./dialog/dialog.component";
 import {RouterModule} from "@angular/router";
 import {UserService} from "./services/user.service";
 import {HttpClientModule} from "@angular/common/http";
@@ -26,15 +27,20 @@ import { sincePipeline } from "./pipes/since.pipe";
                 component: LoginComponent
             },
             {
+                path: "dialog",
+                component: DialogComponent
+            },
+            {
                 path: "",
                 component: DashboardComponent
             },
-            
+
         ], { useHash: true })
     ],
     declarations: [
-        AppComponent, 
+        AppComponent,
         LoginComponent,
+        DialogComponent,
         TimeDurationPipe,
         sincePipeline,
         DashboardComponent],

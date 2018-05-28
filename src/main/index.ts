@@ -13,7 +13,7 @@ import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
 import { join } from 'path';
-// import { Idler } from '../helpers/idle';
+import { Idler } from '../helpers/idle';
 
 // Logger
 autoUpdater.logger = logger;
@@ -66,7 +66,7 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
     role: 'quit'
   }
 ];
-// const idler = new Idler(fscs);
+const idler = new Idler(fscs);
 
 // setup file logger to contain all error logs from elctron-logger.
 fscs.logger(logger);
@@ -352,6 +352,9 @@ ipcMain.on("timer", (event: any, args: any) => {
       async tick => {
         // measure activity
         activity.measure(tick);
+
+        // per every tick of the timer, check idle time.
+        idler.logTick(tick);
 
         // send tick to the web app
         if (appWindow) { appWindow.webContents.send("timer:tick", args.projectId); }

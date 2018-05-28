@@ -8,12 +8,13 @@ export class Idler {
 
   private _totalIdleTime:number = 0;
   private _window: BrowserWindow;
+  private _isOpen: boolean = false;
 
   constructor(private fscs: Fscs) {}
 
-  createWindow() {
-    this._window = new BrowserWindow({frame: false, height: 200, width: 500});
-    this._window.loadURL(`http://localhost:5000`);
+  createWindow(url: string) {
+    this._window = new BrowserWindow({frame: false, height: 200, width: 500, show: false});
+    this._window.loadURL(`${url}/#dialog`);
   }
 
   private idleTime() {
@@ -21,8 +22,8 @@ export class Idler {
   }
 
   idleDialog(time: any) {
-    this.createWindow();
-
+    this._window.show();
+    console.log(time);
     // const dialogOpts = {
     //   type: 'info',
     //   buttons: ['Stop', 'Continue', 'Reassign Idle Time'],
@@ -45,8 +46,9 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    if (idle > 60) {
+    if (idle > 60 && !this._isOpen) {
       this.idleDialog(Math.round(idle / 60));
+      this._isOpen = true;
     }
   }
 

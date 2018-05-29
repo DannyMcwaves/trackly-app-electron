@@ -1,0 +1,15 @@
+#dialog{
+  background: #e8e8e8;
+  * {
+    font-size: 0.92em;
+    font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  div.bg-light .propmt{
+    padding: 3px 15px;
+  }
+  button.btn {
+    border-radius: 2px !important;
+    border-color: #535353;
+    font-style: normal;
+  }
+}

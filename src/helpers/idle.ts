@@ -1,7 +1,7 @@
 
 import * as desktopIdle from 'desktop-idle';
 import {Fscs} from './fscs';
-import {dialog, BrowserWindow} from "electron";
+import {dialog, BrowserWindow, ipcMain} from "electron";
 
 
 export class Idler {
@@ -9,11 +9,17 @@ export class Idler {
   private _totalIdleTime:number = 0;
   private _window: BrowserWindow;
   private _isOpen: boolean = false;
+  private _projects: any;
+  private _activeProject: any;
 
-  constructor(private fscs: Fscs) {}
+  constructor(private fscs: Fscs) {
+    ipcMain.on("idleResponse", (event: any, res: any) => {
+      console.log(res);
+    })
+  }
 
-  createWindow(url: string) {
-    this._window = new BrowserWindow({frame: false, height: 200, width: 500, show: false});
+  createWindow(url: string, parent: any) {
+    this._window = new BrowserWindow({frame: false, height: 207, width: 500, show: false, parent});
     this._window.loadURL(`${url}/#dialog`);
   }
 
@@ -22,21 +28,18 @@ export class Idler {
   }
 
   idleDialog(time: any) {
+    this._window.webContents.send("idletime", time);
     this._window.show();
-    console.log(time);
-    // const dialogOpts = {
-    //   type: 'info',
-    //   buttons: ['Stop', 'Continue', 'Reassign Idle Time'],
-    //   title: 'Idle Prompt',
-    //   message: 'Idle Prompt',
-    //   detail: `You have being Idle for ${time} minutes`,
-    //   checkboxLabel: 'Keep Idle Time'
-    // };
-    //
-    // dialog.showMessageBox(this._window, {}, (response, cbox) => {
-    //   console.log(response);
-    //   console.log(cbox);
-    // });
+  }
+
+  projects(projects: any) {
+    this._projects = projects;
+    this._window.webContents.send("projects", projects);
+  }
+
+  currentProject(project: any) {
+    this._activeProject = project;
+    this._window.webContents.send('currentProject', project.title);
   }
 
   public get idle() {
@@ -46,9 +49,8 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    if (idle > 60 && !this._isOpen) {
+    if (idle > 60 && idle % 60 < 2) {
       this.idleDialog(Math.round(idle / 60));
-      this._isOpen = true;
     }
   }
 

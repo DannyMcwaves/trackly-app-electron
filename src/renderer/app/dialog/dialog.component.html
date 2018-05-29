@@ -4,7 +4,7 @@
     <div class="col-12 propmt"> Idle Propmt </div>
   </div>
 
-  <div id="idle">
+  <div id="idle" [hidden]="hidden">
     <div class="row mt-2 mb-3">
       <div class="col-12">
         You Have been idle for <span id="minutes">{{minutes}}</span> minutes
@@ -32,27 +32,28 @@
     </div>
   </div>
 
-  <div id="reassign">
-    <div class="row mt-2 mb-3">
+  <div id="reassign" [hidden]="!hidden">
+    <div class="row mt-2 mb-4">
       <div class="col-12">
         Reassign Idle Time To:
       </div>
     </div>
-  </div>
 
-  <div class="row mb-4">
-    <div class="col-12">
-      <select [value]="projectName">
-        <option *ngFor="let project of allProjects"> {{project.title}} </option>
-      </select>
+    <div class="row mt-2 mb-4">
+      <label class="col-2" for="selector">Project:</label>
+      <div class="col-7">
+        <select class="" #select id="selector"></select>
+      </div>
+    </div>
+
+    <div class="row py-3">
+      <div class="col-12 pt-1 text-right">
+        <button class="btn btn-sm btn-light" (click)="cancelClick()">Cancel</button>
+        <button class="btn btn-sm btn-light" (click)="assignClick(select.value)">Assign</button>
+      </div>
     </div>
   </div>
 
-  <div class="row py-3">
-    <div class="col-12 pt-1 text-right">
-      <button class="btn btn-sm btn-light" (click)="stopClick(checkbox.checked)">Stop</button>
-      <button class="btn btn-sm btn-light" (click)="continueClick(checkbox.checked)">Continue</button>
-    </div>
-  </div>
+
 
 </div>

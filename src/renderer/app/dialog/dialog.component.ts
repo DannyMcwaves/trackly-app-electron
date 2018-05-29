@@ -16,6 +16,7 @@ export class DialogComponent implements OnInit {
   minutes: number = 0;
   projectName: string = 'Current Active Project';
   allProjects: any;
+  hidden: boolean = false;
 
   constructor() {
     // the number of minutes user was idle.
@@ -33,6 +34,12 @@ export class DialogComponent implements OnInit {
     // projects
     ipcRenderer.on('projects', (event: any, projects: any) => {
       this.allProjects = projects;
+      document.getElementById('selector').innerHTML = projects.map((proj: any) => {
+        if (proj.title == this.projectName) {
+          return `<option value='${proj.title}' selected>${proj.title}</option>`
+        }
+        return `<option value='${proj.title}'>${proj.title}</option>`;
+      }).join('')
     });
   }
 
@@ -45,7 +52,16 @@ export class DialogComponent implements OnInit {
   }
 
   reassignClick() {
-    console.log('reassigned');
+    this.hidden = !this.hidden;
+  }
+
+  cancelClick() {
+    // toggle the hidden value to hide and display.
+    this.hidden = !this.hidden;
+  }
+
+  assignClick(value: string) {
+    ipcRenderer.send("idleResponse", {value: value, action: 'assign'});
   }
 
   ngOnInit(): void {

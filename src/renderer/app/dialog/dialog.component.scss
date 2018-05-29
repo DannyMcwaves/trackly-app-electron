@@ -7,9 +7,27 @@
   div.bg-light .propmt{
     padding: 3px 15px;
   }
+
   button.btn {
     border-radius: 2px !important;
     border-color: #535353;
     font-style: normal;
+  }
+
+  #selector {
+    width: 100%;
+  }
+
+  #idle {
+    padding-top: 5px;
+    padding-bottom: 4px;
+    span, label {
+      font-size: 1em !important;
+    }
+  }
+
+  #reassign {
+    padding-top: 10px;
+    padding-bottom: 8px;
   }
 }

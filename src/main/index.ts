@@ -273,7 +273,7 @@ app.on("ready", () => {
 
   autoAppUpdater();
 
-  idler.createWindow(windowURL);
+  idler.createWindow(windowURL, appWindow);
 
 });
 
@@ -309,6 +309,8 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
         appWindow.webContents.send("timer:click", item.id);
       }}
     ));
+
+  idler.projects(projects);
 
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
@@ -346,6 +348,8 @@ ipcMain.on("timer", (event: any, args: any) => {
     // Get a file
     fscs.newActivityFile(args);
     fscs.appendEvent("startLogging", fscs.getActFile(), args.date);
+
+    idler.currentProject(args);
 
     // Take screenshot within a random time during the first 60 secs.
     shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);

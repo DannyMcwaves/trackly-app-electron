@@ -1,6 +1,7 @@
 
 import * as desktopIdle from 'desktop-idle';
 import {Fscs} from './fscs';
+import {ActiveWindow} from "./windows";
 import {dialog, BrowserWindow, ipcMain} from "electron";
 
 
@@ -12,8 +13,10 @@ export class Idler {
   private _projects: any;
   private _activeProject: any;
   private _idled: number;
+  activeWindow: ActiveWindow;
 
   constructor(private fscs: Fscs) {
+    this.activeWindow = new ActiveWindow();
     ipcMain.on("idleResponse", (event: any, res: any) => {
       this.processIdleAction(res);
     })
@@ -50,8 +53,15 @@ export class Idler {
     return this._totalIdleTime;
   }
 
+  currentWindow() {
+    this.activeWindow.currentWindow().then((data: any) => {
+      console.log(data);
+    })
+  }
+
   public logTick(tick:any) {
     const idle = this.idleTime();
+    this.currentWindow();
     if (idle > 600 && idle % 60 < 2) {
       this.idleDialog(Math.round(idle / 60));
     }

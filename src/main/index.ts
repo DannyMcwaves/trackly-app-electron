@@ -138,6 +138,7 @@ function createApplicationWindow() {
         if (response === 0) {
           timeIsRunning = false;
           windowFrame.close();
+          idler.closeWindow();
         }
       })
     }

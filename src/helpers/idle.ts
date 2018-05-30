@@ -8,17 +8,19 @@ export class Idler {
 
   private _totalIdleTime:number = 0;
   private _window: BrowserWindow;
-  private _isOpen: boolean = false;
+  private _parentWindow: BrowserWindow;
   private _projects: any;
   private _activeProject: any;
+  private _idled: number;
 
   constructor(private fscs: Fscs) {
     ipcMain.on("idleResponse", (event: any, res: any) => {
-      console.log(res);
+      this.processIdleAction(res);
     })
   }
 
   createWindow(url: string, parent: any) {
+    this._parentWindow = parent;
     this._window = new BrowserWindow({frame: false, height: 207, width: 500, show: false, parent});
     this._window.loadURL(`${url}/#dialog`);
   }
@@ -28,6 +30,7 @@ export class Idler {
   }
 
   idleDialog(time: any) {
+    this._idled = time;
     this._window.webContents.send("idletime", time);
     this._window.show();
   }
@@ -49,9 +52,30 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    if (idle > 60 && idle % 60 < 2) {
+    if (idle > 600 && idle % 60 < 2) {
       this.idleDialog(Math.round(idle / 60));
     }
+  }
+
+  adjustIdleTime() {
+    this._parentWindow.webContents.send("adjustIdleTime", this._idled * 60);
+  }
+
+  public processIdleAction(idleResponse: any) {
+    this._window.hide();
+    if (!idleResponse.checked) {
+      this.adjustIdleTime();
+    }
+    if (idleResponse.action === 'stop') {
+      this._parentWindow.webContents.send("timer:stop");
+    }
+    if (idleResponse.action === 'assign') {
+      console.log('assign time to')
+    }
+  }
+
+  closeWindow() {
+    this._window.close();
   }
 
 }

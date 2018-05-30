@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit {
 
     public startTime: moment.Moment;
     public endTime: moment.Moment;
+    private idled: number = 0;
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -61,7 +62,7 @@ export class DashboardComponent implements OnInit {
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
-            this.endTime = moment().milliseconds(0);
+            this.endTime = moment().milliseconds(-(this.idled * 1000));
             this.zone.run(() => {
 
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
@@ -76,6 +77,14 @@ export class DashboardComponent implements OnInit {
             this.zone.run(() => {
                 this.lastSynced = data;
             });
+        });
+
+        // if idler does not want to keep the time. reduce the time margin.
+        ipcRenderer.on('adjustIdleTime', (event: any, idle: any) => {
+          // get the current idle time in milliseconds.
+          // set the idled time to the idled variable.
+          // the project id
+          this.idled += idle;
         });
 
         ipcRenderer.on("timer:click", (event: any, id: string) => {
@@ -119,7 +128,7 @@ export class DashboardComponent implements OnInit {
     getCurrentTime() {
         let time = 0;
         time = this.endTime.diff(this.startTime);
-        return Math.round(time / 1000);
+        return Math.round(time / 1000) - this.idled;
     }
 
     trackProject(project: any) {
@@ -128,6 +137,7 @@ export class DashboardComponent implements OnInit {
             // Clicked on running project
             if (project == this.activeProject) {
                 console.log('same');
+                console.log(this.endTime);
                 ipcRenderer.send("timer", {
                     action: "stop",
                     date: this.endTime.toISOString()
@@ -139,6 +149,7 @@ export class DashboardComponent implements OnInit {
                 this.startTime = null;
                 this.endTime = null;
                 this.activeProject = {};
+                this.idled = 0;
                 return;
             }
 
@@ -148,9 +159,10 @@ export class DashboardComponent implements OnInit {
                 this.startTime =  moment().milliseconds(0);
                 ipcRenderer.send("timer", {
                     action: "stop",
-                    date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString()
+                    date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(-(this.idled * 1000)).toISOString()
                 });
                 ipcRenderer.send("isrunning", false);
+                this.idled = 0;
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;

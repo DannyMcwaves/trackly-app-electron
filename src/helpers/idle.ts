@@ -1,8 +1,10 @@
 
 import * as desktopIdle from 'desktop-idle';
-import {Fscs} from './fscs';
-import {ActiveWindow} from "./windows";
-import {dialog, BrowserWindow, ipcMain} from "electron";
+import { Emitter } from './emitter';
+import { Fscs } from './fscs';
+import { Uploader } from './uploader';
+import { ActiveWindow } from "./windows";
+import { dialog, BrowserWindow, ipcMain } from "electron";
 
 
 export class Idler {
@@ -13,13 +15,32 @@ export class Idler {
   private _projects: any;
   private _activeProject: any;
   private _idled: number;
-  activeWindow: ActiveWindow;
+  private activeWindow: ActiveWindow;
+  private fscs: Fscs;
+  private uploader: Uploader;
+  private _upload: boolean = true;
 
-  constructor(private fscs: Fscs) {
+  constructor(fscs: any, uploader: any) {
     this.activeWindow = new ActiveWindow();
+    this.uploader = uploader;
+    this.fscs = fscs;
     ipcMain.on("idleResponse", (event: any, res: any) => {
       this.processIdleAction(res);
-    })
+    });
+  }
+
+  upload() {
+    // upload when the user is not idle for more than 10mins.
+    if (this._upload) {
+      let returnValue = this.fscs.rotate();
+      // start upload when activity file are successfully rotated.
+      if (returnValue) {
+        // upload files within 10min interval after every rotation.
+        this.uploader.upload(() => {
+          if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
+        });
+      }
+    }
   }
 
   createWindow(url: string, parent: any) {
@@ -36,6 +57,7 @@ export class Idler {
     this._idled = time;
     this._window.webContents.send("idletime", time);
     this._window.show();
+    this._upload = false;
   }
 
   projects(projects: any) {
@@ -64,7 +86,7 @@ export class Idler {
   public logTick(tick:any) {
     const idle = this.idleTime();
     // this.currentWindow();
-    if (idle > 600 && idle % 60 < 2) {
+    if (idle > 595 && idle % 60 < 2) {
       this.idleDialog(Math.floor(idle / 60));
     }
   }
@@ -75,6 +97,7 @@ export class Idler {
 
   public processIdleAction(idleResponse: any) {
     this._window.hide();
+    this._upload = true;
     if (!idleResponse.checked) {
       this.adjustIdleTime();
     }

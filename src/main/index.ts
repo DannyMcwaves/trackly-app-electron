@@ -6,13 +6,14 @@ const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
 import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
-import {config} from 'dotenv';
+import { config } from 'dotenv';
+import { join } from 'path';
 import { autoUpdater } from "electron-updater";
 import { Timer } from "../helpers/timer";
 import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
-import { join } from 'path';
+import { Emitter } from "../helpers/emitter";
 import { Idler } from '../helpers/idle';
 
 // Logger
@@ -66,7 +67,7 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
     role: 'quit'
   }
 ];
-const idler = new Idler(fscs);
+const idler = new Idler(fscs, uploader);
 
 // setup file logger to contain all error logs from elctron-logger.
 fscs.logger(logger);
@@ -227,16 +228,7 @@ function autoAppUpdater() {
 }
 
 function startInterval() {
-  return setInterval(function() {
-    let returnValue = fscs.rotate();
-    // start upload when activity file are successfully rotated.
-    if (returnValue) {
-        // upload files within 10min interval after every rotation.
-        uploader.upload(() => {
-            if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-        });
-    }
-  }, 600000);
+  return setInterval(() => { idler.upload() }, 600000);
 }
 
 function transform(value: number) {

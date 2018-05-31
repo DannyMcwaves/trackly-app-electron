@@ -56,14 +56,16 @@ export class Idler {
   currentWindow() {
     this.activeWindow.currentWindow().then((data: any) => {
       console.log(data);
-    })
+    }).catch((err: any) => {
+      console.log(err);
+    });
   }
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    this.currentWindow();
+    // this.currentWindow();
     if (idle > 600 && idle % 60 < 2) {
-      this.idleDialog(Math.round(idle / 60));
+      this.idleDialog(Math.floor(idle / 60));
     }
   }
 
@@ -77,7 +79,7 @@ export class Idler {
       this.adjustIdleTime();
     }
     if (idleResponse.action === 'stop') {
-      this._parentWindow.webContents.send("timer:stop");
+      setTimeout( () => { this._parentWindow.webContents.send("timer:stop")}, 1000);
     }
     if (idleResponse.action === 'assign') {
       console.log('assign time to')

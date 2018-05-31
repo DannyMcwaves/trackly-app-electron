@@ -126,9 +126,9 @@ export class DashboardComponent implements OnInit {
 
     // Count time
     getCurrentTime() {
-        let time = 0;
-        time = this.endTime.diff(this.startTime);
-        return Math.round(time / 1000) - this.idled;
+      let time = this.endTime.diff(this.startTime);
+      let roundedTime = Math.round(time / 1000);
+      return roundedTime;
     }
 
     trackProject(project: any) {

@@ -5,6 +5,7 @@ import { Fscs } from './fscs';
 import { Uploader } from './uploader';
 import { ActiveWindow } from "./windows";
 import { dialog, BrowserWindow, ipcMain } from "electron";
+import * as moment from "moment";
 
 
 export class Idler {
@@ -19,6 +20,7 @@ export class Idler {
   private fscs: Fscs;
   private uploader: Uploader;
   private _upload: boolean = true;
+  private _interval: any;
 
   constructor(fscs: any, uploader: any) {
     this.activeWindow = new ActiveWindow();
@@ -57,7 +59,6 @@ export class Idler {
     this._idled = time;
     this._window.webContents.send("idletime", time);
     this._window.show();
-    this._upload = false;
   }
 
   projects(projects: any) {
@@ -83,10 +84,21 @@ export class Idler {
     });
   }
 
+  startInterval() {
+    this._interval = setInterval(() => { this.upload() }, 600000);
+  }
+
+  clearInterval() {
+    clearInterval(this._interval);
+  }
+
   public logTick(tick:any) {
     const idle = this.idleTime();
     // this.currentWindow();
-    if (idle > 595 && idle % 60 < 2) {
+    if(idle > 598) {
+      this._upload = false;
+    }
+    if (idle >= 600) {
       this.idleDialog(Math.floor(idle / 60));
     }
   }
@@ -98,15 +110,42 @@ export class Idler {
   public processIdleAction(idleResponse: any) {
     this._window.hide();
     this._upload = true;
-    if (!idleResponse.checked) {
-      this.adjustIdleTime();
+    if (!idleResponse.checked || idleResponse.value !== this._activeProject.title) {
+        this.adjustIdleTime();
     }
     if (idleResponse.action === 'stop') {
       setTimeout( () => { this._parentWindow.webContents.send("timer:stop")}, 1000);
     }
-    if (idleResponse.action === 'assign') {
-      console.log('assign time to')
+    // user decides to keep time and continue.
+    if (idleResponse.checked && idleResponse.action === 'continue') {
+      setTimeout(() => {
+        // if user chooses to continue, upload the current files, clear and start interval.
+        this.upload();
+        this.clearInterval();
+        this.startInterval();
+      }, 1000);
     }
+    if (idleResponse.action === 'assign') {
+      if (idleResponse.value !== this._activeProject.title) {
+        let project = this._projects.filter((newProject: any) => newProject.title === idleResponse.value ? newProject: null);
+        this.generateActivityFile(project);
+      }
+    }
+  }
+
+  generateActivityFile(project: any) {
+    const pro = project[0];
+    const actFile = {
+      timestamp: Date.now(),
+      userId: pro.people[0].userId,
+      workspaceId: pro.workspaceId,
+      projectId: pro.id
+    };
+    const tempFile = this.fscs.generateActivityFile(actFile);
+    this.fscs.appendEvent("startLogging", tempFile, moment().milliseconds(0).toISOString());
+    setTimeout(() => {
+      this.fscs.appendEvent("stopLogging", tempFile, moment().milliseconds(this._idled * 60000).toISOString());
+    }, 1000);
   }
 
   closeWindow() {

@@ -227,10 +227,6 @@ function autoAppUpdater() {
   });
 }
 
-function startInterval() {
-  return setInterval(() => { idler.upload() }, 600000);
-}
-
 function transform(value: number) {
   if (!value) { return "0:00"}
   return moment.duration(Math.round(value), "seconds").format();
@@ -381,14 +377,14 @@ ipcMain.on("timer", (event: any, args: any) => {
     );
 
     // start 10 minutes interval uploads and file rotation.
-    interval = startInterval();
+    idler.startInterval();
   }
 
   // Stop timer and clear the uploads interval.
   if (args.action == "stop") {
     stopMoment = args.date;
     timer.complete();
-    clearInterval(interval);
+    idler.clearInterval();
     clearTimeout(shotOut);
   }
 });

@@ -99,7 +99,7 @@ export class Fscs {
    * Method responsible for creating activity file from blueprint.
    * @param blueprint
    */
-  private generateActivityFile(blueprint: IActivityFileBlueprint) {
+  public generateActivityFile(blueprint: IActivityFileBlueprint) {
     let fileName = `${this.activitiesPath}/${blueprint.timestamp.toString()}.json`;
     let skeleton =  {
       userId: blueprint.userId,

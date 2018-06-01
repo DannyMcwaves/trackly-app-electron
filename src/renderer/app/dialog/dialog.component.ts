@@ -62,6 +62,7 @@ export class DialogComponent implements OnInit {
 
   assignClick(value: string) {
     ipcRenderer.send("idleResponse", {value: value, action: 'assign'});
+    this.hidden = !this.hidden;
   }
 
   ngOnInit(): void {

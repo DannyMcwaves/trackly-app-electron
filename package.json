@@ -68,7 +68,7 @@
     "active-win": "^3.0.0",
     "bootstrap": "^4.0.0",
     "core-js": "^2.5.1",
-    "desktop-idle": "^1.1.1",
+    "desktop-idle": "git+https://github.com/CudoVentures/node-desktop-idle.git#prebuild",
     "desktop-screenshot": "https://github.com/jhotujec/node-desktop-screenshot",
     "dotenv": "^5.0.1",
     "electron-is-dev": "0.3.0",

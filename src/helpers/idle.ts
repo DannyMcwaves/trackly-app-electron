@@ -1,6 +1,6 @@
 
 import * as desktopIdle from 'desktop-idle';
-import { Emitter } from './emitter';
+// import { Emitter } from './emitter';
 import { Fscs } from './fscs';
 import { Uploader } from './uploader';
 import { ActiveWindow } from "./windows";
@@ -48,7 +48,7 @@ export class Idler {
   createWindow(url: string, parent: any) {
     this._parentWindow = parent;
     this._window = new BrowserWindow({frame: false, height: 207, width: 500, show: false, parent});
-    this._window.loadURL(`${url}/#dialog`);
+    this._window.loadURL(`file://${__static}/index.html`);
   }
 
   private idleTime() {
@@ -110,7 +110,7 @@ export class Idler {
   public processIdleAction(idleResponse: any) {
     this._window.hide();
     this._upload = true;
-    if (!idleResponse.checked || idleResponse.value !== this._activeProject.title) {
+    if (!idleResponse.checked) {
         this.adjustIdleTime();
     }
     if (idleResponse.action === 'stop') {

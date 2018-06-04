@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Dialog</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <style>
+    #dialog {
+      background: #e8e8e8;
+    }
+    #dialog * {
+      font-size: 0.92em;
+      font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    #dialog div.bg-light .propmt{
+      padding: 3px 15px;
+    }
+
+    #dialog button.btn {
+      border-radius: 2px !important;
+      border-color: #535353;
+      font-style: normal;
+    }
+
+    #dialog #selector {
+      width: 100%;
+    }
+
+    #dialog #idle {
+      padding-top: 5px;
+      padding-bottom: 2px;
+    }
+    #dialog #idle span, #dialog #idle  label {
+      font-size: 1em !important;
+    }
+
+    #dialog #reassign {
+      padding-top: 10px;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid" id="dialog">
+
+  <div class="row bg-light">
+    <div class="col-12 propmt"> Idle Propmt </div>
+  </div>
+
+  <div id="idle">
+    <div class="row mt-2 mb-3">
+      <div class="col-12">
+        You Have been idle for <span id="minutes"></span> minutes
+      </div>
+      <div class="col-12">
+        Project: &nbsp;&nbsp; <span id="name"></span>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <input id="check" type="checkbox" />
+        <label for="check"> Keep idle time</label>
+      </div>
+    </div>
+
+    <div class="row py-3">
+      <div class="col-4 pt-1">
+        <button id="showAssign" class="btn btn-sm btn-light"> Reassign idle time </button>
+      </div>
+      <div class="col-8 pt-1 text-right">
+        <button id="stopTrack" class="btn btn-sm btn-light">Stop</button>
+        <button id="continueTrack" class="btn btn-sm btn-light">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="reassign">
+    <div class="row mt-2 mb-4">
+      <div class="col-12">
+        Reassign Idle Time To:
+      </div>
+    </div>
+
+    <div class="row mt-2 mb-4">
+      <label class="col-2" for="selector">Project:</label>
+      <div class="col-7">
+        <select class="" id="selector"></select>
+      </div>
+    </div>
+
+    <div class="row py-3">
+      <div class="col-12 pt-1 text-right">
+        <button id="showKeeper" class="btn btn-sm btn-light">Cancel</button>
+        <button id="assign" class="btn btn-sm btn-light">Assign</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+<script>
+  let { ipcRenderer } = require('electron');
+
+  // the number of minutes the current user has being idle.
+  ipcRenderer.on('idletime', (event, time) => {
+    document.getElementById('minutes').innerText = time.toString();
+  });
+
+  // set the name of the current project
+  ipcRenderer.on('currentProject', (event, title) => {
+    document.getElementById('name').innerText = title;
+  });
+
+  // show all the projects that are available.
+  ipcRenderer.on('projects', (event, projects) => {
+    document.getElementById('selector').innerHTML = projects.map((proj) => {
+      if (proj.title === this.projectName) {
+        return `<option value='${proj.title}' selected>${proj.title}</option>`
+      }
+      return `<option value='${proj.title}'>${proj.title}</option>`;
+    }).join('')
+  });
+
+  let $ = (selector) => {
+    let element = document.querySelector(selector);
+    return {
+      hide() {
+        element.style.display = "none";
+      },
+      show() {
+        element.style.display = "block";
+      },
+      on(listener, func) {
+        element.addEventListener(listener, func, false);
+      },
+      innerText(text) {
+        element.innerText = text;
+      },
+      innerHtml(html) {
+        element.innerHTML = html;
+      },
+      el: element
+    }
+  };
+  let reassign = $("#reassign"),
+    idle = $("#idle"),
+    check = $("#check"),
+    selector = $("#selector");
+  reassign.hide();
+
+  $("#showAssign").on("click", function () {
+    idle.hide();
+    reassign.show();
+  });
+  $("#showKeeper").on("click", function () {
+    idle.show();
+    reassign.hide();
+  });
+  $("#stopTrack").on("click", function () {
+    ipcRenderer.send("idleResponse", {checked: check.el.checked, action: 'stop'});
+    check.el.checked = false;
+  });
+  $("#continueTrack").on("click", function () {
+    ipcRenderer.send("idleResponse", {checked: check.el.checked, action: 'continue'});
+    check.el.checked = false;
+  });
+  $("#assign").on("click", function () {
+    ipcRenderer.send("idleResponse", {value: selector.el.value, action: 'assign'});
+    check.el.checked = false;
+    $("#showKeeper").el.click();
+  });
+
+</script>
+</html>

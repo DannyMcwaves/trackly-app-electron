@@ -7,7 +7,7 @@ import {ipcRenderer} from "electron";
 import "./dashboard.component.scss";
 import {UserService} from "../services/user.service";
 import {OnInit} from "@angular/core/src/metadata/lifecycle_hooks";
-import {Router} from "@angular/router";
+import {Router, ActivatedRoute, Params} from "@angular/router";
 import {HttpClient, HttpParams} from "@angular/common/http";
 
 import * as moment from "moment";
@@ -50,9 +50,11 @@ export class DashboardComponent implements OnInit {
      * @param {UserService} userService
      * @param {Router} router
      * @param {HttpClient} http
+     * @param {ngZone} zone
+     * @param {ActivatedRoute} activatedRoute
      */
     constructor(private userService: UserService, private router: Router,
-                private http: HttpClient, public zone: NgZone) {
+                private http: HttpClient, public zone: NgZone, private activatedRoute: ActivatedRoute) {
 
         this.store = new Store();
 
@@ -264,6 +266,15 @@ export class DashboardComponent implements OnInit {
      * Load initial projects
      */
     ngOnInit() {
+
+        console.log(this.activatedRoute.snapshot.queryParams);
+        console.log(this.activatedRoute.snapshot.params);
+        console.log(this.activatedRoute.snapshot.queryParamMap);
+        // this.activatedRoute.params.subscribe((params: Params) => {
+          // let userId = params['userId'];
+          // console.log(params);
+        // });
+
         // Load in the workspaces
         this.getWorkspaces().subscribe(response => {
             this.workspaces = response;

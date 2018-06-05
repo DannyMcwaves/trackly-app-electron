@@ -2,6 +2,7 @@
 const ioHook = require("iohook");
 import * as logger from "electron-log";
 import { Fscs } from "./fscs";
+import { ActiveWindow } from "./windows";
 
 export const activityStorage: any = {userStatus: false, duration: 0};
 
@@ -11,8 +12,11 @@ export class Activity {
   private isActive = false;
   private measurementInterval = 2; // seconds
   private status = ioHook.getStatus();
+  private activeWindow: ActiveWindow;
 
-  constructor(private fscs: Fscs) {}
+  constructor(private fscs: Fscs) {
+    this.activeWindow = new ActiveWindow(fscs);
+  }
 
   /**
    * Do something with results of past n seconds of user activity.
@@ -25,6 +29,7 @@ export class Activity {
       logger.info(`Status changed to ${wasActive} w/ ${this.measurementInterval} seconds.`);
 
       this.fscs.appendActivity(wasActive, this.cachedInterval);
+      this.activeWindow.current(this.cachedInterval);
       this.cachedIsActive = this.isActive;
       this.cachedInterval = 0;
       activityStorage.duration = 0;

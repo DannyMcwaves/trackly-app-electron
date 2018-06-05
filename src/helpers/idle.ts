@@ -3,7 +3,6 @@ import * as desktopIdle from 'desktop-idle';
 // import { Emitter } from './emitter';
 import { Fscs } from './fscs';
 import { Uploader } from './uploader';
-import { ActiveWindow } from "./windows";
 import { dialog, BrowserWindow, ipcMain } from "electron";
 import * as moment from "moment";
 
@@ -16,14 +15,12 @@ export class Idler {
   private _projects: any;
   private _activeProject: any;
   private _idled: number;
-  private activeWindow: ActiveWindow;
   private fscs: Fscs;
   private uploader: Uploader;
   private _upload: boolean = true;
   private _interval: any;
 
   constructor(fscs: any, uploader: any) {
-    this.activeWindow = new ActiveWindow();
     this.uploader = uploader;
     this.fscs = fscs;
     ipcMain.on("idleResponse", (event: any, res: any) => {
@@ -74,14 +71,6 @@ export class Idler {
   public get idle() {
     this._totalIdleTime += this.idleTime();
     return this._totalIdleTime;
-  }
-
-  currentWindow() {
-    this.activeWindow.currentWindow().then((data: any) => {
-      console.log(data);
-    }).catch((err: any) => {
-      console.log(err);
-    });
   }
 
   startInterval() {

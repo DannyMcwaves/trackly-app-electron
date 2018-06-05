@@ -107,7 +107,8 @@ export class Fscs {
       projectId: blueprint.projectId,
       createdAt: moment().milliseconds(0).toISOString(),
       events: [] as any[],
-      activities: [] as any[]
+      activities: [] as any[],
+      activeWindows: [] as any[]
     };
 
     jsonfile.writeFileSync(fileName, skeleton);
@@ -147,9 +148,22 @@ export class Fscs {
   private insertJsonNode(target: string, node: string, value: any) {
     fse.readFile(target, (err, data: any) => {
       let json = JSON.parse(data);
-      json[node].push(value);
+      if (node === 'activeWindows') {
+        json[node] = value;
+      } else {
+        json[node].push(value);
+      }
       fse.writeFile(target, JSON.stringify(json), () => {});
     });
+  }
+
+  /**
+   * append the name of the current active windows to current activities file
+   */
+  public appendActiveWindow(windows: any) {
+    if (this.currentActivityFile) {
+      this.insertJsonNode(this.currentActivityFile, 'activeWindows', windows)
+    }
   }
 
   /**

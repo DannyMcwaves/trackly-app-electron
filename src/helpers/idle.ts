@@ -115,7 +115,7 @@ export class Idler {
       }, 1000);
     }
     if (idleResponse.action === 'assign') {
-      if (idleResponse.value !== this._activeProject.title) {
+      if (idleResponse.value !== this._activeProject.title && this._activeProject.title !== "(No project)") {
         let project = this._projects.filter((newProject: any) => newProject.title === idleResponse.value ? newProject: null);
         this.generateActivityFile(project);
       }

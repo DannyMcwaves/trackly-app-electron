@@ -118,12 +118,17 @@ export class Fscs {
    * Method responsible for appening event to the activity file.
    * @param evt
    * @param file
+   * @param timestamp
+   * @param id
    */
-  public appendEvent(evt: string, file: string, timestamp: string) {
+  public appendEvent(evt: string, file: string, timestamp: string, id: string) {
     this.insertJsonNode(file, 'events', {
       type: evt,
-      timestamp: timestamp}
-    );
+      payload: {
+        projectId: id
+      },
+      timestamp: timestamp
+    });
   }
 
   /**
@@ -147,11 +152,7 @@ export class Fscs {
   private insertJsonNode(target: string, node: string, value: any) {
     fse.readFile(target, (err, data: any) => {
       let json = JSON.parse(data);
-      if (node === 'activeWindows') {
-        json[node] = value;
-      } else {
-        json[node].push(value);
-      }
+      json[node].push(value);
       fse.writeFile(target, JSON.stringify(json), () => {});
     });
   }
@@ -195,7 +196,7 @@ export class Fscs {
       projectId: fp.projectId
     });
 
-    this.appendEvent("continueLogging", tempFile, moment().milliseconds(0).toISOString());
+    this.appendEvent("continueLogging", tempFile, moment().milliseconds(0).toISOString(), fp.projectId);
 
     // Swap files
     this.loadActFile(tempFile);

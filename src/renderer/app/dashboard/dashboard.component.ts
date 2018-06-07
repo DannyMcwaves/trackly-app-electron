@@ -32,7 +32,6 @@ export class DashboardComponent implements OnInit {
 
     public startTime: moment.Moment;
     public endTime: moment.Moment;
-    private idled: number = 0;
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -51,10 +50,8 @@ export class DashboardComponent implements OnInit {
      * @param {Router} router
      * @param {HttpClient} http
      * @param {ngZone} zone
-     * @param {ActivatedRoute} activatedRoute
      */
-    constructor(private userService: UserService, private router: Router,
-                private http: HttpClient, public zone: NgZone, private activatedRoute: ActivatedRoute) {
+    constructor(private userService: UserService, private router: Router, private http: HttpClient, public zone: NgZone) {
 
         this.store = new Store();
 
@@ -64,7 +61,7 @@ export class DashboardComponent implements OnInit {
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
-            this.endTime = moment().milliseconds(-(this.idled * 1000));
+            this.endTime = moment().milliseconds(0);
             this.zone.run(() => {
 
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
@@ -79,14 +76,6 @@ export class DashboardComponent implements OnInit {
             this.zone.run(() => {
                 this.lastSynced = data;
             });
-        });
-
-        // if idler does not want to keep the time. reduce the time margin.
-        ipcRenderer.on('adjustIdleTime', (event: any, idle: any) => {
-          // get the current idle time in milliseconds.
-          // set the idled time to the idled variable.
-          // the project id
-          this.idled += idle;
         });
 
         ipcRenderer.on("timer:click", (event: any, id: string) => {
@@ -129,8 +118,7 @@ export class DashboardComponent implements OnInit {
     // Count time
     getCurrentTime() {
       let time = this.endTime.diff(this.startTime);
-      let roundedTime = Math.round(time / 1000);
-      return roundedTime;
+      return Math.round(time / 1000);
     }
 
     trackProject(project: any) {
@@ -139,10 +127,10 @@ export class DashboardComponent implements OnInit {
             // Clicked on running project
             if (project == this.activeProject) {
                 console.log('same');
-                console.log(this.endTime);
                 ipcRenderer.send("timer", {
                     action: "stop",
-                    date: this.endTime.toISOString()
+                    date: this.endTime.toISOString(),
+                    projectId: project.id
                 });
                 ipcRenderer.send("isrunning", false);
                 this.currentSessionCached = this.currentSession;
@@ -151,7 +139,6 @@ export class DashboardComponent implements OnInit {
                 this.startTime = null;
                 this.endTime = null;
                 this.activeProject = {};
-                this.idled = 0;
                 return;
             }
 
@@ -161,10 +148,10 @@ export class DashboardComponent implements OnInit {
                 this.startTime =  moment().milliseconds(0);
                 ipcRenderer.send("timer", {
                     action: "stop",
-                    date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(-(this.idled * 1000)).toISOString()
+                    date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString(),
+                    projectId: project.id
                 });
                 ipcRenderer.send("isrunning", false);
-                this.idled = 0;
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
@@ -266,14 +253,6 @@ export class DashboardComponent implements OnInit {
      * Load initial projects
      */
     ngOnInit() {
-
-        console.log(this.activatedRoute.snapshot.queryParams);
-        console.log(this.activatedRoute.snapshot.params);
-        console.log(this.activatedRoute.snapshot.queryParamMap);
-        // this.activatedRoute.params.subscribe((params: Params) => {
-          // let userId = params['userId'];
-          // console.log(params);
-        // });
 
         // Load in the workspaces
         this.getWorkspaces().subscribe(response => {

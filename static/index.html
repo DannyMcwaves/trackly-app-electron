@@ -25,21 +25,12 @@
       font-style: normal;
     }
 
-    #dialog #selector {
-      width: 100%;
-    }
-
     #dialog #idle {
       padding-top: 5px;
       padding-bottom: 2px;
     }
     #dialog #idle span, #dialog #idle  label {
       font-size: 1em !important;
-    }
-
-    #dialog #reassign {
-      padding-top: 10px;
-      padding-bottom: 8px;
     }
   </style>
 </head>
@@ -61,7 +52,7 @@
       </div>
     </div>
 
-    <div class="row mb-4">
+    <div class="row mb-4" style="visibility: hidden">
       <div class="col-12">
         <input id="check" type="checkbox" />
         <label for="check"> Keep idle time</label>
@@ -69,34 +60,8 @@
     </div>
 
     <div class="row py-3">
-      <div class="col-4 pt-1">
-        <button id="showAssign" class="btn btn-sm btn-light"> Reassign idle time </button>
-      </div>
-      <div class="col-8 pt-1 text-right">
-        <button id="stopTrack" class="btn btn-sm btn-light">Stop</button>
-        <button id="continueTrack" class="btn btn-sm btn-light">Continue</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="reassign">
-    <div class="row mt-2 mb-4">
-      <div class="col-12">
-        Reassign Idle Time To:
-      </div>
-    </div>
-
-    <div class="row mt-2 mb-4">
-      <label class="col-2" for="selector">Project:</label>
-      <div class="col-7">
-        <select class="" id="selector"></select>
-      </div>
-    </div>
-
-    <div class="row py-3">
       <div class="col-12 pt-1 text-right">
-        <button id="showKeeper" class="btn btn-sm btn-light">Cancel</button>
-        <button id="assign" class="btn btn-sm btn-light">Assign</button>
+        <button id="continueTrack" class="btn btn-sm btn-light"> OK </button>
       </div>
     </div>
   </div>
@@ -117,64 +82,9 @@
     document.getElementById('name').innerText = title;
   });
 
-  // show all the projects that are available.
-  ipcRenderer.on('projects', (event, projects) => {
-    document.getElementById('selector').innerHTML = projects.map((proj) => {
-      if (proj.title === this.projectName) {
-        return `<option value='${proj.title}' selected>${proj.title}</option>`
-      }
-      return `<option value='${proj.title}'>${proj.title}</option>`;
-    }).join('')
-  });
-
-  let $ = (selector) => {
-    let element = document.querySelector(selector);
-    return {
-      hide() {
-        element.style.display = "none";
-      },
-      show() {
-        element.style.display = "block";
-      },
-      on(listener, func) {
-        element.addEventListener(listener, func, false);
-      },
-      innerText(text) {
-        element.innerText = text;
-      },
-      innerHtml(html) {
-        element.innerHTML = html;
-      },
-      el: element
-    }
-  };
-  let reassign = $("#reassign"),
-    idle = $("#idle"),
-    check = $("#check"),
-    selector = $("#selector");
-  reassign.hide();
-
-  $("#showAssign").on("click", function () {
-    idle.hide();
-    reassign.show();
-  });
-  $("#showKeeper").on("click", function () {
-    idle.show();
-    reassign.hide();
-  });
-  $("#stopTrack").on("click", function () {
-    ipcRenderer.send("idleResponse", {checked: check.el.checked, action: 'stop'});
-    check.el.checked = false;
-  });
-  $("#continueTrack").on("click", function () {
-    ipcRenderer.send("idleResponse", {checked: check.el.checked, action: 'continue'});
-    check.el.checked = false;
-  });
-  $("#assign").on("click", function () {
-    ipcRenderer.send("idleResponse", {value: selector.el.value, action: 'assign'});
-    check.el.checked = false;
-    $("#showKeeper").el.click();
-  });
+  document.getElementById("continueTrack").addEventListener("click", function () {
+    ipcRenderer.send("idleResponse", {action: 'ok'});
+  }, false);
 
 </script>
 </html>

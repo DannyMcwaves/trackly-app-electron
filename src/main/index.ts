@@ -334,7 +334,7 @@ ipcMain.on("timer", (event: any, args: any) => {
   if (args.action == "start") {
     // Get a file
     fscs.newActivityFile(args);
-    fscs.appendEvent("startLogging", fscs.getActFile(), args.date, args.projectId);
+    fscs.appendEvent("startLogging", fscs.getActFile(), args.date, {projectId: args.projectId});
 
     idler.currentProject(args);
 
@@ -364,7 +364,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         logger.log("Timer stopped..");
 
         // upload files through the idler
-        idler.stopUpload(stopMoment, args.projectId);
+        idler.stopUpload(stopMoment, {projectId: args.projectId});
       }
     );
 

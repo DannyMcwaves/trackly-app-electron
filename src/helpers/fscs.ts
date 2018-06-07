@@ -119,14 +119,12 @@ export class Fscs {
    * @param evt
    * @param file
    * @param timestamp
-   * @param id
+   * @param payload
    */
-  public appendEvent(evt: string, file: string, timestamp: string, id: string) {
+  public appendEvent(evt: string, file: string, timestamp: string, payload: any) {
     this.insertJsonNode(file, 'events', {
       type: evt,
-      payload: {
-        projectId: id
-      },
+      payload: payload,
       timestamp: timestamp
     });
   }
@@ -196,7 +194,7 @@ export class Fscs {
       projectId: fp.projectId
     });
 
-    this.appendEvent("continueLogging", tempFile, moment().milliseconds(0).toISOString(), fp.projectId);
+    this.appendEvent("continueLogging", tempFile, moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
 
     // Swap files
     this.loadActFile(tempFile);

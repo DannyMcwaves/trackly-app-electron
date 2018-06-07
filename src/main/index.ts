@@ -299,8 +299,6 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
       }}
     ));
 
-  idler.projects(projects);
-
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   tray.setContextMenu(trayMenu);
@@ -336,7 +334,7 @@ ipcMain.on("timer", (event: any, args: any) => {
   if (args.action == "start") {
     // Get a file
     fscs.newActivityFile(args);
-    fscs.appendEvent("startLogging", fscs.getActFile(), args.date);
+    fscs.appendEvent("startLogging", fscs.getActFile(), args.date, args.projectId);
 
     idler.currentProject(args);
 
@@ -362,17 +360,11 @@ ipcMain.on("timer", (event: any, args: any) => {
         // stop the timer;
         activity.stop();
 
+        // log the timer stopped
         logger.log("Timer stopped..");
-        let actFile = fscs.getActFile();
 
-        // append stopLogging and unload the current activities file.
-        fscs.appendEvent("stopLogging", actFile, stopMoment);
-        fscs.unloadActFile();
-
-        // upload activity files and screenshots to the backend.
-        uploader.upload(() => {
-          if (appWindow) { appWindow.webContents.send("sync:update", Date.now()); }
-        });
+        // upload files through the idler
+        idler.stopUpload(stopMoment, args.projectId);
       }
     );
 

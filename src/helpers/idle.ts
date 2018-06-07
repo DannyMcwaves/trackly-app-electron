@@ -19,6 +19,9 @@ export class Idler {
   private uploader: Uploader;
   private _upload: boolean = true;
   private _interval: any;
+  private _idleInterval: any;
+  private _interruptIdler: boolean = false;
+  private _isIdle: boolean = false;
 
   constructor(fscs: any, uploader: any) {
     this.uploader = uploader;
@@ -29,16 +32,31 @@ export class Idler {
   }
 
   upload() {
-    // upload when the user is not idle for more than 10mins.
+    let returnValue = this.fscs.rotate();
+    // start upload when activity file are successfully rotated.
+    if (returnValue) {
+      // upload files within 10min interval after every rotation.
+      this.uploader.upload(() => {
+        if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
+      });
+    }
+  }
+
+  stopUpload(stopMoment: any, id:any) {
+    // delegate the uploader for the stopper program to the idler program.
+    // when the user was idle and the idler kicks in, do not upload the activities file
+    // on stop.
     if (this._upload) {
-      let returnValue = this.fscs.rotate();
-      // start upload when activity file are successfully rotated.
-      if (returnValue) {
-        // upload files within 10min interval after every rotation.
-        this.uploader.upload(() => {
-          if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
-        });
-      }
+      let actFile = this.fscs.getActFile();
+
+      // append stopLogging and unload the current activities file.
+      this.fscs.appendEvent("stopLogging", actFile, stopMoment, id);
+      this.fscs.unloadActFile();
+
+      // upload activity files and screenshots to the backend.
+      this.uploader.upload(() => {
+        if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
+      });
     }
   }
 
@@ -55,7 +73,7 @@ export class Idler {
   idleDialog(time: any) {
     this._idled = time;
     this._window.webContents.send("idletime", time);
-    this._window.show();
+    // this._window.show();
   }
 
   projects(projects: any) {
@@ -68,11 +86,6 @@ export class Idler {
     this._window.webContents.send('currentProject', project.title);
   }
 
-  public get idle() {
-    this._totalIdleTime += this.idleTime();
-    return this._totalIdleTime;
-  }
-
   startInterval() {
     this._interval = setInterval(() => { this.upload() }, 600000);
   }
@@ -83,58 +96,55 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    // this.currentWindow();
-    if(idle > 598) {
+    if(idle > 59) {
       this._upload = false;
     }
-    if (idle >= 600) {
-      this.idleDialog(Math.floor(idle / 60));
+    if (idle >= 60) {
+      this._interruptIdler = false;
+      this._isIdle = true;
+      this.startIdleTime(Math.floor(idle / 60));
+    } else if(this._isIdle) {
+      this._interruptIdler = true;
+      let time = this._idled + 2;
+      this.startIdleTime(Math.floor(time / 60));
     }
   }
 
-  adjustIdleTime() {
-    this._parentWindow.webContents.send("adjustIdleTime", this._idled * 60);
+  startIdleTime(time: any) {
+
+    // show keep sending the time to the window.
+    this.idleDialog(time);
+
+    // start the idle timer interval
+    if(!this._idleInterval) {
+
+      // when this happens start tracking the idle time by stopping the main tracker.
+      this._parentWindow.webContents.send("timer:stop");
+
+      this._idleInterval = setInterval(() => {
+        this.logTick({});
+      }, 2000);
+
+    }
+
+    console.log(this._interruptIdler);
+    console.log(this._idled);
+
+    if (this._interruptIdler) {
+      this._window.show();
+    }
   }
 
   public processIdleAction(idleResponse: any) {
     this._window.hide();
     this._upload = true;
-    if (!idleResponse.checked) {
-        this.adjustIdleTime();
-    }
-    if (idleResponse.action === 'stop') {
-      setTimeout( () => { this._parentWindow.webContents.send("timer:stop")}, 1000);
-    }
-    // user decides to keep time and continue.
-    if (idleResponse.checked && idleResponse.action === 'continue') {
-      setTimeout(() => {
-        // if user chooses to continue, upload the current files, clear and start interval.
-        this.upload();
-        this.clearInterval();
-        this.startInterval();
-      }, 1000);
-    }
-    if (idleResponse.action === 'assign') {
-      if (idleResponse.value !== this._activeProject.title && this._activeProject.title !== "(No project)") {
-        let project = this._projects.filter((newProject: any) => newProject.title === idleResponse.value ? newProject: null);
-        this.generateActivityFile(project);
-      }
-    }
-  }
 
-  generateActivityFile(project: any) {
-    const pro = project[0];
-    const actFile = {
-      timestamp: Date.now(),
-      userId: pro.people[0].userId,
-      workspaceId: pro.workspaceId,
-      projectId: pro.id
-    };
-    const tempFile = this.fscs.generateActivityFile(actFile);
-    this.fscs.appendEvent("startLogging", tempFile, moment().milliseconds(0).toISOString());
-    setTimeout(() => {
-      this.fscs.appendEvent("stopLogging", tempFile, moment().milliseconds(this._idled * 60000).toISOString());
-    }, 1000);
+    // user decides to keep time and continue.
+    console.log(idleResponse);
+
+    clearInterval(this._idleInterval);
+    this._interruptIdler = false;
+    this._isIdle = false;
   }
 
   closeWindow() {

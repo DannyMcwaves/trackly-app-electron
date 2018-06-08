@@ -89,10 +89,10 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    if(idle > 59) {
+    if(idle > 598) {
       this._upload = false;
     }
-    if (idle >= 60) {
+    if (idle >= 600) {
       let time;
       if (this._interruptIdler) {
         time = this._idled + 2;
@@ -148,14 +148,12 @@ export class Idler {
 
     this.fscs.appendEvent("stopIdle", actFile, moment().milliseconds(600000).toISOString(), "");
 
-    // user decides to keep time and continue.
-    console.log(idleResponse);
-
     clearInterval(this._idleInterval);
     this._interruptIdler = false;
     this._isIdle = false;
     this._idled = 0;
     this._idleOpen = false;
+    this._idleInterval = undefined;
 
     this.stopUpload();
   }

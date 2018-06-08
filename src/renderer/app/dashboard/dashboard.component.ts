@@ -63,7 +63,6 @@ export class DashboardComponent implements OnInit {
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
             this.endTime = moment().milliseconds(0);
             this.zone.run(() => {
-
                 this.perProject[projectId] = this.getCurrentTime() + this.perProjectCached[projectId];
                 this.totalIimeToday = this.getCurrentTime() + this.totalIimeTodayCached;
                 this.currentSession = this.getCurrentTime() + this.currentSessionCached;
@@ -86,7 +85,7 @@ export class DashboardComponent implements OnInit {
         ipcRenderer.on("timer:stop", (event: any) => {
           // so the trick is to get the id of the element and then click on it.
           if (this.activeProject.id) {
-            document.getElementById(this.activeProject.id).click();
+            this.trackProject(this.activeProject);
           }
         });
     }
@@ -146,12 +145,14 @@ export class DashboardComponent implements OnInit {
             if (project != this.activeProject) {
                 console.log('new');
                 this.startTime =  moment().milliseconds(0);
-                ipcRenderer.send("timer", {
-                    action: "stop",
-                    date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString(),
-                    projectId: project.id
-                });
-                ipcRenderer.send("isrunning", false);
+                if (this.activeProject.id) {
+                  ipcRenderer.send("timer", {
+                      action: "stop",
+                      date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString(),
+                      projectId: project.id
+                  });
+                  ipcRenderer.send("isrunning", false);
+                }
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;

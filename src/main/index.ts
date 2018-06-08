@@ -380,8 +380,8 @@ ipcMain.on("timer", (event: any, args: any) => {
   // Stop timer and clear the uploads interval.
   if (args.action == "stop") {
     stopMoment = args.date;
-    timer.complete();
     idler.clearInterval();
     clearTimeout(shotOut);
+    timer.complete();
   }
 });

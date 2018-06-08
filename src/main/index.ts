@@ -363,8 +363,13 @@ ipcMain.on("timer", (event: any, args: any) => {
         // log the timer stopped
         logger.log("Timer stopped..");
 
+        let actFile = fscs.getActFile();
+
+        // append stopLogging and unload the current activities file.
+        fscs.appendEvent("stopLogging", actFile, stopMoment, {projectId: args.projectId});
+
         // upload files through the idler
-        idler.stopUpload(stopMoment, {projectId: args.projectId});
+        idler.stopUpload();
       }
     );
 

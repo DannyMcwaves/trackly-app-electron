@@ -1,5 +1,6 @@
 declare module 'threads';
 declare module 'desktop-idle';
 declare module 'active-win';
-declare module 'node-notifier';
+declare module 'express';
+declare module 'body-parser';
 declare const __static: string;

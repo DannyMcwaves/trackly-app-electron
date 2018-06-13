@@ -15,6 +15,7 @@ import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
 import { Emitter } from "../helpers/emitter";
 import { Idler } from '../helpers/idle';
+import appServer from '../helpers/server';
 
 // Logger
 autoUpdater.logger = logger;
@@ -68,6 +69,8 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   }
 ];
 const idler = new Idler(fscs, uploader);
+const ports = [14197, 24197, 34197, 44197, 54197, 64197];
+
 
 // setup file logger to contain all error logs from elctron-logger.
 fscs.logger(logger);
@@ -97,6 +100,7 @@ let stopMoment: string;
 let tray: any = null;
 let timeIsRunning: boolean = false;
 let shotOut: any;
+let server: any;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -237,6 +241,9 @@ app.on("window-all-closed", () => {
   // before the window is finally closed, complete all timers.
   timer.complete();
 
+  // close the express the server
+  server.close();
+
   // upload any error file to the error server.
   uploader.uploadErrorReports();
 
@@ -256,14 +263,22 @@ app.on("activate", () => {
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
 
+  // initiate the system tray program.
   systemTray();
 
+  // create the main window application
   appWindow = createApplicationWindow();
 
+  // start the autoUpdater
   autoAppUpdater();
 
+  // get the idler program up and running.
   idler.createWindow(windowURL, appWindow);
 
+  // start the browser extension server.
+  server = appServer.listen(ports[0], () => {
+    logger.log("extension sever listening on", ports[0]);
+  });
 });
 
 /**

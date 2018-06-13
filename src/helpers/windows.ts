@@ -12,6 +12,8 @@ export class ActiveWindow {
 
   private fscs: Fscs;
   private windows: any;
+  private _endstamp: number = 0;
+  private _current: string;
 
   constructor(fscs: any) {
     this.fscs = fscs;
@@ -23,23 +25,25 @@ export class ActiveWindow {
   }
 
   public current(duration: any) {
-    // let isavailable = false;
     this.currentWindow().then((data: any) => {
       let name = data.owner.name;
-      // this.windows = this.windows.map((x: any) => {
-      //   if (x.name === name) {
-      //     isavailable = true;
-      //     return {name, duration: x.duration + duration}
-      //   }
-      //   return x
-      // });
-      // if (!isavailable) {
-      //   this.windows.push({name, duration});
-      // }
       let file = this.fscs.getActFile();
-      setTimeout( () => {
-        this.fscs.appendEvent("startActiveWindow", file, moment().milliseconds(0).toISOString(), {title: name});
-      }, 800);
+      if (this._current && name !== this._current) {
+        setTimeout( () => {
+          this.fscs.appendEvent("stopActiveWindow", file, moment().milliseconds(this._endstamp).toISOString(), {title: this._current});
+        }, 300);
+        this._current = name;
+        setTimeout( () => {
+          this.fscs.appendEvent("startActiveWindow", file, moment().milliseconds(0).toISOString(), {title: name});
+        }, 800);
+      } else if (name === this._current) {
+        this._endstamp += duration * 1000;
+      } else {
+        setTimeout( () => {
+          this.fscs.appendEvent("startActiveWindow", file, moment().milliseconds(0).toISOString(), {title: name});
+        }, 800);
+        this._current = name;
+      }
     }).catch((err: any) => {
       logger.log(err);
     });

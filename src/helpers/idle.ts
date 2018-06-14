@@ -1,7 +1,9 @@
 
 import * as desktopIdle from 'desktop-idle';
 import { Fscs } from './fscs';
+import { Emitter } from './emitter';
 import { Uploader } from './uploader';
+import {activityStorage} from "./activity";
 import { dialog, BrowserWindow, ipcMain } from "electron";
 import * as moment from "moment";
 
@@ -30,7 +32,25 @@ export class Idler {
     });
   }
 
+  appendAllToJson() {
+
+    // append new activities if available before generating new file.
+    if(activityStorage.duration > 0) {
+      Emitter.appendActivity(activityStorage.userStatus, activityStorage.duration);
+    }
+
+    let temp = JSON.stringify(Emitter.appState),
+      actFile = this.fscs.getActFile();
+
+    Emitter.appState = {activities: [], events: []};
+
+    this.fscs.appendMain(actFile, temp);
+  }
+
   upload() {
+
+    this.appendAllToJson();
+
     let returnValue = this.fscs.rotate();
     // start upload when activity file are successfully rotated.
     if (returnValue) {
@@ -45,6 +65,9 @@ export class Idler {
     // delegate the uploader for the stopper program to the idler program.
     // when the user was idle and the idler kicks in, do not upload the activities file
     // on stop.
+
+    this.appendAllToJson();
+
     if (this._upload) {
       this.fscs.unloadActFile();
 

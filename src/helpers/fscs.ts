@@ -6,7 +6,7 @@ import * as fse from "fs-extra";
 import * as logger from "electron-log";
 import * as moment from "moment";
 import * as jsonfile from "jsonfile";
-import {activityStorage} from "./activity";
+import {Emitter} from "./emitter";
 
 export class Fscs {
   // Paths
@@ -55,9 +55,18 @@ export class Fscs {
   /**
    * if time tracked is less than 1 minute, unlink the json and jpeg files.
    */
-  public unLinkFiles(file: string) {
-    fse.unlink(`${this.screenshotsPath}/${file.match(/\d+/)[0]}.jpg`, () => {});
-    fse.unlink(file, () => {});
+  public appendMain(file: string, json: string) {
+    let data = JSON.parse(json),
+      fileData = JSON.parse(fse.readFileSync(file).toString());
+
+    fileData.events = data.events;
+    fileData.activities = data.activities;
+
+    console.log(fileData);
+
+    fse.writeFileSync(file, JSON.stringify(fileData));
+
+    return true;
   }
 
   /**
@@ -106,8 +115,7 @@ export class Fscs {
       projectId: blueprint.projectId,
       createdAt: moment().milliseconds(0).toISOString(),
       events: [] as any[],
-      activities: [] as any[],
-      activeWindows: [] as any[]
+      activities: [] as any[]
     };
 
     jsonfile.writeFileSync(fileName, skeleton);
@@ -156,15 +164,6 @@ export class Fscs {
   }
 
   /**
-   * append the name of the current active windows to current activities file
-   */
-  public appendActiveWindow(windows: any) {
-    if (this.currentActivityFile) {
-      this.insertJsonNode(this.currentActivityFile, 'activeWindows', windows)
-    }
-  }
-
-  /**
    * Method responsible for rotating old activity files with
    * new ones. This method is usually called in an interval.
    */
@@ -174,11 +173,6 @@ export class Fscs {
     if (!currentActFile) {
       logger.log("Rotation skipped due to no in-memory file.");
       return;
-    }
-
-    // append new activities if available before generating new file.
-    if(activityStorage.duration > 0) {
-      this.appendActivity(activityStorage.userStatus, activityStorage.duration);
     }
 
     const ts = Date.now();
@@ -195,6 +189,8 @@ export class Fscs {
     });
 
     this.appendEvent("continueLogging", tempFile, moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
+
+    Emitter.appendEvent("continueLogging", moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
 
     // Swap files
     this.loadActFile(tempFile);

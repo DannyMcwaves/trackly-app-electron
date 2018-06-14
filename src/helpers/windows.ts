@@ -5,6 +5,7 @@
 import * as activeWindow from 'active-win';
 import * as logger from "electron-log";
 import {Fscs} from './fscs';
+import {Emitter} from './emitter';
 import * as moment from 'moment';
 
 
@@ -13,7 +14,7 @@ export class ActiveWindow {
   private fscs: Fscs;
   private windows: any;
   private _endstamp: number = 0;
-  private _current: string;
+  public _current: string;
 
   constructor(fscs: any) {
     this.fscs = fscs;
@@ -25,23 +26,28 @@ export class ActiveWindow {
   }
 
   public current(duration: any) {
+
     this.currentWindow().then((data: any) => {
+
       let name = data.owner.name;
-      let file = this.fscs.getActFile();
+
       if (this._current && name !== this._current) {
-        setTimeout( () => {
-          this.fscs.appendEvent("stopActiveWindow", file, moment().milliseconds(this._endstamp).toISOString(), {title: this._current});
-        }, 300);
+
+        Emitter.appendEvent("stopActiveWindow", moment().milliseconds(this._endstamp).toISOString(), {title: this._current});
+
+        Emitter.appendEvent("startActiveWindow", moment().milliseconds(0).toISOString(), {title: name});
+
         this._current = name;
-        setTimeout( () => {
-          this.fscs.appendEvent("startActiveWindow", file, moment().milliseconds(0).toISOString(), {title: name});
-        }, 800);
+        this._endstamp = 0;
+
       } else if (name === this._current) {
+
         this._endstamp += duration * 1000;
+
       } else {
-        setTimeout( () => {
-          this.fscs.appendEvent("startActiveWindow", file, moment().milliseconds(0).toISOString(), {title: name});
-        }, 800);
+
+        Emitter.appendEvent("startActiveWindow", moment().milliseconds(0).toISOString(), {title: name});
+
         this._current = name;
       }
     }).catch((err: any) => {

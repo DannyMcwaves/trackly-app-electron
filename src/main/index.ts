@@ -14,6 +14,7 @@ import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
 import { Emitter } from "../helpers/emitter";
+import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import appServer from '../helpers/server';
 
@@ -241,6 +242,11 @@ function startServer() {
   server = appServer.listen(ports[0], () => {
     logger.log("extension sever listening on", ports[0]);
   });
+
+  server.on('error', (err: any) => {
+    logger.log("port in use error");
+    logger.log(err);
+  });
 }
 
 app.on("window-all-closed", () => {
@@ -386,8 +392,8 @@ ipcMain.on("timer", (event: any, args: any) => {
 
         let actFile = fscs.getActFile();
 
-        // append stopLogging and unload the current activities file.
-        fscs.appendEvent("stopLogging", actFile, stopMoment, {projectId: args.projectId});
+        // stop window.
+        ActiveWindow.stopWindow();
 
         // append stop logging to the global app state.
         Emitter.appendEvent("stopLogging", stopMoment, {projectId: args.projectId});

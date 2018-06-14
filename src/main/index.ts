@@ -236,13 +236,17 @@ function transform(value: number) {
   return moment.duration(Math.round(value), "seconds").format();
 }
 
+function startServer() {
+  // start the browser extension server.
+  server = appServer.listen(ports[0], () => {
+    logger.log("extension sever listening on", ports[0]);
+  });
+}
+
 app.on("window-all-closed", () => {
 
   // before the window is finally closed, complete all timers.
   timer.complete();
-
-  // close the express the server
-  server.close();
 
   // upload any error file to the error server.
   uploader.uploadErrorReports();
@@ -275,10 +279,6 @@ app.on("ready", () => {
   // get the idler program up and running.
   idler.createWindow(windowURL, appWindow);
 
-  // start the browser extension server.
-  server = appServer.listen(ports[0], () => {
-    logger.log("extension sever listening on", ports[0]);
-  });
 });
 
 /**
@@ -351,10 +351,16 @@ ipcMain.on("timer", (event: any, args: any) => {
     fscs.newActivityFile(args);
     fscs.appendEvent("startLogging", fscs.getActFile(), args.date, {projectId: args.projectId});
 
+    // append the startLogging event to the app data emitter.
+    Emitter.appendEvent("startLogging", args.date, {projectId: args.projectId});
+
     idler.currentProject(args);
 
     // Take screenshot within a random time during the first 60 secs.
     shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
+
+    // start the browser extension server.
+    startServer();
 
     timer.ticker.subscribe(
       async tick => {
@@ -383,6 +389,9 @@ ipcMain.on("timer", (event: any, args: any) => {
         // append stopLogging and unload the current activities file.
         fscs.appendEvent("stopLogging", actFile, stopMoment, {projectId: args.projectId});
 
+        // append stop logging to the global app state.
+        Emitter.appendEvent("stopLogging", stopMoment, {projectId: args.projectId});
+
         // upload files through the idler
         idler.stopUpload();
       }
@@ -398,5 +407,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     idler.clearInterval();
     clearTimeout(shotOut);
     timer.complete();
+    server.close();
   }
 });

@@ -13,17 +13,17 @@ export class Activity {
   private isActive = false;
   private measurementInterval = 2; // seconds
   private status = ioHook.getStatus();
-  private activeWindow: ActiveWindow;
 
-  constructor(private fscs: Fscs) {
-    this.activeWindow = new ActiveWindow(fscs);
-  }
+  constructor(private fscs: Fscs) {}
 
   /**
    * Do something with results of past n seconds of user activity.
-   * @param isActive
+   * @param wasActive
    */
   result(wasActive: boolean) {
+
+    // current window on action.
+    ActiveWindow.current(this.cachedInterval);
 
     // This can be heavily refactored
     if (this.isActive != this.cachedIsActive) {
@@ -31,7 +31,6 @@ export class Activity {
 
       Emitter.appendActivity(wasActive, this.cachedInterval);
 
-      this.activeWindow.current(this.cachedInterval);
       this.cachedIsActive = this.isActive;
       this.cachedInterval = 0;
       activityStorage.duration = 0;
@@ -40,6 +39,7 @@ export class Activity {
       activityStorage.duration = this.cachedInterval;
     }
     this.cachedInterval += this.measurementInterval;
+
   }
 
   /**

@@ -188,8 +188,6 @@ export class Fscs {
       projectId: fp.projectId
     });
 
-    this.appendEvent("continueLogging", tempFile, moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
-
     Emitter.appendEvent("continueLogging", moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
 
     // Swap files

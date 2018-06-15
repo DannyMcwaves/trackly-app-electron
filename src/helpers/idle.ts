@@ -49,16 +49,20 @@ export class Idler {
 
   upload() {
 
-    this.appendAllToJson();
+    if (this._upload) {
 
-    let returnValue = this.fscs.rotate();
-    // start upload when activity file are successfully rotated.
-    if (returnValue) {
-      // upload files within 10min interval after every rotation.
-      this.uploader.upload(() => {
-        if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
-      });
+      this.appendAllToJson();
+
+      let returnValue = this.fscs.rotate();
+      // start upload when activity file are successfully rotated.
+      if (returnValue) {
+        // upload files within 10min interval after every rotation.
+        this.uploader.upload(() => {
+          if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
+        });
+      }
     }
+
   }
 
   stopUpload() {
@@ -66,9 +70,12 @@ export class Idler {
     // when the user was idle and the idler kicks in, do not upload the activities file
     // on stop.
 
-    this.appendAllToJson();
+    console.log(this._upload);
 
     if (this._upload) {
+
+      this.appendAllToJson();
+
       this.fscs.unloadActFile();
 
       // upload activity files and screenshots to the backend.
@@ -112,9 +119,9 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    if(idle > 598) {
-      this._upload = false;
-    }
+
+    this._upload = !(idle >= 598);
+
     if (idle >= 600) {
       let time;
       if (this._interruptIdler) {
@@ -144,11 +151,8 @@ export class Idler {
 
       // when this happens start tracking the idle time by stopping the main tracker.
       this._parentWindow.webContents.send("timer:stop");
-      setTimeout(() => {
-        let actFile = this.fscs.getActFile();
 
-        this.fscs.appendEvent("startIdle", actFile, moment().milliseconds(0).toISOString(), "");
-      }, 700);
+      Emitter.appendEvent("startIdle", moment().milliseconds(0).toISOString(), "");
 
       this._idleInterval = setInterval(() => {
         this.logTick({});
@@ -167,9 +171,7 @@ export class Idler {
     this._window.hide();
     this._upload = true;
 
-    let actFile = this.fscs.getActFile();
-
-    this.fscs.appendEvent("stopIdle", actFile, moment().milliseconds(600000).toISOString(), "");
+    Emitter.appendEvent("stopIdle", moment().milliseconds(600000).toISOString(), "");
 
     clearInterval(this._idleInterval);
     this._interruptIdler = false;

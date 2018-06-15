@@ -16,7 +16,7 @@ import { Uploader } from "../helpers/uploader";
 import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
-import appServer from '../helpers/server';
+import { app as appServer, portAvailable } from '../helpers/server';
 
 // Logger
 autoUpdater.logger = logger;
@@ -96,12 +96,12 @@ let windowDefaults = {
     webSecurity: false // TODO: Remove in production!
   }
 };
-let interval: any;
 let stopMoment: string;
 let tray: any = null;
 let timeIsRunning: boolean = false;
 let shotOut: any;
 let server: any;
+let port: any;
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -239,14 +239,34 @@ function transform(value: number) {
 
 function startServer() {
   // start the browser extension server.
-  server = appServer.listen(ports[0], () => {
-    logger.log("extension sever listening on", ports[0]);
-  });
+  if (port) {
 
-  server.on('error', (err: any) => {
-    logger.log("port in use error");
-    logger.log(err);
-  });
+    server = appServer.listen(port, () => {
+      logger.log("extension sever listening on", port);
+    });
+
+    server.on('error', (err: any) => {
+      logger.log("port in use error");
+      logger.log(err);
+    });
+  } else {
+    portAvailable(ports).then(p => {
+      if (p) {
+        port = p;
+
+        server = appServer.listen(p, () => {
+          logger.log("extension sever listening on", p);
+        });
+
+        server.on('error', (err: any) => {
+          logger.log("port in use error");
+          logger.log(err);
+        });
+      }
+    }).catch(err => {
+      console.log(err);
+    })
+  }
 }
 
 app.on("window-all-closed", () => {

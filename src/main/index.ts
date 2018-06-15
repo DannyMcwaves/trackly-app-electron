@@ -269,6 +269,12 @@ function startServer() {
   }
 }
 
+function closeServer() {
+  if(server) {
+    server.close();
+  }
+}
+
 app.on("window-all-closed", () => {
 
   // before the window is finally closed, complete all timers.
@@ -433,6 +439,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     idler.clearInterval();
     clearTimeout(shotOut);
     timer.complete();
-    server.close();
+    closeServer();
   }
 });

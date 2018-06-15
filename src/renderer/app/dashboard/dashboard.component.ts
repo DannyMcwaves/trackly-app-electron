@@ -7,7 +7,7 @@ import {ipcRenderer} from "electron";
 import "./dashboard.component.scss";
 import {UserService} from "../services/user.service";
 import {OnInit} from "@angular/core/src/metadata/lifecycle_hooks";
-import {Router, ActivatedRoute, Params} from "@angular/router";
+import {Router} from "@angular/router";
 import {HttpClient, HttpParams} from "@angular/common/http";
 
 import * as moment from "moment";
@@ -101,7 +101,7 @@ export class DashboardComponent implements OnInit {
 
     /**
      * Get logged in user ID and Token
-     * @returns {{userId: string | null; authToken: string | null}}
+     * @returns {userId: string | null; authToken: string | null}
      * @private
      */
     _getUserAuth() {
@@ -116,8 +116,11 @@ export class DashboardComponent implements OnInit {
 
     // Count time
     getCurrentTime() {
-      let time = this.endTime.diff(this.startTime);
-      return Math.round(time / 1000);
+      if (this.startTime !== null) {
+        let time = this.endTime.diff(this.startTime);
+        return Math.round(time / 1000);
+      }
+      return 1
     }
 
     trackProject(project: any) {

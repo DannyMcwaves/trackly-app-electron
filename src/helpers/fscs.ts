@@ -241,7 +241,6 @@ export class Fscs {
         }
       );
 
-      logger.log("Screenshot taken");
   }
 
 }

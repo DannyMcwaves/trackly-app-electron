@@ -2,7 +2,7 @@
 const ioHook = require("iohook");
 import * as logger from "electron-log";
 import { Fscs } from "./fscs";
-// import { ActiveWindow } from "./windows";
+import { ActiveWindow } from "./windows";
 import { Emitter } from "./emitter";
 
 export const activityStorage: any = {userStatus: false, duration: 0};
@@ -23,7 +23,7 @@ export class Activity {
   result(wasActive: boolean) {
 
     // current window on action.
-    // ActiveWindow.current(this.cachedInterval);
+    ActiveWindow.current(this.cachedInterval);
 
     // This can be heavily refactored
     if (this.isActive != this.cachedIsActive) {

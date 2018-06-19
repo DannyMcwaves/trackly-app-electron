@@ -14,7 +14,7 @@ import { Activity } from "../helpers/activity";
 import { Fscs } from "../helpers/fscs";
 import { Uploader } from "../helpers/uploader";
 import { Emitter } from "../helpers/emitter";
-import { ActiveWindow } from "../helpers/windows";
+// import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
 
@@ -383,6 +383,9 @@ ipcMain.on("timer", (event: any, args: any) => {
     fscs.newActivityFile(args);
     fscs.appendEvent("startLogging", fscs.getActFile(), args.date, {projectId: args.projectId});
 
+    // when the user starts the timer
+    Emitter.resetAppState();
+
     // append the startLogging event to the app data emitter.
     Emitter.appendEvent("startLogging", args.date, {projectId: args.projectId});
 
@@ -419,7 +422,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         let actFile = fscs.getActFile();
 
         // stop window.
-        ActiveWindow.stopWindow();
+        // ActiveWindow.stopWindow();
 
         // append stop logging to the global app state.
         Emitter.appendEvent("stopLogging", stopMoment, {projectId: args.projectId});

@@ -3,14 +3,8 @@
 * throughout the script.
 * */
 
-import * as moment from "moment";
-
 
 export class Emitter {
-
-  public static uploadStatus: boolean = true;
-
-  public static tempAppState: any = {};
 
   public static appState: any = {activities: [], events: []};
 
@@ -20,6 +14,10 @@ export class Emitter {
 
   static appendEvent(event: any, timestamp: any, payload: any) {
     this.appState.events.push({type: event, payload, timestamp});
+  }
+
+  static resetAppState() {
+    this.appState = {activities: [], events: []}
   }
 
 }

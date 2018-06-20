@@ -3,8 +3,9 @@ import * as desktopIdle from 'desktop-idle';
 import { Fscs } from './fscs';
 import { Emitter } from './emitter';
 import { Uploader } from './uploader';
-import {activityStorage} from "./activity";
+import { activityStorage } from "./activity";
 import { dialog, BrowserWindow, ipcMain } from "electron";
+import { ActiveWindow } from "./windows";
 import * as moment from "moment";
 
 
@@ -51,6 +52,8 @@ export class Idler {
 
     if (this._upload) {
 
+      ActiveWindow.stopWindow();
+
       this.appendAllToJson();
 
       let returnValue = this.fscs.rotate();
@@ -69,8 +72,6 @@ export class Idler {
     // delegate the uploader for the stopper program to the idler program.
     // when the user was idle and the idler kicks in, do not upload the activities file
     // on stop.
-
-    console.log(this._upload);
 
     if (this._upload) {
 

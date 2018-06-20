@@ -2,7 +2,7 @@
  * Track the current windows the use spends much time on the most.
  */
 
-import * as activeWindow from 'active-win';
+import * as activeWindow from 'active-window';
 import * as logger from "electron-log";
 import {Emitter} from './emitter';
 import * as moment from 'moment';
@@ -13,14 +13,14 @@ export class ActiveWindow {
   public static _current: string;
 
   static currentWindow() {
-    return activeWindow();
+    return activeWindow(__static);
   }
 
   public static current(duration: any) {
 
     this.currentWindow().then((data: any) => {
 
-      let name = data.owner.name;
+      let name = data.app;
 
       if (name !== this._current) {
 

@@ -88,7 +88,7 @@ export class Idler {
 
   createWindow(url: string, parent: any) {
     this._parentWindow = parent;
-    this._window = new BrowserWindow({frame: false, height: 207, width: 500, show: false, parent});
+    this._window = new BrowserWindow({frame: false, height: 209, width: 500, show: false, parent});
     this._window.loadURL(`file://${__static}/index.html`);
   }
 

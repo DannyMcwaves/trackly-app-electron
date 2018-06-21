@@ -46,6 +46,7 @@ export class Uploader {
             callback();
           } else {
             logger.warn(`File upload failed: ${file}`);
+            logger.error(err);
           }
         });
       });
@@ -74,6 +75,7 @@ export class Uploader {
             logger.log(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
           } else {
             logger.warn(`File upload failed: ${file}`);
+            logger.error(err);
           }
         });
       });
@@ -91,7 +93,8 @@ export class Uploader {
         if (!err && res.statusCode == 200) {
           fse.unlink(logFile, () => { });
         } else {
-          logger.error(`Log File upload failed: ${logFile}`);
+          logger.warn(`Log File upload failed: ${logFile}`);
+          logger.error(err);
         }
       })
     } else if(fileSize !== null) {

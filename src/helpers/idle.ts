@@ -45,7 +45,9 @@ export class Idler {
 
     Emitter.appState = {activities: [], events: []};
 
-    this.fscs.appendMain(actFile, temp);
+    if (actFile) {
+      this.fscs.appendMain(actFile, temp);
+    }
   }
 
   upload() {
@@ -120,7 +122,6 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    console.log(idle);
     this._upload = !(idle >= 598);
 
     if (idle >= 600) {

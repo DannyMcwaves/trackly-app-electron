@@ -88,7 +88,7 @@ export class Idler {
 
   createWindow(url: string, parent: any) {
     this._parentWindow = parent;
-    this._window = new BrowserWindow({frame: false, height: 209, width: 500, show: false, parent});
+    this._window = new BrowserWindow({frame: false, height: 209, width: 500, show: false, parent, maximizable: false});
     this._window.loadURL(`file://${__static}/index.html`);
   }
 
@@ -120,7 +120,7 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-
+    console.log(idle);
     this._upload = !(idle >= 598);
 
     if (idle >= 600) {

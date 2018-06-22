@@ -92,6 +92,7 @@ let windowDefaults = {
   show: false,
   resizable: true,
   movable: true,
+  maximizable: false,
   webPreferences: {
     webSecurity: false // TODO: Remove in production!
   }

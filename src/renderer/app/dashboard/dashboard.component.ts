@@ -190,9 +190,15 @@ export class DashboardComponent implements OnInit {
 
         if (this.today.getDate() !== (new Date()).getDate()) {
 
-          this.getProjects().subscribe((response: any) => {
+          this.startTime = moment().milliseconds(0);
 
-            this.totalIimeToday = 0;
+          console.log(this.getCurrentTime());
+
+          this.totalIimeTodayCached = 0;
+
+          this.today = new Date();
+
+          this.getProjects().subscribe((response: any) => {
 
             let projects = response.filter((item: any) => !item.archived);
 
@@ -209,7 +215,7 @@ export class DashboardComponent implements OnInit {
           });
 
         }
-      }, 60000);
+      }, 15000);
     }
 
     /**

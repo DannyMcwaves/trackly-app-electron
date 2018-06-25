@@ -92,6 +92,7 @@ export class Idler {
     this._parentWindow = parent;
     this._window = new BrowserWindow({frame: false, height: 209, width: 500, show: false, parent, maximizable: false});
     this._window.loadURL(`file://${__static}/index.html`);
+    this._window.hide();
   }
 
   private idleTime() {

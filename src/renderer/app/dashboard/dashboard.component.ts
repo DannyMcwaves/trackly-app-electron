@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit {
 
     public startTime: moment.Moment;
     public endTime: moment.Moment;
+    private today: any = new Date();
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -77,17 +78,20 @@ export class DashboardComponent implements OnInit {
             });
         });
 
+        // send time travels to the system tray.
         ipcRenderer.on("timer:click", (event: any, id: string) => {
           // so the trick is to get the id of the element and then click on it.
           document.getElementById(id).click();
         });
 
+        // stop the timer.
         ipcRenderer.on("timer:stop", (event: any) => {
           // so the trick is to get the id of the element and then click on it.
           if (this.activeProject.id) {
             this.trackProject(this.activeProject);
           }
         });
+
     }
 
     /**
@@ -175,6 +179,37 @@ export class DashboardComponent implements OnInit {
             alert('Time tracking is not enabled.');
         }
 
+    }
+
+    /**
+     * check next day
+     * */
+    trackNextDay() {
+      setInterval(() => {
+        console.log(this.today.getDate(), (new Date()).getDate());
+
+        if (this.today.getDate() !== (new Date()).getDate()) {
+
+          this.getProjects().subscribe((response: any) => {
+
+            this.totalIimeToday = 0;
+
+            let projects = response.filter((item: any) => !item.archived);
+
+            projects.forEach((element: any) => {
+              this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+              this.perProjectCached[element.id] = this.perProject[element.id];
+              this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+              this.totalIimeTodayCached = this.totalIimeToday;
+              ipcRenderer.send("time:travel", this.totalIimeToday);
+            });
+
+          }, error => {
+            console.log(error);
+          });
+
+        }
+      }, 60000);
     }
 
     /**
@@ -298,6 +333,7 @@ export class DashboardComponent implements OnInit {
                 if (this.user.people[0].timeTracking) {
                   this._resizeFrame();
                 }
+
                 this.projects.forEach((element: any) => {
                     this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
                     this.perProjectCached[element.id] = this.perProject[element.id];
@@ -305,6 +341,10 @@ export class DashboardComponent implements OnInit {
                     this.totalIimeTodayCached = this.totalIimeToday;
                     ipcRenderer.send("time:travel", this.totalIimeToday);
                 });
+
+                // keep track of the next day and get new projects
+                this.trackNextDay();
+
             }, error => {
                 this.logOut();
             });

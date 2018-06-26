@@ -43,6 +43,7 @@ export class DashboardComponent implements OnInit {
     private baseFrameHeight = 36 + 120;
     private baseProjectHeight = 60;
     private maxProjectsLength = 5;
+    private nextInterval: any;
 
     /**
      * Dashboard component constructor with added protection
@@ -185,14 +186,11 @@ export class DashboardComponent implements OnInit {
      * check next day
      * */
     trackNextDay() {
-      setInterval(() => {
-        console.log(this.today.getDate(), (new Date()).getDate());
+      this.nextInterval = setInterval(() => {
 
         if (this.today.getDate() !== (new Date()).getDate()) {
 
           this.startTime = moment().milliseconds(0);
-
-          console.log(this.getCurrentTime());
 
           this.totalIimeTodayCached = 0;
 
@@ -215,7 +213,7 @@ export class DashboardComponent implements OnInit {
           });
 
         }
-      }, 15000);
+      }, 10000);
     }
 
     /**
@@ -257,14 +255,6 @@ export class DashboardComponent implements OnInit {
         }, error => {
             alert("There was an error changing the workspace!")
         });
-    }
-
-    incrementCurrentSession() {
-        this.currentSession++;
-    }
-
-    addProject() {
-        ipcRenderer.send("open:link", "https://trackly.com/app/projects");
     }
 
     /**

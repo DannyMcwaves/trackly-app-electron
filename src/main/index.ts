@@ -32,6 +32,15 @@ const uploader = new Uploader(fscs);
 const store = new Store();
 const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
+    label: 'Preferences',
+    accelerator: 'CmdOrCtrl+,'
+  },
+
+  {
+    type: 'separator'
+  },
+
+  {
     label: 'Start Tracking',
     submenu: [
       {label: 'No Projects'}
@@ -214,10 +223,16 @@ function autoAppUpdater() {
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
     console.log('download completed');
+
+    let dir = join(__static, '/tracklyTemplate.png');
+
+    let image = nativeImage.createFromPath(dir);
+
     const dialogOpts = {
-      type: 'info',
+      type: 'none',
+      icon: image,
       buttons: ['Restart', 'Later'],
-      title: 'Application Update',
+      title: 'Trackly - Update Notification',
       message: process.platform === 'win32' ? releaseNotes : releaseName,
       detail: 'A new version has been downloaded. Restart the application to apply the updates.'
     };
@@ -310,7 +325,8 @@ app.on("ready", () => {
   autoAppUpdater();
 
   // get the idler program up and running.
-  idler.createWindow(windowURL, appWindow);
+  // idler.createWindow(appWindow);
+  idler.createParent(appWindow);
 
 });
 
@@ -341,7 +357,7 @@ ipcMain.on('isrunning', (event: any, status: boolean) => {
 * */
 ipcMain.on('projects', (event: any, projects: [{}]) => {
 
-  trayMenuTemplate[0].submenu = projects.map((item: any) => (
+  trayMenuTemplate[2].submenu = projects.map((item: any) => (
       {label: item.title, click() {
         appWindow.webContents.send("timer:click", item.id);
       }}
@@ -350,6 +366,43 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   tray.setContextMenu(trayMenu);
+});
+
+/*
+ * check for updates on the next day*/
+
+ipcMain.on('checkUpdates', (event: any) => {
+
+  // Updater
+  autoUpdater.checkForUpdates();
+
+  // event listeners for the autoUpdater.
+  autoUpdater.on('checking-for-update', () => {
+    logger.log('checking for updates.....');
+  });
+
+  autoUpdater.on('update-available', (ev, info) => {
+    logger.log('Update available.');
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['OK'],
+      title: 'Updater',
+      message: 'New version available...',
+      detail: 'A new version of Trackly is Available. Please restart app to download new version.'
+    };
+    dialog.showMessageBox(dialogOpts, (response) => {
+      logger.log(response);
+    });
+  });
+
+  autoUpdater.on('update-not-available', (ev, info) => {
+    logger.log('No updates available at this time.');
+  });
+
+  autoUpdater.on('error', (ev, err) => {
+    logger.log(err);
+  });
+
 });
 
 /**

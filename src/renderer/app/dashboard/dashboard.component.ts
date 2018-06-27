@@ -1,4 +1,6 @@
 // tslint:disable-next-line:no-var-requires
+import {clearInterval} from "timers";
+
 const Store = require("electron-store");
 
 import {Component, ViewEncapsulation, NgZone} from "@angular/core";
@@ -32,7 +34,8 @@ export class DashboardComponent implements OnInit {
 
     public startTime: moment.Moment;
     public endTime: moment.Moment;
-    private today: any = new Date();
+    private today: any = (new Date()).getDate();
+    private idleDisplay: string = "none";
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -44,6 +47,7 @@ export class DashboardComponent implements OnInit {
     private baseProjectHeight = 60;
     private maxProjectsLength = 5;
     private nextInterval: any;
+    private idleHeight: number = 10;
 
     /**
      * Dashboard component constructor with added protection
@@ -93,6 +97,16 @@ export class DashboardComponent implements OnInit {
           }
         });
 
+        // send idle timer signal to UI
+        ipcRenderer.on("idler", (event: any) => {
+          this.idleDisplay = "block";
+          console.log('starting idler');
+        });
+
+        window.onbeforeunload = (ev: any) => {
+          clearInterval(this.nextInterval);
+        };
+
     }
 
     /**
@@ -101,6 +115,7 @@ export class DashboardComponent implements OnInit {
     private _resizeFrame() {
         let height: number;
         height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
+        this.idleHeight = height;
         ipcRenderer.send('win:height', height);
     }
 
@@ -188,13 +203,15 @@ export class DashboardComponent implements OnInit {
     trackNextDay() {
       this.nextInterval = setInterval(() => {
 
-        if (this.today.getDate() !== (new Date()).getDate()) {
+        if (this.today !== (new Date()).getDate()) {
+
+          ipcRenderer.send('checkUpdates');
 
           this.startTime = moment().milliseconds(0);
 
           this.totalIimeTodayCached = 0;
 
-          this.today = new Date();
+          this.today = (new Date()).getDate();
 
           this.getProjects().subscribe((response: any) => {
 

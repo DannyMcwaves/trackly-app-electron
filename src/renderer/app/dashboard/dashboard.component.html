@@ -15,7 +15,7 @@
     </header>
     <!-- / Header -->
 
-    <!-- Content -->
+  <!-- Content -->
     <section id="content" class="p-0" *ngIf="user">
         <div id="timer">
             <!-- Timer clock -->
@@ -27,7 +27,7 @@
 
             <!-- Wokspaces button -->
             <div class="timer-button">
-                <button (click)="openDashboard()" class="btn btn-primary btn-sm"><i class="fa fa-home"></i></button>
+                <button (click)="openDashboard()" class="btn p-0 btn-primary btn-sm"><img src="../assets/baseline_show_chart_white_24dp.png" alt="Chart Logo" /></button>
                 <button *ngIf="workspaces?.length == -1" class="btn btn-sm btn-outline-primary">{{activeWorkspace.title}}</button>
                 <div *ngIf="workspaces?.length > 1" ngbDropdown placement="bottom-right" class="d-inline-block">
                   <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
@@ -76,6 +76,32 @@
     <!-- / Footer -->
 
     <!--idler-->
-    <div id="idler" [ngStyle]="{'min-height.px': idleHeight, 'display': idleDisplay}">this is sth tho</div>
+    <div id="idler" class="p-2" [ngStyle]="{'min-height.px': idleHeight, 'display': idleDisplay}">
+      <div class="idle-header bg-light px-1">
+        <div class="propmt"> Idle Notification </div>
+      </div>
+      <div class="idle-body bg-light p-1">
+        <div class="mb-3">
+          <div class="">
+            You have been idle for {{idleTime}} minutes.
+          </div>
+          <div class="">
+            Last project worked on: &nbsp;&nbsp; {{currentIdleProject}}
+          </div>
+        </div>
+
+        <div class="mb-4" style="">
+          <div class="">
+            <label>The idle time did not count in your daily time tracking, and the time tracker has automatically stopped.</label>
+          </div>
+        </div>
+
+        <div class="py-2">
+          <div class="pt-1 text-right">
+            <button id="continueTrack" class="btn btn-sm btn-light"> OK </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- / idler -->
 </div>

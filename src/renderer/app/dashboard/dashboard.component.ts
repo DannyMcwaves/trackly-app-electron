@@ -35,7 +35,6 @@ export class DashboardComponent implements OnInit {
     public startTime: moment.Moment;
     public endTime: moment.Moment;
     private today: any = (new Date()).getDate();
-    private idleDisplay: string = "none";
 
     private workspaces: any;
     private activeWorkspace: any;
@@ -47,7 +46,12 @@ export class DashboardComponent implements OnInit {
     private baseProjectHeight = 60;
     private maxProjectsLength = 5;
     private nextInterval: any;
+
+    // idle stuff
+    private idleDisplay: string = "none";
     private idleHeight: number = 10;
+    private idleTime: number = 10;
+    private currentIdleProject: string = "Madison Square";
 
     /**
      * Dashboard component constructor with added protection
@@ -207,7 +211,15 @@ export class DashboardComponent implements OnInit {
 
           ipcRenderer.send('checkUpdates');
 
+          // set the current start time to now
           this.startTime = moment().milliseconds(0);
+
+          // set the current end time to now too.
+          this.endTime = moment().milliseconds(0);
+
+          this.totalIimeToday = this.getCurrentTime() + this.totalIimeTodayCached;
+          this.currentSession = this.getCurrentTime() + this.currentSessionCached;
+          ipcRenderer.send("time:travel", this.totalIimeToday);
 
           this.totalIimeTodayCached = 0;
 

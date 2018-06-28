@@ -5,7 +5,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, remote, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
 import { config } from 'dotenv';
 import { join } from 'path';
 import { autoUpdater } from "electron-updater";
@@ -112,6 +112,9 @@ let timeIsRunning: boolean = false;
 let shotOut: any;
 let server: any;
 let port: any;
+let close: string = 'na';
+let dir = join(__static, '/tracklyTemplate.png');
+let image = nativeImage.createFromPath(dir);
 
 // Ensure only one instance of the application gets run
 const isSecondInstance = app.makeSingleInstance(
@@ -135,6 +138,25 @@ if (isDevelopment) {
   windowDefaults.resizable = false;
 }
 
+// when the user is closing the window.
+const closeWindowNotification = () => new Promise((resolve, reject) => {
+
+    let buttons = ['Quit', 'Minimize', 'Cancel'];
+
+    const dialogOpts = {
+      type: 'none',
+      icon: image,
+      buttons,
+      title: 'Trackly',
+      message: "Do you want to Quit Trackly?",
+      checkboxLabel: " Remember My Choice"
+    };
+
+    dialog.showMessageBox(dialogOpts, (response, checked) => {
+      resolve({response: buttons[response], checked});
+    });
+});
+
 /**
  * Create application wind
  */
@@ -143,6 +165,7 @@ function createApplicationWindow() {
   windowFrame.loadURL(windowURL);
 
   windowFrame.on("close", (event: any) => {
+    let val = store.get('close');
     if (timeIsRunning) {
       event.preventDefault();
       dialog.showMessageBox({
@@ -157,6 +180,27 @@ function createApplicationWindow() {
           idler.closeWindow();
         }
       })
+    } else if(val === 'Quit') {
+      windowFrame.close();
+      // store.delete('close');
+    } else if(val === 'Minimize') {
+      windowFrame.minimize();
+      // store.delete('close');
+    } else if(close === 'na') {
+      event.preventDefault();
+      closeWindowNotification().then((res: any) => {
+        if (res.checked) {
+          store.set("close", res.response);
+        }
+        if(res.response === 'Minimize') {
+          windowFrame.minimize();
+        } else if(res.response === 'Quit') {
+          close = 'ya';
+          windowFrame.close();
+        }
+      }).catch((err: any) => {
+        console.log(err);
+      });
     }
   });
 
@@ -169,10 +213,6 @@ function createApplicationWindow() {
 }
 
 function systemTray() {
-
-  let dir = join(__static, '/tracklyTemplate.png');
-
-  let image = nativeImage.createFromPath(dir);
 
   tray = new Tray(image);
 
@@ -223,10 +263,6 @@ function autoAppUpdater() {
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
     console.log('download completed');
-
-    let dir = join(__static, '/tracklyTemplate.png');
-
-    let image = nativeImage.createFromPath(dir);
 
     const dialogOpts = {
       type: 'none',
@@ -369,8 +405,8 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
 });
 
 /*
- * check for updates on the next day*/
-
+ * check for updates on the next day
+ * */
 ipcMain.on('checkUpdates', (event: any) => {
 
   // Updater
@@ -385,6 +421,7 @@ ipcMain.on('checkUpdates', (event: any) => {
     logger.log('Update available.');
     const dialogOpts = {
       type: 'info',
+      icon: image,
       buttons: ['OK'],
       title: 'Updater',
       message: 'New version available...',

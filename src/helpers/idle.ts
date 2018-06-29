@@ -93,29 +93,6 @@ export class Idler {
   }
 
   createWindow() {
-
-    // this._window = new BrowserWindow({frame: false, height: 209, width: 500, show: false, parent, maximizable: false});
-
-    // this._window = dialog.showMessageBox(this._parentWindow, {});
-
-    // const dialogOpts = {
-    //   type: 'none',
-    //   buttons: ['OK'],
-    //   title: 'Trackly - Idle Notification',
-    //   message: 'you have being idle',
-    //   detail: 'A new version has been downloaded. Restart the application to apply the updates.' +
-    //   '\nthis should be on another line.'
-    // };
-    //
-    // let dial = dialog.showMessageBox(this._parentWindow, dialogOpts, (response) => {
-    //   console.log(response)
-    // });
-
-    // console.log(dial);
-
-    // this._window.loadURL(`file://${__static}/index.html`);
-    // this._window.hide();
-
     this._parentWindow.webContents.send("idler");
   }
 
@@ -124,17 +101,15 @@ export class Idler {
   }
 
   idleDialog(time: any) {
-    // this._window.webContents.send("idletime", time);
+    this._parentWindow.webContents.send("idletime", time);
   }
 
   projects(projects: any) {
     this._projects = projects;
-    // this._window.webContents.send("projects", projects);
   }
 
   currentProject(project: any) {
     this._activeProject = project;
-    // this._window.webContents.send('currentProject', project.title);
   }
 
   startInterval() {
@@ -147,9 +122,9 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    this._upload = !(idle >= 58);
+    this._upload = !(idle >= 598);
 
-    if (idle >= 60) {
+    if (idle >= 600) {
       let time;
       if (this._interruptIdler) {
         time = this._idled + 2;
@@ -167,6 +142,11 @@ export class Idler {
 
   startIdleTime(time: any) {
 
+    if (this._interruptIdler && !this._idleOpen) {
+      this.createWindow();
+      this._idleOpen = true;
+    }
+
     // set idled to the timer passed
     this._idled = time;
 
@@ -183,19 +163,14 @@ export class Idler {
 
       this._idleInterval = setInterval(() => {
         this.logTick({});
-      }, 2000);
-
+      }, 1000);
 
     }
 
-    if (this._interruptIdler && !this._idleOpen) {
-      this.createWindow();
-      this._idleOpen = true;
-    }
   }
 
   processIdleAction(idleResponse: any) {
-    this._window.hide();
+
     this._upload = true;
 
     Emitter.appendEvent("stopIdle", moment().milliseconds(600000).toISOString(), "");

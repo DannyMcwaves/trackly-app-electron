@@ -113,7 +113,7 @@ let shotOut: any;
 let server: any;
 let port: any;
 let close: string = 'na';
-let dir = join(__static, '/tracklyTemplate.png');
+let dir = join(__static, '/trackly.png');
 let image = nativeImage.createFromPath(dir);
 
 // Ensure only one instance of the application gets run
@@ -166,6 +166,7 @@ function createApplicationWindow() {
 
   windowFrame.on("close", (event: any) => {
     let val = store.get('close');
+
     if (timeIsRunning) {
       event.preventDefault();
       dialog.showMessageBox({
@@ -177,15 +178,16 @@ function createApplicationWindow() {
         if (response === 0) {
           timeIsRunning = false;
           windowFrame.close();
-          idler.closeWindow();
         }
       })
-    } else if(val === 'Quit') {
-      windowFrame.close();
-      // store.delete('close');
     } else if(val === 'Minimize') {
+      event.preventDefault();
       windowFrame.minimize();
-      // store.delete('close');
+    } else if(val === 'Cancel') {
+      event.preventDefault();
+    } else if(val === 'Quit' && close === 'na') {
+      close = 'ya';
+      windowFrame.close();
     } else if(close === 'na') {
       event.preventDefault();
       closeWindowNotification().then((res: any) => {

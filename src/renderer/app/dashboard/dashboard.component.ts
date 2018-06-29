@@ -1,6 +1,3 @@
-// tslint:disable-next-line:no-var-requires
-import {clearInterval} from "timers";
-
 const Store = require("electron-store");
 
 import {Component, ViewEncapsulation, NgZone} from "@angular/core";
@@ -104,9 +101,14 @@ export class DashboardComponent implements OnInit {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.idleDisplay = "block";
-          console.log('starting idler');
         });
 
+        // keep updating the idle time
+        ipcRenderer.on("idletime", (event: any, time: number) => {
+          this.idleTime = time;
+        });
+
+        // before the window unloads clear the tracking next day interval
         window.onbeforeunload = (ev: any) => {
           clearInterval(this.nextInterval);
         };
@@ -147,6 +149,11 @@ export class DashboardComponent implements OnInit {
       return 1
     }
 
+    closeIdleTime() {
+      this.idleDisplay = 'none';
+      ipcRenderer.send('idleResponse', {});
+    }
+
     trackProject(project: any) {
         // Check if time tracking is enabled for a user
         if (this.user && this.user.people[0].timeTracking) {
@@ -184,6 +191,7 @@ export class DashboardComponent implements OnInit {
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[this.activeProject.id] = this.perProject[this.activeProject.id] || 0;
                 this.activeProject = project;
+                this.currentIdleProject = project.title;
                 ipcRenderer.send("timer", {
                   action: "start",
                   title: project.title,
@@ -225,24 +233,70 @@ export class DashboardComponent implements OnInit {
 
           this.today = (new Date()).getDate();
 
-          this.getProjects().subscribe((response: any) => {
-
-            let projects = response.filter((item: any) => !item.archived);
-
-            projects.forEach((element: any) => {
-              this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
-              this.perProjectCached[element.id] = this.perProject[element.id];
-              this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
-              this.totalIimeTodayCached = this.totalIimeToday;
-              ipcRenderer.send("time:travel", this.totalIimeToday);
-            });
-
-          }, error => {
-            console.log(error);
-          });
-
+          this._refresher();
         }
       }, 10000);
+    }
+
+    /*
+     * refresh the last sync and everything
+     */
+    refreshWorkSpace() {
+      this._refresher();
+    }
+
+    _refresher() {
+
+      this.lastSynced = -1;
+
+      this.totalIimeToday = 0;
+
+      // Load in the workspaces
+      this.getWorkspaces().subscribe(response => {
+
+        this.workspaces = response;
+
+        this.getProjects().subscribe((response: any) => {
+
+          this.projects = response.filter((item: any) => !item.archived);
+
+          ipcRenderer.send('projects', this.projects);
+
+          // Empty response
+          if (!this.projects.length) {
+            this.projects = [];
+            this.projects.push({
+              archived: false,
+              description: "(No desription)",
+              id: '0',
+              title: "(No project)",
+              workspaceId: this.activeWorkspace.id
+            });
+          }
+
+          // when the user is enabled to track time, resize to the size of the window content.
+          if (this.user.people[0].timeTracking) {
+            this._resizeFrame();
+          }
+
+          this.projects.forEach((element: any) => {
+            this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+            this.perProjectCached[element.id] = this.perProject[element.id];
+            this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+            this.totalIimeTodayCached = this.totalIimeToday;
+            ipcRenderer.send("time:travel", this.totalIimeToday);
+          });
+
+          this.lastSynced = Date.now();
+
+        }, error => {
+          console.log("error getting projects");
+          this.lastSynced = null;
+        });
+      }, error => {
+          console.log("error getting workspaces");
+          this.lastSynced = null;
+      });
     }
 
     /**

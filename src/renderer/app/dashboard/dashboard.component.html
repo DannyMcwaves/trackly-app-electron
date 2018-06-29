@@ -67,38 +67,43 @@
     <!-- Footer -->
     <footer>
         <div class="footer-sync">
-            <i class="fa fa-fw fa-history mr-1"></i>{{lastSynced|sincePipeline}}
+          <i (click)="refreshWorkSpace()" class="fa fa-fw fa-2x fa-refresh mr-1"></i>
+          <div id="tooltip" class="pb-2 pt-1 px-2">
+            Refresh Workspace
+          </div>
+          <span>{{lastSynced|sincePipeline}}</span>
         </div>
         <div class="footer-session">
-            <i class="fa fa-fw fa-clock-o mr-1"></i>Session &mdash; {{currentSession|timeDuration}}
+          <i class="fa fa-fw fa-2x fa-clock-o mr-1"></i>
+          <span>Session &mdash; {{currentSession|timeDuration}}</span>
         </div>
     </footer>
     <!-- / Footer -->
 
     <!--idler-->
     <div id="idler" class="p-2" [ngStyle]="{'min-height.px': idleHeight, 'display': idleDisplay}">
-      <div class="idle-header bg-light px-1">
-        <div class="propmt"> Idle Notification </div>
+      <div class="idle-header px-1">
+        <div class="propmt"> &nbsp;Idle Notification </div>
       </div>
-      <div class="idle-body bg-light p-1">
+      <div class="idle-body bg-light p-2">
         <div class="mb-3">
-          <div class="">
-            You have been idle for {{idleTime}} minutes.
+          <div>
+            You are on idle mode for <b>{{idleTime}} minutes</b>.
           </div>
-          <div class="">
-            Last project worked on: &nbsp;&nbsp; {{currentIdleProject}}
+          <div>
+            Last project worked on: <b>{{currentIdleProject}}</b>
           </div>
         </div>
 
-        <div class="mb-4" style="">
-          <div class="">
-            <label>The idle time did not count in your daily time tracking, and the time tracker has automatically stopped.</label>
+        <div class="mb-2">
+          <div>
+            <label>Tracking has automatically stopped and will not count towards your daily tracked time.</label>
           </div>
         </div>
 
         <div class="py-2">
           <div class="pt-1 text-right">
-            <button id="continueTrack" class="btn btn-sm btn-light"> OK </button>
+            <button id="idle-button" (click)="closeIdleTime()"> OK </button>
           </div>
         </div>
       </div>

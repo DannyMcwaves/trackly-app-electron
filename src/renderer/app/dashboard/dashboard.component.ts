@@ -362,8 +362,9 @@ export class DashboardComponent implements OnInit {
      * Log user out of the application
      */
     logOut() {
-        ipcRenderer.send("timer", {action: "stop"});
-        this.userService.logout();
+      ipcRenderer.send('isrunning', false);
+      ipcRenderer.send("timer", {action: "stop"});
+      this.userService.logout();
     }
 
     /**

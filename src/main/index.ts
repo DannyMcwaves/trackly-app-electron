@@ -145,11 +145,10 @@ const closeWindowNotification = () => new Promise((resolve, reject) => {
 
     const dialogOpts = {
       type: 'none',
-      icon: image,
       buttons,
       title: 'Trackly',
       message: "Do you want to Quit Trackly?",
-      checkboxLabel: " Remember My Choice"
+      checkboxLabel: " Remember my choice"
     };
 
     dialog.showMessageBox(dialogOpts, (response, checked) => {

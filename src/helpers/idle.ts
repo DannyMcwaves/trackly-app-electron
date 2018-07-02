@@ -67,7 +67,20 @@ export class Idler {
         });
       }
     }
+  }
 
+  resetUpload() {
+    ActiveWindow.stopWindow();
+
+    this.appendAllToJson();
+
+    let returnValue = this.fscs.rotate();
+    // start upload when activity file are successfully rotated.
+
+    // upload files within 10min interval after every rotation.
+    this.uploader.upload(() => {
+      if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
+    });
   }
 
   stopUpload() {
@@ -183,10 +196,6 @@ export class Idler {
     this._idleInterval = undefined;
 
     this.stopUpload();
-  }
-
-  closeWindow() {
-    // this._window.close();
   }
 
 }

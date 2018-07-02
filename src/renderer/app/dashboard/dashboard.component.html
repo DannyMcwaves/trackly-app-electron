@@ -44,12 +44,12 @@
 
         <!-- Projects -->
         <div *ngIf="user?.people[0].timeTracking && projects?.length" id="projects">
-            <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project === activeProject }">
+            <div *ngFor="let project of projects" class="project" [ngClass]="{'active': project.id === activeProject?.id }">
                 <i (click)="trackProject(project)"
                    [id]="project.id"
                     class="fa project-button"
-                    [ngClass]="{'fa-play-circle':project != activeProject,
-                                'fa-stop-circle': project == activeProject}">
+                    [ngClass]="{'fa-play-circle':project.id != activeProject?.id,
+                                'fa-stop-circle': project.id == activeProject?.id}">
                 </i>
                 <h3 class="project-title">{{project.title}}</h3>
                 <h3 class="project-timer">{{perProject[project.id]|timeDuration}}</h3>
@@ -103,7 +103,7 @@
 
         <div class="py-2">
           <div class="pt-1 text-right">
-            <button id="idle-button" (click)="closeIdleTime()"> OK </button>
+            <button id="idle-button" class="btn btn-sm btn-primary" (click)="closeIdleTime()"> OK </button>
           </div>
         </div>
       </div>

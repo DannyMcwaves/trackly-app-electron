@@ -465,6 +465,13 @@ ipcMain.on("win:height", (event: any, height: number) => {
 });
 
 /**
+ * start the initiation of reset time by rotating data
+ */
+ipcMain.on("resetTimer", (event: any) => {
+  idler.resetUpload();
+});
+
+/**
  * ===========
  * == TIMER ==
  * ===========

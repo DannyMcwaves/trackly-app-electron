@@ -108,6 +108,12 @@ export class DashboardComponent implements OnInit {
           this.idleTime = time;
         });
 
+        // reset timer when the timer is clicked.
+        ipcRenderer.on("resetTimer", (event: any) => {
+          console.log('resetting timer');
+          this._refresher();
+        });
+
         // before the window unloads clear the tracking next day interval
         window.onbeforeunload = (ev: any) => {
           clearInterval(this.nextInterval);
@@ -158,7 +164,7 @@ export class DashboardComponent implements OnInit {
         // Check if time tracking is enabled for a user
         if (this.user && this.user.people[0].timeTracking) {
             // Clicked on running project
-            if (project == this.activeProject) {
+            if (project.id == this.activeProject.id) {
                 console.log('same');
                 ipcRenderer.send("timer", {
                     action: "stop",
@@ -176,7 +182,7 @@ export class DashboardComponent implements OnInit {
             }
 
             // Clicked on new project
-            if (project != this.activeProject) {
+            if (project.id != this.activeProject.id) {
                 console.log('new');
                 this.startTime =  moment().milliseconds(0);
                 if (this.activeProject.id) {
@@ -242,14 +248,14 @@ export class DashboardComponent implements OnInit {
      * refresh the last sync and everything
      */
     refreshWorkSpace() {
-      this._refresher();
+      ipcRenderer.send("resetTimer")
     }
 
     _refresher() {
 
       this.lastSynced = -1;
 
-      this.totalIimeToday = 0;
+      let _totalIimeToday = 0;
 
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
@@ -282,8 +288,8 @@ export class DashboardComponent implements OnInit {
           this.projects.forEach((element: any) => {
             this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
             this.perProjectCached[element.id] = this.perProject[element.id];
-            this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
-            this.totalIimeTodayCached = this.totalIimeToday;
+            _totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+            this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
             ipcRenderer.send("time:travel", this.totalIimeToday);
           });
 

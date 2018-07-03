@@ -78,9 +78,13 @@ export class Idler {
     // start upload when activity file are successfully rotated.
 
     // upload files within 10min interval after every rotation.
-    this.uploader.upload(() => {
-      if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
-    });
+    if (returnValue) {
+      this.uploader.upload(() => {
+        if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
+      });
+    } else {
+      this._parentWindow.webContents.send("resetTimer");
+    }
   }
 
   stopUpload() {

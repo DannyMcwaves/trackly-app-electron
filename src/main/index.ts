@@ -265,6 +265,8 @@ function autoAppUpdater() {
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
     console.log('download completed');
 
+    close = 'ya';
+
     const dialogOpts = {
       type: 'none',
       icon: image,

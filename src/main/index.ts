@@ -5,7 +5,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, remote, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
 import { config } from 'dotenv';
 import { join } from 'path';
 import { autoUpdater } from "electron-updater";
@@ -17,6 +17,7 @@ import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
+import {createPrefWindow} from "../helpers/pref";
 
 // Logger
 autoUpdater.logger = logger;
@@ -32,8 +33,12 @@ const uploader = new Uploader(fscs);
 const store = new Store();
 const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
-    label: 'Preferences',
-    accelerator: 'CmdOrCtrl+,'
+    label: 'Preferences...',
+    accelerator: 'CmdOrCtrl+,',
+    click() {
+      logger.log('this is for preferences');
+      createPrefWindow();
+    }
   },
 
   {

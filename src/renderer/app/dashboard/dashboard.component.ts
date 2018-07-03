@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
 
     private workspaces: any;
     private activeWorkspace: any;
-    private lastSynced: number;
+    private lastSynced: any;
     private store: any;
 
     // Frame height & Sizes
@@ -110,7 +110,6 @@ export class DashboardComponent implements OnInit {
 
         // reset timer when the timer is clicked.
         ipcRenderer.on("resetTimer", (event: any) => {
-          console.log('resetting timer');
           this._refresher();
         });
 
@@ -248,7 +247,7 @@ export class DashboardComponent implements OnInit {
      * refresh the last sync and everything
      */
     refreshWorkSpace() {
-      this.lastSynced = 1;
+      this.lastSynced = 'refresh';
       ipcRenderer.send("resetTimer")
     }
 
@@ -279,10 +278,6 @@ export class DashboardComponent implements OnInit {
             });
           }
 
-          // when the user is enabled to track time, resize to the size of the window content.
-          if (this.user.people[0].timeTracking) {
-            this._resizeFrame();
-          }
 
           this.projects.forEach((element: any) => {
             this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
@@ -294,13 +289,16 @@ export class DashboardComponent implements OnInit {
 
           this.lastSynced = Date.now();
 
+          // when the user is enabled to track time, resize to the size of the window content.
+          this._resizeFrame();
+
         }, error => {
           console.log("error getting projects");
-          this.lastSynced = null;
+          this.lastSynced = 'error';
         });
       }, error => {
           console.log("error getting workspaces");
-          this.lastSynced = null;
+          this.lastSynced = 'error';
       });
     }
 

@@ -9,7 +9,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class sincePipeline implements PipeTransform {
   transform(value: number) {
     if (!value) { return 'Tracking not synced'}
-    if (value === -1) {return 'Refreshing...'}
+    if (value === 1) {return 'Refreshing...'}
     return "Updated -- " + moment(value).format('DD. MMM YYYY [at] HH:mm');
   }
 }

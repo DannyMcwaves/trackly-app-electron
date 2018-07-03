@@ -248,12 +248,11 @@ export class DashboardComponent implements OnInit {
      * refresh the last sync and everything
      */
     refreshWorkSpace() {
+      this.lastSynced = 1;
       ipcRenderer.send("resetTimer")
     }
 
     _refresher() {
-
-      this.lastSynced = -1;
 
       let _totalIimeToday = 0;
 

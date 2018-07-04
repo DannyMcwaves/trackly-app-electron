@@ -1,6 +1,6 @@
 <div id="wrapper">
     <!-- Header -->
-    <header>
+    <header class="py-0">
         <img src="../assets/logo.svg" alt="Trackly" id="logo">
         <ul class="list-inline" id="user-nav">
             <li *ngIf="workspaces?.length == 1" class="list-inline-item">
@@ -9,7 +9,9 @@
                 </figure>
             </li>
             <li class="list-inline-item">
-                <a href="#" (click)="logOut()">Log out</a>
+                <a href="#" (click)="openPrefs()">
+                  <img src="../assets/baseline_settings_white_24dp.png" alt="Chart Logo" />
+                </a>
             </li>
         </ul>
     </header>

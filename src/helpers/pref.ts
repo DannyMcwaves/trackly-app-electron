@@ -1,39 +1,26 @@
 
-import { BrowserWindow } from "electron";
-import {join} from "path";
+import { app, BrowserWindow, ipcMain } from "electron";
+const Store = require("electron-store");
+
 
 let windowDefaults = {
-  height: 0,
-  width: 400,
-  minWidth: 400,
+  height: 300,
+  width: 600,
+  minWidth: 600,
   title: "Preferences",
-  center: true,
-  show: false,
-  resizable: true,
+  center: false,
+  show: true,
+  resizable: false,
   movable: true,
   maximizable: false,
   webPreferences: {
     webSecurity: true
   }
 };
-let windowURL = join(__static, '/prefs.html');
+let windowURL = `file://${__static}/prefs.html`;
 let appWindow: BrowserWindow;
-
-
-// // Ensure only one instance of the application gets run
-// const isSecondInstance = app.makeSingleInstance(
-//   (commandLine, workingDirectory) => {
-//     if (appWindow) {
-//       if (appWindow.isMinimized()) appWindow.restore();
-//       appWindow.focus();
-//     }
-//   }
-// );
-//
-// if (isSecondInstance) {
-//   app.quit();
-// }
-//
+let mainWindow: any;
+let store = new Store();
 
 /**
  * Create application window for preferences.
@@ -50,7 +37,60 @@ function createWindow() {
   return windowFrame;
 }
 
+/**
+ * listen to the cancel event coming from the preferences page.
+ */
+ipcMain.on("cancel", (event: any, payload: any) => {
+  appWindow.close();
+});
+
+/**
+ * listen to the preferences event coming from the preferences page
+ */
+ipcMain.on("ok", (event: any, payload: any) => {
+  appWindow.close();
+  if(payload.launch) {
+    console.log("set the app to restart on login");
+  }
+  if(payload.notification) {
+    store.set('close', 'Minimize');
+  } else {
+    store.set('close', null);
+  }
+});
+
+ipcMain.on("apply", (event: any, payload: any) => {
+  if(payload.launch) {
+    console.log("set the app to restart on login");
+  }
+  if(payload.notification) {
+    store.set('close', 'Minimize');
+  } else {
+    store.set('close', null);
+  }
+});
+
+/**
+ * when an event to open the preferences pane is fired
+ */
+ipcMain.on('openPref', (event: any) => {
+  createPrefWindow();
+});
+
+// when an event asks to be logout
+ipcMain.on('logout', (event: any) => {
+  appWindow.close();
+  if (mainWindow) {
+    mainWindow.webContents.send('logout');
+  }
+});
+
 export function createPrefWindow() {
-  // appWindow = createWindow();
-  console.log('real');
+  if (!appWindow) {
+    appWindow = createWindow();
+  }
+}
+
+export function addAppWindow(window: any) {
+  mainWindow = window;
 }

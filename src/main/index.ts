@@ -17,7 +17,7 @@ import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
-import {createPrefWindow} from "../helpers/pref";
+import {createPrefWindow, addAppWindow} from "../helpers/pref";
 
 // Logger
 autoUpdater.logger = logger;
@@ -36,7 +36,6 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
     label: 'Preferences...',
     accelerator: 'CmdOrCtrl+,',
     click() {
-      logger.log('this is for preferences');
       createPrefWindow();
     }
   },
@@ -81,6 +80,41 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
     },
     accelerator: 'CmdOrCtrl+Q',
     role: 'quit'
+  }
+];
+const titlebarMenu: MenuItemConstructorOptions[] = [
+  {
+    label: 'Trackly',
+    submenu: [
+      {
+        label: 'Preferences...',
+        accelerator: 'CmdOrCtrl+,',
+        click() {
+          createPrefWindow();
+        }
+      },
+
+      {
+        type: 'separator'
+      },
+
+      {
+        label: 'Minimize',
+        click() {
+          // createPrefWindow();
+          console.log('this is to minimize');
+          if(appWindow) {appWindow.minimize();}
+        }
+      },
+      {
+        label: 'Quit Trackly',
+        click() {
+          app.quit();
+        },
+        accelerator: 'CmdOrCtrl+Q',
+        role: 'quit'
+      }
+    ]
   }
 ];
 const idler = new Idler(fscs, uploader);
@@ -368,9 +402,13 @@ app.on("ready", () => {
   // start the autoUpdater
   autoAppUpdater();
 
+  // add the main window to the prefs page.
+  addAppWindow(appWindow);
+
   // get the idler program up and running.
-  // idler.createWindow(appWindow);
   idler.createParent(appWindow);
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(titlebarMenu));
 
 });
 
@@ -403,7 +441,7 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
 
   trayMenuTemplate[2].submenu = projects.map((item: any) => (
       {label: item.title, click() {
-        appWindow.webContents.send("timer:click", item.id);
+        if(appWindow) { appWindow.webContents.send("timer:click", item.id); }
       }}
     ));
 

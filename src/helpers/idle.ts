@@ -4,14 +4,13 @@ import { Fscs } from './fscs';
 import { Emitter } from './emitter';
 import { Uploader } from './uploader';
 import { activityStorage } from "./activity";
-import { dialog, BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import { ActiveWindow } from "./windows";
 import * as moment from "moment";
 
 
 export class Idler {
 
-  private _window: BrowserWindow;
   private _parentWindow: BrowserWindow;
   private _projects: any;
   private _activeProject: any;

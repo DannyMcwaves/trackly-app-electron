@@ -3,7 +3,7 @@
     <header class="py-0">
         <img src="../assets/logo.svg" alt="Trackly" id="logo">
         <ul class="list-inline" id="user-nav">
-            <li *ngIf="workspaces?.length == 1" class="list-inline-item">
+            <li class="list-inline-item">
                 <figure class="avatar avatar--sm">
                     <div class="initials">{{generateInitials()}}</div>
                 </figure>
@@ -17,7 +17,7 @@
     </header>
     <!-- / Header -->
 
-  <!-- Content -->
+    <!-- Content -->
     <section id="content" class="p-0" *ngIf="user">
         <div id="timer">
             <!-- Timer clock -->
@@ -30,8 +30,7 @@
             <!-- Wokspaces button -->
             <div class="timer-button">
                 <button (click)="openDashboard()" class="btn p-0 btn-primary btn-sm"><img src="../assets/baseline_show_chart_white_24dp.png" alt="Chart Logo" /></button>
-                <button *ngIf="workspaces?.length == -1" class="btn btn-sm btn-outline-primary">{{activeWorkspace.title}}</button>
-                <div *ngIf="workspaces?.length > 1" ngbDropdown placement="bottom-right" class="d-inline-block">
+                <div *ngIf="workspaces?.length === -1" ngbDropdown placement="bottom-right" class="d-inline-block">
                   <button class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
                       {{ activeWorkspace?.title }}
                   </button>
@@ -83,7 +82,7 @@
     <!-- / Footer -->
 
     <!--idler-->
-    <div id="idler" class="p-2" [ngStyle]="{'min-height.px': idleHeight, 'display': idleDisplay}">
+    <div id="idler" class="p-2 d-none" [ngStyle]="{'min-height.px': idleHeight}">
       <div class="idle-header px-1">
         <div class="propmt"> &nbsp;Idle Notification </div>
       </div>

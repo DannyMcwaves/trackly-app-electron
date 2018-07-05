@@ -100,7 +100,8 @@ export class DashboardComponent implements OnInit {
 
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
-          this.idleDisplay = "block";
+          // this.idleDisplay = "block";
+          document.getElementById("idler").classList.remove('d-none');
         });
 
         // keep updating the idle time
@@ -111,6 +112,10 @@ export class DashboardComponent implements OnInit {
         // reset timer when the timer is clicked.
         ipcRenderer.on("resetTimer", (event: any) => {
           this._refresher();
+        });
+
+        ipcRenderer.on("logout", (event: any) => {
+          this.logOut();
         });
 
         // before the window unloads clear the tracking next day interval
@@ -155,7 +160,8 @@ export class DashboardComponent implements OnInit {
     }
 
     closeIdleTime() {
-      this.idleDisplay = 'none';
+      // this.idleDisplay = 'none';
+      document.getElementById("idler").classList.add('d-none');
       ipcRenderer.send('idleResponse', {});
     }
 
@@ -262,6 +268,17 @@ export class DashboardComponent implements OnInit {
 
         this.getProjects().subscribe((response: any) => {
 
+          let ap = this.activeProject;
+          let newAp = response.filter((item: any) => item.id === ap.id);
+          console.log(newAp);
+          console.log(ap);
+          if(newAp.length > 0) {
+            this.activeProject = newAp[0];
+          } else if(ap.length > 0) {
+            console.log('stopping the time tracked');
+            this.trackProject(ap);
+          }
+
           this.projects = response.filter((item: any) => !item.archived);
 
           ipcRenderer.send('projects', this.projects);
@@ -277,7 +294,6 @@ export class DashboardComponent implements OnInit {
               workspaceId: this.activeWorkspace.id
             });
           }
-
 
           this.projects.forEach((element: any) => {
             this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
@@ -362,6 +378,10 @@ export class DashboardComponent implements OnInit {
       ipcRenderer.send('isrunning', false);
       ipcRenderer.send("timer", {action: "stop"});
       this.userService.logout();
+    }
+
+    openPrefs() {
+      ipcRenderer.send('openPref');
     }
 
     /**

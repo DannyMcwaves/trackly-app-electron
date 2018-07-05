@@ -20,7 +20,7 @@
         <div class="text-center reset-link pt-2"><a (click)="forgotClick()" href="#">Forgot Password?</a></div>
 
     </form>
-    <div id="resetForm" class="px-1 py-3" [hidden]="hidden">
+    <div id="resetForm" class="px-1 py-3 d-none" [hidden]="hidden">
 
         <input #resetMail (input)="emailInput(resetMail.value)" type="email" class="form-control" placeholder="Email">
 

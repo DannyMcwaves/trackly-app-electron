@@ -82,41 +82,6 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
     role: 'quit'
   }
 ];
-const titlebarMenu: MenuItemConstructorOptions[] = [
-  {
-    label: 'Trackly',
-    submenu: [
-      {
-        label: 'Preferences...',
-        accelerator: 'CmdOrCtrl+,',
-        click() {
-          createPrefWindow();
-        }
-      },
-
-      {
-        type: 'separator'
-      },
-
-      {
-        label: 'Minimize',
-        click() {
-          // createPrefWindow();
-          console.log('this is to minimize');
-          if(appWindow) {appWindow.minimize();}
-        }
-      },
-      {
-        label: 'Quit Trackly',
-        click() {
-          app.quit();
-        },
-        accelerator: 'CmdOrCtrl+Q',
-        role: 'quit'
-      }
-    ]
-  }
-];
 const idler = new Idler(fscs, uploader);
 const ports = [14197, 24197, 34197, 44197, 54197, 64197];
 
@@ -143,7 +108,8 @@ let windowDefaults = {
   maximizable: false,
   webPreferences: {
     webSecurity: false // TODO: Remove in production!
-  }
+  },
+  openDevTools: true
 };
 let stopMoment: string;
 let tray: any = null;
@@ -303,7 +269,7 @@ function autoAppUpdater() {
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
     console.log('download completed');
-
+    store.delete('close');
     close = 'ya';
 
     const dialogOpts = {
@@ -407,8 +373,6 @@ app.on("ready", () => {
 
   // get the idler program up and running.
   idler.createParent(appWindow);
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(titlebarMenu));
 
 });
 

@@ -4,7 +4,7 @@ const Store = require("electron-store");
 
 
 let windowDefaults = {
-  height: 300,
+  height: 310,
   width: 600,
   minWidth: 600,
   title: "Preferences",
@@ -88,6 +88,12 @@ ipcMain.on('logout', (event: any) => {
 export function createPrefWindow() {
   if (!appWindow) {
     appWindow = createWindow();
+
+    // send the initial state of the store to the prefs page
+    let close = store.get('close');
+    if(close === 'Minimize') {
+      appWindow.webContents.send('close');
+    }
   }
 }
 

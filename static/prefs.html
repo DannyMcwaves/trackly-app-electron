@@ -75,9 +75,6 @@
     <script>
 
       const { ipcRenderer } = require('electron');
-      const Store = require('electron-store');
-      const store = new Store();
-      let close = store.get('close');
 
       const prefObject = {
         launch: false,
@@ -101,9 +98,9 @@
         }
       };
 
-      if (close === 'Minimize') {
+      ipcRenderer.on('close', (event) => {
         $("#leaveApp").el.checked = true;
-      }
+      });
 
       $("#launchApp").on('change', (e) => {
         prefObject.launch = e.target.checked;

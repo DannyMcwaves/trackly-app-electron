@@ -497,6 +497,9 @@ ipcMain.on("timer", (event: any, args: any) => {
     // append the startLogging event to the app data emitter.
     Emitter.appendEvent("startLogging", args.date, {projectId: args.projectId});
 
+    // current window on action.
+    ActiveWindow.current(0);
+
     idler.currentProject(args);
 
     // Take screenshot within a random time during the first 60 secs.

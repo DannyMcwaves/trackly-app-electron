@@ -76,9 +76,9 @@
 
       const { ipcRenderer } = require('electron');
 
-      const prefObject = {
+      let prefObject = {
         launch: false,
-        notification: close === 'Minimize' // false
+        notification: false
       };
 
       const $ = (selector) => {
@@ -98,8 +98,10 @@
         }
       };
 
-      ipcRenderer.on('close', (event) => {
-        $("#leaveApp").el.checked = true;
+      ipcRenderer.on('init', (event, init) => {
+        $("#leaveApp").el.checked = init.notification;
+        $("#launchApp").el.checked = init.launch;
+        prefObject = init;
       });
 
       $("#launchApp").on('change', (e) => {

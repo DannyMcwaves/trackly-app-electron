@@ -5,7 +5,7 @@ import {ipcRenderer} from "electron";
 
 import "./dashboard.component.scss";
 import {UserService} from "../services/user.service";
-import {OnInit} from "@angular/core/src/metadata/lifecycle_hooks";
+import {OnInit, AfterViewChecked} from "@angular/core/src/metadata/lifecycle_hooks";
 import {Router} from "@angular/router";
 import {HttpClient, HttpParams} from "@angular/common/http";
 
@@ -16,7 +16,7 @@ import * as moment from "moment";
     templateUrl: "/dashboard.component.html",
     encapsulation: ViewEncapsulation.None
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewChecked {
     private baseURL = process.env.apiUrl ? process.env.apiUrl + "/api" : 'https://trackly.com/api';
     public projects: any;
     public perProject = {};
@@ -37,6 +37,7 @@ export class DashboardComponent implements OnInit {
     private activeWorkspace: any;
     private lastSynced: any;
     private store: any;
+    private resize: boolean;
 
     // Frame height & Sizes
     private baseFrameHeight = 36 + 120;
@@ -170,7 +171,6 @@ export class DashboardComponent implements OnInit {
         if (this.user && this.user.people[0].timeTracking) {
             // Clicked on running project
             if (project.id == this.activeProject.id) {
-                console.log('same');
                 ipcRenderer.send("timer", {
                     action: "stop",
                     date: this.endTime.toISOString(),
@@ -188,7 +188,6 @@ export class DashboardComponent implements OnInit {
 
             // Clicked on new project
             if (project.id != this.activeProject.id) {
-                console.log('new');
                 this.startTime =  moment().milliseconds(0);
                 if (this.activeProject.id) {
                   ipcRenderer.send("timer", {
@@ -268,15 +267,14 @@ export class DashboardComponent implements OnInit {
 
         this.getProjects().subscribe((response: any) => {
 
-          let ap = this.activeProject;
-          let newAp = response.filter((item: any) => item.id === ap.id);
-          console.log(newAp);
-          console.log(ap);
-          if(newAp.length > 0) {
-            this.activeProject = newAp[0];
-          } else if(ap.length > 0) {
-            console.log('stopping the time tracked');
-            this.trackProject(ap);
+          let oldActive = JSON.parse(JSON.stringify(this.activeProject));
+
+          let newActive = response.filter((item: any) => item.id === oldActive.id)[0];
+
+          if(newActive) {
+            this.activeProject = newActive;
+          } else if(oldActive.id) {
+            this.trackProject(oldActive);
           }
 
           this.projects = response.filter((item: any) => !item.archived);
@@ -303,10 +301,11 @@ export class DashboardComponent implements OnInit {
             ipcRenderer.send("time:travel", this.totalIimeToday);
           });
 
-          this.lastSynced = Date.now();
+          // this.startTime =  moment().milliseconds(0);
 
-          // when the user is enabled to track time, resize to the size of the window content.
-          this._resizeFrame();
+          this.resize = true;
+
+          this.lastSynced = Date.now();
 
         }, error => {
           console.log("error getting projects");
@@ -455,5 +454,17 @@ export class DashboardComponent implements OnInit {
         }, error => {
             this.logOut();
         });
+    }
+
+    ngAfterViewChecked() {
+      if (this.resize) {
+        try {
+          // when the user is enabled to track time, resize to the size of the window content.
+          this._resizeFrame();
+          this.resize = false;
+        } catch (err) {
+          console.log('child problems');
+        }
+      }
     }
 }

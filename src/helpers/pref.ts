@@ -37,6 +37,28 @@ function createWindow() {
   return windowFrame;
 }
 
+function processPayload(payload: any) {
+  // set the payload launch variable to the store and launch app on login or nah.
+  if(payload.launch) {
+    store.set('launch', true);
+    app.setLoginItemSettings({
+      openAtLogin: true
+    });
+  } else {
+    store.set('launch', false);
+    app.setLoginItemSettings({
+      openAtLogin: false
+    });
+  }
+
+  // set the minimize variable to the store
+  if(payload.notification) {
+    store.set('close', 'Minimize');
+  } else {
+    store.set('close', false);
+  }
+}
+
 /**
  * listen to the cancel event coming from the preferences page.
  */
@@ -49,25 +71,11 @@ ipcMain.on("cancel", (event: any, payload: any) => {
  */
 ipcMain.on("ok", (event: any, payload: any) => {
   appWindow.close();
-  if(payload.launch) {
-    console.log("set the app to restart on login");
-  }
-  if(payload.notification) {
-    store.set('close', 'Minimize');
-  } else {
-    store.set('close', null);
-  }
+  processPayload(payload);
 });
 
 ipcMain.on("apply", (event: any, payload: any) => {
-  if(payload.launch) {
-    console.log("set the app to restart on login");
-  }
-  if(payload.notification) {
-    store.set('close', 'Minimize');
-  } else {
-    store.set('close', null);
-  }
+  processPayload(payload);
 });
 
 /**
@@ -91,9 +99,13 @@ export function createPrefWindow() {
 
     // send the initial state of the store to the prefs page
     let close = store.get('close');
-    if(close === 'Minimize') {
-      appWindow.webContents.send('close');
-    }
+    let launch = store.get('launch');
+    setTimeout(() => {
+      appWindow.webContents.send('init', {notification: close === 'Minimize', launch});
+    }, 300);
+
+  } else {
+    appWindow.focus();
   }
 }
 

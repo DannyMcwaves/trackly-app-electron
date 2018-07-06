@@ -7,6 +7,7 @@ import * as logger from "electron-log";
 import * as moment from "moment";
 import * as jsonfile from "jsonfile";
 import {Emitter} from "./emitter";
+import {ActiveWindow} from "./windows";
 
 export class Fscs {
   // Paths
@@ -188,7 +189,11 @@ export class Fscs {
       projectId: fp.projectId
     });
 
+    // append Continue logging to the json file.
     Emitter.appendEvent("continueLogging", moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
+
+    // get the current active window.
+    ActiveWindow.current(0);
 
     // Swap files
     this.loadActFile(tempFile);

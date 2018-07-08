@@ -262,7 +262,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
-
+          
         this.workspaces = response;
 
         this.getProjects().subscribe((response: any) => {
@@ -376,6 +376,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     logOut() {
       ipcRenderer.send('isrunning', false);
       ipcRenderer.send("timer", {action: "stop"});
+      this.activeWorkspace = undefined;
       this.userService.logout();
     }
 
@@ -399,7 +400,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         this.getWorkspaces().subscribe(response => {
             this.workspaces = response;
             if (!this.activeWorkspace) {
-                this.activeWorkspace = this.workspaces[0];
+              this.activeWorkspace = this.workspaces[0];
             }
 
             this.getUser().subscribe(response => {

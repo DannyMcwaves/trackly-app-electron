@@ -227,6 +227,13 @@ function systemTray() {
   tray.setContextMenu(trayMenu);
 
   tray.setTitle('00:00:00');
+
+  tray.on('click', () => {
+    logger.log('clicking on this tray thing now');
+    if (appWindow) {
+      appWindow.focus();
+    }
+  });
 }
 
 function autoAppUpdater() {

@@ -228,8 +228,9 @@ function systemTray() {
 
   tray.setTitle('00:00:00');
 
+  tray.setToolTip("Trackly");
+
   tray.on('click', () => {
-    logger.log('clicking on this tray thing now');
     if (appWindow) {
       appWindow.focus();
     }
@@ -366,11 +367,11 @@ app.on("activate", () => {
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
 
-  // initiate the system tray program.
-  systemTray();
-
   // create the main window application
   appWindow = createApplicationWindow();
+
+  // initiate the system tray program.
+  systemTray();
 
   // start the autoUpdater
   autoAppUpdater();

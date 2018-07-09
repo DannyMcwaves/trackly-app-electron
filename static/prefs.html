@@ -75,13 +75,13 @@
       let element = document.getElementById('header');
 
       if (process.platform === 'darwin') {
-        element.innerText = 'OSX Settings';
+        element.innerText = 'OSX SETTINGS';
       } else if (process.platform === 'win32') {
-        element.innerText = 'Windows Settings';
+        element.innerText = 'WINDOWS SETTINGS';
       } else if (process.platform === 'linux') {
-        element.innerText = 'Linux Settings';
+        element.innerText = 'LINUX SETTINGS';
       } else {
-        element.innerText = 'Trackly Settings';
+        element.innerText = 'TRACKLY SETTINGS';
       }
 
       let prefObject = {

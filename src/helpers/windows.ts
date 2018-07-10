@@ -10,7 +10,8 @@ import * as moment from 'moment';
 
 export class ActiveWindow {
 
-  public static _current: string;
+  public static _currentName: string;
+  public static _currentTitle: string;
 
   static currentWindow() {
     return activeWindow(__static);
@@ -21,12 +22,17 @@ export class ActiveWindow {
     this.currentWindow().then((data: any) => {
 
       let name = data.app;
+      let title = data.title;
 
-      if (name !== this._current) {
+      if ((name !== this._currentName) || (title !== this._currentTitle)) {
 
-        Emitter.appendEvent("startActiveWindow", moment().milliseconds(0).toISOString(), {title: name});
+        Emitter.appendEvent("startActiveWindow",
+          moment().milliseconds(0).toISOString(),
+          {title: name, windowTitle: title}
+        );
 
-        this._current = name;
+        this._currentName = name;
+        this._currentTitle = title;
 
       }
     }).catch((err: any) => {
@@ -35,7 +41,10 @@ export class ActiveWindow {
   }
 
   public static stopWindow() {
-    Emitter.appendEvent("stopActiveWindow", moment().milliseconds(0).toISOString(), {title: this._current});
+    Emitter.appendEvent("stopActiveWindow",
+      moment().milliseconds(0).toISOString(),
+      {title: this._currentName, windowTitle:this._currentTitle}
+    );
   }
 
 }

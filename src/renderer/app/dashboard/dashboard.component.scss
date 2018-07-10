@@ -48,7 +48,10 @@ figure {
 
 
 #projects {
+
   box-sizing: border-box;
+  max-height: 300px;
+
   .project {
     padding: 0 20px;
     height: 60px;

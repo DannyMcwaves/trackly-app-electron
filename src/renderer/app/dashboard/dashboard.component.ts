@@ -131,7 +131,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      */
     private _resizeFrame() {
         let height: number;
-        height = this.baseFrameHeight + this.baseProjectHeight*this.projects.length;
+        let projectHeight = this.projects.length < 6 ? this.projects.length : 5;
+        height = this.baseFrameHeight + this.baseProjectHeight * projectHeight;
         this.idleHeight = height;
         ipcRenderer.send('win:height', height);
     }
@@ -262,7 +263,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
-          
+
         this.workspaces = response;
 
         this.getProjects().subscribe((response: any) => {
@@ -466,6 +467,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         } catch (err) {
           console.log('child problems');
         }
+      }
+      let el = document.getElementById('projects');
+      if (el && this.projects.length > 5) {
+        el.style.overflowY = 'scroll';
+      } else if(el) {
+        el.style.overflowY = 'auto';
       }
     }
 }

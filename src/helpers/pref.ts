@@ -1,6 +1,7 @@
 
 import { app, BrowserWindow, ipcMain } from "electron";
 const Store = require("electron-store");
+import { autoUpdater } from "electron-updater";
 
 
 let windowDefaults = {
@@ -59,6 +60,33 @@ function processPayload(payload: any) {
   }
 }
 
+function processUpdates() {
+
+  // set autoDownload to true;
+  autoUpdater.autoDownload = false;
+
+  // Updater
+  autoUpdater.checkForUpdates();
+
+  // event listeners for the autoUpdater.
+  autoUpdater.on('checking-for-update', () => {
+    appWindow.webContents.send('checking-for-update');
+  });
+
+  autoUpdater.on('update-available', (ev, info) => {
+    appWindow.webContents.send('update-available');
+  });
+
+  autoUpdater.on('update-not-available', (ev, info) => {
+    appWindow.webContents.send('update-not-available');
+  });
+
+  autoUpdater.on('error', (ev, err) => {
+    appWindow.webContents.send('update-error');
+  });
+
+}
+
 /**
  * listen to the cancel event coming from the preferences page.
  */
@@ -91,6 +119,11 @@ ipcMain.on('logout', (event: any) => {
   if (mainWindow) {
     mainWindow.webContents.send('logout');
   }
+});
+
+ipcMain.on('update', (event: any) => {
+  console.log('checking for update');
+  processUpdates();
 });
 
 export function createPrefWindow() {

@@ -29,9 +29,19 @@
         font-family: Montserrat, sans-serif;
         border-radius: 0;
       }
-      #logout{
+      #logout {
         color: #EC644B !important;
         cursor: pointer;
+      }
+      #extension {
+        font-size: 0.85em;
+        font-family: Montserrat, sans-serif;
+        cursor: pointer;
+      }
+      #extend {
+        padding: 0 !important;
+        margin: 0 !important;
+        margin-top: -5px !important;
       }
       #updateNotes {
         font-size: 0.8em;
@@ -48,7 +58,7 @@
 
           <h2 id="header" class="col-12">App Settings</h2>
 
-          <form class="col-12 form">
+          <form class="col-12 form mb-0">
             <div class="form-check">
               <input type="checkbox" class="form-check-input" id="launchApp">
               <label class="form-check-label" for="launchApp"> Open Trackly on system startup. </label>
@@ -60,6 +70,10 @@
           </form>
 
           <hr class="col-12">
+
+          <div id="extend" class="col-12 mt-0 pt-0">
+            <a id="extension"> Add browser extension 📤 </a>
+          </div>
 
           <div class="col-4">
             <a id="logout" class=""> Log Out </a>
@@ -171,6 +185,11 @@
       $("#logout").on('click', (e) => {
         e.preventDefault();
         ipcRenderer.send('logout');
+      });
+
+      $("#extension").on('click', (e) => {
+        e.preventDefault();
+        ipcRenderer.send('extension');
       });
 
       $("#updates").on('click', (e) => {

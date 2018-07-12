@@ -118,6 +118,7 @@ let shotOut: any;
 let server: any;
 let port: any;
 let close: string = 'na';
+let quit = false;
 let dir = join(__static, '/trackly.png');
 let image = nativeImage.createFromPath(dir);
 
@@ -180,8 +181,8 @@ function createApplicationWindow() {
         message: 'You\'re currently tracking time, are you sure you want to quit?'
       }, function (response) {
         if (response === 0) {
-          timeIsRunning = false;
-          windowFrame.close();
+          quit = true;
+          appWindow.webContents.send("timer:stop");
         }
       })
     } else if(val === 'Minimize') {
@@ -245,12 +246,9 @@ function autoAppUpdater() {
   autoUpdater.checkForUpdates();
 
   // event listeners for the autoUpdater.
-  autoUpdater.on('checking-for-update', () => {
-    logger.log('checking for updates.....');
-  });
+  autoUpdater.on('checking-for-update', () => {});
 
   autoUpdater.on('update-available', (ev, info) => {
-    logger.log('Update available.');
     const dialogOpts = {
       type: 'info',
       buttons: ['OK'],
@@ -263,20 +261,14 @@ function autoAppUpdater() {
     });
   });
 
-  autoUpdater.on('update-not-available', (ev, info) => {
-    logger.log('No updates available at this time.');
-  });
+  autoUpdater.on('update-not-available', (ev, info) => {});
 
-  autoUpdater.on('error', (ev, err) => {
-    logger.log(err);
-  });
+  autoUpdater.on('error', (ev, err) => {});
 
-  autoUpdater.on('download-progress', (ev, progressObj) => {
-    logger.log(progressObj);
-  });
+  autoUpdater.on('download-progress', (ev, progressObj) => {});
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
-    console.log('download completed');
+
     store.delete('close');
     close = 'ya';
 
@@ -292,8 +284,6 @@ function autoAppUpdater() {
     dialog.showMessageBox(dialogOpts, (response) => {
       if (response === 0) {
         // delete accessToken and userId before installing newer updates.
-        store.delete("token");
-        store.delete("userId");
         autoUpdater.quitAndInstall();
       }
     });
@@ -548,6 +538,11 @@ ipcMain.on("timer", (event: any, args: any) => {
 
         // upload files through the idler
         idler.stopUpload();
+
+        // now quit
+        if (quit) {
+          appWindow.close();
+        }
       }
     );
 

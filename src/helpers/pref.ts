@@ -1,5 +1,5 @@
 
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 const Store = require("electron-store");
 import { autoUpdater } from "electron-updater";
 
@@ -22,6 +22,7 @@ let windowURL = `file://${__static}/prefs.html`;
 let appWindow: BrowserWindow;
 let mainWindow: any;
 let store = new Store();
+let extensionUrl = 'https://trackly.com/download/browser-extension';
 
 /**
  * Create application window for preferences.
@@ -122,8 +123,11 @@ ipcMain.on('logout', (event: any) => {
 });
 
 ipcMain.on('update', (event: any) => {
-  console.log('checking for update');
   processUpdates();
+});
+
+ipcMain.on('extension', (event: any) => {
+  shell.openExternal(extensionUrl);
 });
 
 export function createPrefWindow() {

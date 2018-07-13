@@ -333,6 +333,11 @@ function closeServer() {
   }
 }
 
+function createDialog() {
+  // this function should create all the custom dialog boxes
+  // from the Trackly static html template.
+}
+
 app.on("window-all-closed", () => {
 
   // before the window is finally closed, complete all timers.

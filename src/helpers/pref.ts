@@ -83,6 +83,7 @@ function processUpdates() {
   });
 
   autoUpdater.on('error', (ev, err) => {
+    ev.preventDefault();
     appWindow.webContents.send('update-error');
   });
 

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Trackly - Update</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <style>
+    h2 {
+      font-size: 1.2em;
+      font-family: Montserrat, sans-serif;
+    }
+    label {
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+    }
+  </style>
+</head>
+<body>
+<div class="container pt-3">
+  <div class="row">
+
+    <div class="col-12 row no-gutters">
+
+      <h2 id="header" class="col-12">Please restart to apply the updates.</h2>
+
+      <div class="col-12 row no-gutters py-2 justify-content-around align-self-end">
+        <div class="text-right col-8">
+          <button id="ok" class="btn btn-sm mr-2"> Restart </button>
+          <button id="apply" class="btn btn-sm"> Later </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+  <script>
+
+    const { ipcRenderer } = require('electron');
+
+    const text = {
+      buttons: ['Restart', 'Later'],
+      title: 'Trackly - Update',
+      message: 'Update is ready.',
+      detail: 'Please restart to apply the updates.'
+    };
+
+    const $ = (selector) => {
+
+      let element = document.querySelector(selector);
+
+      return {
+        val() {
+          return element.checked
+        },
+
+        on(event, listener) {
+          element.addEventListener(event, listener, false);
+        },
+
+        el: element
+      }
+    };
+
+  </script>
+</body>
+</html>

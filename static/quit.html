@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Trackly - Quit</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <style>
+    h2 {
+      font-size: 1.2em;
+      font-family: Montserrat, sans-serif;
+    }
+    label {
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+    }
+  </style>
+</head>
+<body>
+<div class="container pt-3">
+  <div class="row">
+
+    <div class="col-12 row no-gutters">
+
+      <h2 id="header" class="col-12">Are you sure you want to quit?</h2>
+
+      <form class="col-12 form mb-0">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="leaveApp">
+          <label class="form-check-label" for="leaveApp"> Remember my choice </label>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-12 row no-gutters py-2 justify-content-around align-self-end">
+      <div class="text-right col-8">
+        <button id="ok" class="btn btn-sm mr-2"> &nbsp; Quit &nbsp;</button>
+        <button id="cancel" class="btn btn-sm mr-2"> Minimize </button>
+        <button id="apply" class="btn btn-sm"> Cancel </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+  const { ipcRenderer } = require('electron');
+
+  const text = {
+    buttons: ['Quit', 'Minimize', 'Cancel'],
+    title: 'Trackly - Quit',
+    message: 'Are you sure you want to quit?',
+    checkboxLabel: 'Remember my choice'
+  };
+
+  const $ = (selector) => {
+
+    let element = document.querySelector(selector);
+
+    return {
+      val() {
+        return element.checked
+      },
+
+      on(event, listener) {
+        element.addEventListener(event, listener, false);
+      },
+
+      el: element
+    }
+  };
+
+</script>
+</body>
+</html>

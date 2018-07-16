@@ -8,43 +8,51 @@
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <style>
-    h2 {
-      font-size: 1.2em;
+    #header {
+      font-size: 0.95em;
       font-family: Montserrat, sans-serif;
+      font-weight: 300;
     }
     label {
       font-size: 0.8em;
       font-family: Montserrat, sans-serif;
     }
+    #mainContainer {
+      height: 150px !important;
+    }
+    #ok {
+      background-color: #0074ee;
+      color: #ffffff;
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+    }
+    #apply {
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+      background-color: rgba(204, 204, 204, 0.43);
+    }
   </style>
 </head>
 <body>
-<div class="container pt-3">
+
+<div id="mainContainer" class="container pt-3">
   <div class="row">
+    <h4 id="header" class="col-11 ml-3">Tracking is currently enabled, are you sure you want to quit?</h4>
 
-    <div class="col-12 row no-gutters">
-
-      <h2 id="header" class="col-12">Tracking is currently enabled, are you sure you want to quit?</h2>
-
-      <div class="col-12 row no-gutters py-2 justify-content-around align-self-end">
-        <div class="text-right col-8">
-          <button id="ok" class="btn btn-sm mr-2"> &nbsp; Yes &nbsp;</button>
-          <button id="apply" class="btn btn-sm"> No </button>
-        </div>
+    <div class="col-11 pt-4 pr-3">
+      <div class="text-right">
+        <button id="ok" class="btn btn-sm mr-2"> &nbsp; Yes &nbsp; </button>
+        <button id="apply" class="btn btn-sm"> &nbsp; No &nbsp; </button>
       </div>
-
+    </div>
   </div>
 </div>
-</div>
+
 <script>
 
   const { ipcRenderer } = require('electron');
-
-  const text = {
-    buttons: ['Yes', 'No'],
-      title: 'Trackly - Quite',
-    message: 'Tracking is currently enabled, are you sure you want to quit?'
-  };
 
   const $ = (selector) => {
 
@@ -62,6 +70,14 @@
       el: element
     }
   };
+
+  $('#ok').on('click', (e) => {
+    ipcRenderer.send('quitTracking', {quit: true});
+  });
+
+  $('#apply').on('click', (e) => {
+    ipcRenderer.send('quitTracking', {quit: false});
+  })
 
 </script>
 </body>

@@ -8,49 +8,58 @@
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <style>
-    h2 {
-      font-size: 1.2em;
+    #header {
+      font-size: 1.03em;
+      font-family: Montserrat, sans-serif;
+    }
+    #subheader{
+      font-size: 0.85em;
       font-family: Montserrat, sans-serif;
     }
     label {
       font-size: 0.8em;
       font-family: Montserrat, sans-serif;
     }
+    #restart {
+      background-color: #0074ee;
+      color: #ffffff;
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+    }
+    #later{
+      background-color: rgba(204, 204, 204, 0.43);
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+    }
   </style>
 </head>
+
 <body>
-<div class="container pt-3">
-  <div class="row">
 
-    <div class="col-12 row no-gutters">
-
-      <h2 id="header" class="col-12">Please restart to apply the updates.</h2>
-
-      <div class="col-12 row no-gutters py-2 justify-content-around align-self-end">
-        <div class="text-right col-8">
-          <button id="ok" class="btn btn-sm mr-2"> Restart </button>
-          <button id="apply" class="btn btn-sm"> Later </button>
-        </div>
+  <div class="container-fluid pt-3">
+    <div class="row">
+      <div class="col-12">
+        <h2 id="header" class="col-12">Update is ready</h2>
+        <div id="subheader" class="col-12">Please restart to apply the updates.</div>
       </div>
 
+      <div class="col-12 pt-4">
+        <div class="text-right d-block">
+          <button id="restart" class="btn btn-sm mr-2"> Restart </button>
+          <button id="later" class="btn btn-sm mr-3"> Later </button>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
   <script>
 
     const { ipcRenderer } = require('electron');
 
-    const text = {
-      buttons: ['Restart', 'Later'],
-      title: 'Trackly - Update',
-      message: 'Update is ready.',
-      detail: 'Please restart to apply the updates.'
-    };
-
     const $ = (selector) => {
-
       let element = document.querySelector(selector);
-
       return {
         val() {
           return element.checked
@@ -64,6 +73,16 @@
       }
     };
 
+    $('#restart').on('click', (event) => {
+      ipcRenderer.send('restart', {restart: true});
+    });
+
+    $('#later').on('click', (event) => {
+      ipcRenderer.send('restart', {restart: false});
+    });
+
   </script>
+
 </body>
+
 </html>

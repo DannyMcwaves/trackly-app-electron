@@ -13,10 +13,7 @@ let windowDefaults = {
   show: true,
   resizable: false,
   movable: true,
-  maximizable: false,
-  webPreferences: {
-    webSecurity: true
-  }
+  maximizable: false
 };
 let windowURL = `file://${__static}/prefs.html`;
 let appWindow: BrowserWindow;

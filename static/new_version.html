@@ -8,43 +8,35 @@
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <style>
-    h2 {
-      font-size: 1.2em;
+    div#header {
+      font-size: 0.9em;
       font-family: Montserrat, sans-serif;
     }
     label {
       font-size: 0.8em;
       font-family: Montserrat, sans-serif;
     }
+    #ok {
+      background-color: #0074ee;
+      color: #ffffff;
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
-<div class="container pt-3">
+<div class="container-fluid pt-3">
   <div class="row">
-
-    <div class="col-12 row no-gutters">
-
-      <h2 id="header" class="col-12">We are currently downloading the latest version on the background.</h2>
-
-      <div class="col-12 row no-gutters py-2 justify-content-around align-self-end">
-        <div class="text-right col-8">
-          <button id="ok" class="btn btn-sm mr-2"> &nbsp; OK &nbsp; </button>
-        </div>
-      </div>
-
+    <div id="header" class="col-12">We are currently downloading the latest version in the background.</div>
+    <div class="col-12 text-right pt-4 pb-2 align-self-end">
+      <button id="ok" class="btn btn-sm mr-2"> &nbsp; OK &nbsp; </button>
     </div>
   </div>
 </div>
 <script>
 
   const { ipcRenderer } = require('electron');
-
-  const text = {
-    buttons: ['OK'],
-    title: 'Trackly - Update',
-    message: 'New version is available',
-    detail: 'We are currently downloading the latest version on the background.'
-  };
 
   const $ = (selector) => {
 
@@ -62,6 +54,14 @@
       el: element
     }
   };
+
+  setTimeout(() => {
+    ipcRenderer.send('updateAvailable');
+  }, 5000);
+
+  $('#ok').on('click', () => {
+    ipcRenderer.send('updateAvailable');
+  });
 
 </script>
 </body>

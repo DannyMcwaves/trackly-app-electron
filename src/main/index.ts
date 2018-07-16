@@ -95,6 +95,7 @@ let syncInterval = process.env.ELECTRON_WEBPACK_APP_SYNC_INTERVAL || "600";
 
 // Globals
 let appWindow: BrowserWindow;
+let notificationWindow: BrowserWindow;
 let windowURL: string;
 let windowDefaults = {
   height: 0,
@@ -108,8 +109,7 @@ let windowDefaults = {
   maximizable: false,
   webPreferences: {
     webSecurity: false // TODO: Remove in production!
-  },
-  openDevTools: true
+  }
 };
 let stopMoment: string;
 let tray: any = null;
@@ -119,6 +119,7 @@ let server: any;
 let port: any;
 let close: string = 'na';
 let quit = false;
+let restartAndInstall = false;
 let dir = join(__static, '/trackly.png');
 let image = nativeImage.createFromPath(dir);
 
@@ -144,24 +145,6 @@ if (isDevelopment) {
   windowDefaults.resizable = false;
 }
 
-// when the user is closing the window.
-const closeWindowNotification = () => new Promise((resolve, reject) => {
-
-    let buttons = ['Quit', 'Minimize', 'Cancel'];
-
-    const dialogOpts = {
-      type: 'none',
-      buttons,
-      title: 'Trackly',
-      message: "Do you want to Quit Trackly?",
-      checkboxLabel: " Remember my choice"
-    };
-
-    dialog.showMessageBox(dialogOpts, (response, checked) => {
-      resolve({response: buttons[response], checked});
-    });
-});
-
 /**
  * Create application wind
  */
@@ -174,17 +157,7 @@ function createApplicationWindow() {
 
     if (timeIsRunning) {
       event.preventDefault();
-      dialog.showMessageBox({
-        type: 'question',
-        buttons: ['Yes', 'No'],
-        title: 'Confirm',
-        message: 'You\'re currently tracking time, are you sure you want to quit?'
-      }, function (response) {
-        if (response === 0) {
-          quit = true;
-          appWindow.webContents.send("timer:stop");
-        }
-      })
+      createDialog('tracking', {height: 140, width: 450});
     } else if(val === 'Minimize') {
       event.preventDefault();
       windowFrame.minimize();
@@ -195,19 +168,7 @@ function createApplicationWindow() {
       windowFrame.close();
     } else if(close === 'na') {
       event.preventDefault();
-      closeWindowNotification().then((res: any) => {
-        if (res.checked) {
-          store.set("close", res.response);
-        }
-        if(res.response === 'Minimize') {
-          windowFrame.minimize();
-        } else if(res.response === 'Quit') {
-          close = 'ya';
-          windowFrame.close();
-        }
-      }).catch((err: any) => {
-        console.log(err);
-      });
+      createDialog('quit', {height: 140, width: 450});
     }
   });
 
@@ -249,16 +210,9 @@ function autoAppUpdater() {
   autoUpdater.on('checking-for-update', () => {});
 
   autoUpdater.on('update-available', (ev, info) => {
-    const dialogOpts = {
-      type: 'info',
-      buttons: ['OK'],
-      title: 'Updater',
-      message: 'Trackly is updating...',
-      detail: 'A new version of Trackly is downloading. This should take a couple of seconds.'
-    };
-    dialog.showMessageBox(dialogOpts, (response) => {
-      logger.log(response);
-    });
+    if (autoUpdater.autoDownload) {
+      createDialog('new_version', {height: 130, width: 450});
+    }
   });
 
   autoUpdater.on('update-not-available', (ev, info) => {});
@@ -268,25 +222,7 @@ function autoAppUpdater() {
   autoUpdater.on('download-progress', (ev, progressObj) => {});
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
-
-    store.delete('close');
-    close = 'ya';
-
-    const dialogOpts = {
-      type: 'none',
-      icon: image,
-      buttons: ['Restart', 'Later'],
-      title: 'Trackly - Update Notification',
-      message: process.platform === 'win32' ? releaseNotes : releaseName,
-      detail: 'A new version has been downloaded. Restart the application to apply the updates.'
-    };
-
-    dialog.showMessageBox(dialogOpts, (response) => {
-      if (response === 0) {
-        // delete accessToken and userId before installing newer updates.
-        autoUpdater.quitAndInstall();
-      }
-    });
+    createDialog('restart', {height: 140, width: 450});
   });
 }
 
@@ -333,9 +269,15 @@ function closeServer() {
   }
 }
 
-function createDialog() {
+function createDialog(url: string, defaults: object = {}) {
   // this function should create all the custom dialog boxes
   // from the Trackly static html template.
+  let appDefaults = {...{ show: true, center: true, useContentSize: true}, ...defaults};
+
+  notificationWindow = new BrowserWindow(appDefaults);
+  notificationWindow.loadURL(`file://${__static}/${url}.html`);
+
+  return notificationWindow;
 }
 
 app.on("window-all-closed", () => {
@@ -377,6 +319,60 @@ app.on("ready", () => {
   // get the idler program up and running.
   idler.createParent(appWindow);
 
+});
+
+/**
+ * when the timer is tracking and you want to quit the timer
+ */
+ipcMain.on('quitTracking', (event: any, state: any) => {
+  notificationWindow.close();
+  if (state.quit) {
+    quit = true;
+    appWindow.webContents.send("timer:stop");
+  }
+});
+
+/**
+ * dialog to quit the desktop application.
+ */
+ipcMain.on('quit', (event: any, res: any) => {
+  notificationWindow.close();
+  if (res.checked) {
+    store.set("close", res.value);
+  }
+  if(res.value === 'Minimize') {
+    appWindow.minimize();
+  } else if(res.value === 'Quit') {
+    close = 'ya';
+    appWindow.close();
+  }
+});
+
+/**
+ * when an update is available
+ * close the dialog window
+ */
+ipcMain.on('updateAvailable', (event: any) => {
+  notificationWindow.close();
+});
+
+/**
+ * restart and apply new updates
+ */
+ipcMain.on('restart', (event: any, res: any) => {
+
+  notificationWindow.close();
+
+  if (res.restart) {
+    store.delete('close');
+    close = 'ya';
+    restartAndInstall = true;
+    if (timeIsRunning) {
+      appWindow.webContents.send("timer:stop");
+    } else {
+      autoUpdater.quitAndInstall();
+    }
+  }
 });
 
 /**
@@ -547,6 +543,8 @@ ipcMain.on("timer", (event: any, args: any) => {
         // now quit
         if (quit) {
           appWindow.close();
+        } else if (restartAndInstall) {
+          autoUpdater.quitAndInstall();
         }
       }
     );

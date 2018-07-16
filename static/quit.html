@@ -16,29 +16,42 @@
       font-size: 0.8em;
       font-family: Montserrat, sans-serif;
     }
+    #ok, #Min {
+      background-color: #0074ee;
+      color: #ffffff;
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+    }
+    #cancel{
+      background-color: rgba(204, 204, 204, 0.43);
+      font-size: 0.8em;
+      font-family: Montserrat, sans-serif;
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
 <div class="container pt-3">
   <div class="row">
 
-    <div class="col-12 row no-gutters">
+    <div class="col-12 pl-5 row">
 
       <h2 id="header" class="col-12">Are you sure you want to quit?</h2>
 
       <form class="col-12 form mb-0">
         <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="leaveApp">
-          <label class="form-check-label" for="leaveApp"> Remember my choice </label>
+          <input type="checkbox" class="form-check-input" id="checkbox">
+          <label class="form-check-label" for="checkbox"> Remember my choice </label>
         </div>
       </form>
     </div>
 
-    <div class="col-12 row no-gutters py-2 justify-content-around align-self-end">
-      <div class="text-right col-8">
+    <div class="col-12 row pt-4 pb-2 justify-content-around align-self-end">
+      <div class="text-right col-11">
         <button id="ok" class="btn btn-sm mr-2"> &nbsp; Quit &nbsp;</button>
-        <button id="cancel" class="btn btn-sm mr-2"> Minimize </button>
-        <button id="apply" class="btn btn-sm"> Cancel </button>
+        <button id="Min" class="btn btn-sm mr-2"> Minimize </button>
+        <button id="cancel" class="btn btn-sm"> Cancel </button>
       </div>
     </div>
 
@@ -48,13 +61,6 @@
 <script>
 
   const { ipcRenderer } = require('electron');
-
-  const text = {
-    buttons: ['Quit', 'Minimize', 'Cancel'],
-    title: 'Trackly - Quit',
-    message: 'Are you sure you want to quit?',
-    checkboxLabel: 'Remember my choice'
-  };
 
   const $ = (selector) => {
 
@@ -72,6 +78,20 @@
       el: element
     }
   };
+
+  const checkbox = $("#checkbox").el;
+
+  $('#ok').on('click', (event) => {
+    ipcRenderer.send('quit', {value: 'Quit', checked: checkbox.checked})
+  });
+
+  $('#Min').on('click', (event) => {
+    ipcRenderer.send('quit', {value: 'Minimize', checked: checkbox.checked})
+  });
+
+  $('#cancel').on('click', (event) => {
+    ipcRenderer.send('quit', {value: 'Cancel', checked: checkbox.checked})
+  });
 
 </script>
 </body>

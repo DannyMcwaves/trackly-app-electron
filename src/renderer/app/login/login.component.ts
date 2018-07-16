@@ -112,8 +112,17 @@ export class LoginComponent implements OnInit {
       this.store.set('userId', res['userId']);
       this.router.navigate([""]);
     }, err => {
-      alert("Login failed");
+      this.showAlert("warning", "Sign-in failed");
     });
 
+  }
+
+  showAlert(id: string, text: string){
+    document.getElementById(id).getElementsByTagName("strong")[0].innerHTML = text;
+    document.getElementById(id).style.display = "block";
+  }
+
+  closeAlert(id: string) {
+    document.getElementById(id).style.display = "none";
   }
 }

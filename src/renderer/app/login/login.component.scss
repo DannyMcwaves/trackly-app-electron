@@ -7,7 +7,7 @@ header {
     padding-right: 20px;
     padding-left: 20px;
     box-sizing: border-box;
-    background-image: -webkit-linear-gradient(180deg, #0074ee, #006ee2);
+    background-image: -webkit-linear-gradient(180deg, #0077ee, #006ee2);
 
     #logo {
         margin-top: 15px;
@@ -54,4 +54,8 @@ form {
 
 #version {
     font-size: 10px;
+}
+
+.brandBlue {
+    background-color:#0074ee;
 }

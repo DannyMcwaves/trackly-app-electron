@@ -157,7 +157,7 @@ function createApplicationWindow() {
 
     if (timeIsRunning) {
       event.preventDefault();
-      createDialog('tracking', {height: 140, width: 450});
+      createDialog('tracking', {height: 150, width: 450});
     } else if(val === 'Minimize') {
       event.preventDefault();
       windowFrame.minimize();

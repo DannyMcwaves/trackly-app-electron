@@ -424,13 +424,17 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                 // Empty response
                 if (!this.projects.length) {
                     this.projects = [];
-                    this.projects.push({
-                        archived: false,
-                        description: "(No desription)",
-                        id: '0',
-                        title: "(No project)",
-                        workspaceId: this.activeWorkspace.id
-                    });
+                }
+
+                if(this.projects.find( (prj: any): boolean => { return prj.id === 0 }) ) {
+                  this.projects.push({
+                    archived: false,
+                    description: "(No desription)",
+                    id: '0',
+                    title: "(No project)",
+                    workspaceId: this.activeWorkspace.id
+                  });
+  
                 }
 
                 // when the user is enabled to track time, resize to the size of the window content.

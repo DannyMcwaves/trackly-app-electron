@@ -342,9 +342,12 @@ ipcMain.on('quit', (event: any, res: any) => {
   }
   if(res.value === 'Minimize') {
     appWindow.minimize();
+    quit = false;
   } else if(res.value === 'Quit') {
     close = 'ya';
     appWindow.close();
+  } else {
+    quit = false;
   }
 });
 

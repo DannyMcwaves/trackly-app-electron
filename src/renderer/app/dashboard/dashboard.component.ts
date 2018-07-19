@@ -426,7 +426,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                     this.projects = [];
                 }
 
-                if(this.projects.find( (prj: any): boolean => { return prj.id === 0 }) ) {
+                if(!this.projects.find( (prj: any): boolean => { return prj.id === 0 }) ) {
                   this.projects.push({
                     archived: false,
                     description: "(No desription)",
@@ -434,7 +434,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                     title: "(No project)",
                     workspaceId: this.activeWorkspace.id
                   });
-  
+
                 }
 
                 // when the user is enabled to track time, resize to the size of the window content.

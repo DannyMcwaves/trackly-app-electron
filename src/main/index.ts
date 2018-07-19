@@ -46,9 +46,9 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
 
   {
     label: 'Start Tracking',
-    submenu: [
-      {label: 'No Projects'}
-    ]
+    click() {
+      if(appWindow) { appWindow.webContents.send("timer:click", '0'); }
+    }
   },
 
   {
@@ -405,11 +405,22 @@ ipcMain.on('isrunning', (event: any, status: boolean) => {
 * */
 ipcMain.on('projects', (event: any, projects: [{}]) => {
 
-  trayMenuTemplate[2].submenu = projects.map((item: any) => (
+  const projies = projects.map((item: any) => (
       {label: item.title, click() {
         if(appWindow) { appWindow.webContents.send("timer:click", item.id); }
       }}
     ));
+
+  if (projies.length) {
+    trayMenuTemplate[2].submenu = projies
+  } else {
+    trayMenuTemplate[2] = {
+      label: 'Start Tracking',
+      click() {
+        if(appWindow) { appWindow.webContents.send("timer:click", '0'); }
+      }
+    }
+  }
 
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 

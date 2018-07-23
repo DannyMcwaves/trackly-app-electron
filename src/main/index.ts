@@ -118,7 +118,6 @@ let shotOut: any;
 let server: any;
 let port: any;
 let close: string = 'na';
-let quit = false;
 let restartAndInstall = false;
 let dir = join(__static, '/trackly.png');
 let image = nativeImage.createFromPath(dir);
@@ -155,10 +154,7 @@ function createApplicationWindow() {
   windowFrame.on("close", (event: any) => {
     let val = store.get('close');
 
-    if (timeIsRunning) {
-      event.preventDefault();
-      createDialog('tracking', {height: 120, width: 450});
-    } else if(val === 'Minimize') {
+    if(val === 'Minimize') {
       event.preventDefault();
       windowFrame.minimize();
     } else if(val === 'Cancel') {
@@ -322,17 +318,6 @@ app.on("ready", () => {
 });
 
 /**
- * when the timer is tracking and you want to quit the timer
- */
-ipcMain.on('quitTracking', (event: any, state: any) => {
-  notificationWindow.close();
-  if (state.quit) {
-    quit = true;
-    appWindow.webContents.send("timer:stop");
-  }
-});
-
-/**
  * dialog to quit the desktop application.
  */
 ipcMain.on('quit', (event: any, res: any) => {
@@ -342,12 +327,12 @@ ipcMain.on('quit', (event: any, res: any) => {
   }
   if(res.value === 'Minimize') {
     appWindow.minimize();
-    quit = false;
   } else if(res.value === 'Quit') {
     close = 'ya';
-    appWindow.close();
-  } else {
-    quit = false;
+    appWindow.webContents.send("timer:stop");
+    setTimeout(() => {
+      appWindow.close();
+    }, 2000);
   }
 });
 
@@ -554,10 +539,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         // upload files through the idler
         idler.stopUpload();
 
-        // now quit
-        if (quit) {
-          appWindow.close();
-        } else if (restartAndInstall) {
+        if (restartAndInstall) {
           autoUpdater.quitAndInstall();
         }
       }

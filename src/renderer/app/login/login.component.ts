@@ -120,9 +120,12 @@ export class LoginComponent implements OnInit {
   showAlert(id: string, text: string){
     document.getElementById(id).getElementsByTagName("strong")[0].innerHTML = text;
     document.getElementById(id).style.display = "block";
+   
+    ipcRenderer.send("win:height", this.positionInfo - this.resetHeight + document.getElementById(id).offsetHeight + 20);
   }
 
   closeAlert(id: string) {
     document.getElementById(id).style.display = "none";
+    ipcRenderer.send("win:height", this.positionInfo - this.resetHeight);
   }
 }

@@ -177,7 +177,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                     date: this.endTime.toISOString(),
                     projectId: project.id
                 });
-                ipcRenderer.send("isrunning", false);
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
                 this.perProjectCached[project.id] = this.perProject[project.id];
@@ -196,7 +195,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                       date: this.endTime ? this.endTime.toISOString() : moment().milliseconds(0).toISOString(),
                       projectId: project.id
                   });
-                  ipcRenderer.send("isrunning", false);
                 }
                 this.currentSessionCached = this.currentSession;
                 this.totalIimeTodayCached = this.totalIimeToday;
@@ -212,7 +210,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                   timestamp: Date.now(),
                   date: this.startTime.toISOString()
                 });
-                ipcRenderer.send("isrunning", true);
             }
         } else {
             alert('Time tracking is not enabled.');

@@ -157,7 +157,7 @@ function createApplicationWindow() {
 
     if (timeIsRunning) {
       event.preventDefault();
-      createDialog('tracking', {height: 150, width: 450});
+      createDialog('tracking', {height: 120, width: 450});
     } else if(val === 'Minimize') {
       event.preventDefault();
       windowFrame.minimize();
@@ -222,7 +222,7 @@ function autoAppUpdater() {
   autoUpdater.on('download-progress', (ev, progressObj) => {});
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
-    createDialog('restart', {height: 140, width: 450});
+    createDialog('restart', {height: 135, width: 450});
   });
 }
 

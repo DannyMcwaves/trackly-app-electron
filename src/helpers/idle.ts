@@ -179,7 +179,7 @@ export class Idler {
 
       this._idleInterval = setInterval(() => {
         this.logTick({});
-      }, 1000);
+      }, 2000);
 
     }
 

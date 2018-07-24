@@ -1,4 +1,6 @@
 import * as logger from "electron-log";
+const unhandled = require('electron-unhandled');
+unhandled(logger.error, true);
 const Store = require("electron-store");
 
 // moment addons

@@ -17,6 +17,10 @@ import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { enableProdMode } from "@angular/core";
 import { AppModule } from "./app/app.module";
 
+import * as logger from "electron-log";
+const unhandled = require('electron-unhandled');
+unhandled(logger.error, true);
+
 if(process.env.NODE_ENV === "production") {
     enableProdMode();
 }

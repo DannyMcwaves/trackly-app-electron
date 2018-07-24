@@ -538,7 +538,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         ActiveWindow.stopWindow();
 
         // append stop logging to the global app state.
-        Emitter.appendEvent("stopLogging", stopMoment, {projectId: args.projectId});
+        Emitter.appendEvent("stopLogging", moment().milliseconds(0), {projectId: args.projectId});
 
         // upload files through the idler
         idler.stopUpload();

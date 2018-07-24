@@ -215,7 +215,9 @@ function autoAppUpdater() {
 
   autoUpdater.on('update-not-available', (ev, info) => {});
 
-  autoUpdater.on('error', (ev, err) => {});
+  autoUpdater.on('error', (ev, err) => {
+    logger.log(err);
+  });
 
   autoUpdater.on('download-progress', (ev, progressObj) => {});
 

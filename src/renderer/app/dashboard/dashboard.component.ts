@@ -277,11 +277,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
           this.projects = response.filter((item: any) => !item.archived);
 
-          ipcRenderer.send('projects', this.projects);
-
-          // Empty response
-          if (!this.projects.length) {
-            this.projects = [];
+          if(!this.projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
             this.projects.push({
               archived: false,
               description: "(No desription)",
@@ -290,6 +286,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
               workspaceId: this.activeWorkspace.id
             });
           }
+
+          ipcRenderer.send('projects', this.projects);
 
           this.projects.forEach((element: any) => {
             this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;

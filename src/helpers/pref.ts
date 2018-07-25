@@ -19,7 +19,7 @@ let windowURL = `file://${__static}/prefs.html`;
 let appWindow: BrowserWindow;
 let mainWindow: any;
 let store = new Store();
-let extensionUrl = 'https://trackly.com/download/browser-extension';
+let extensionUrl = 'https://trackly.com/browser';
 
 /**
  * Create application window for preferences.

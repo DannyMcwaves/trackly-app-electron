@@ -499,13 +499,13 @@ ipcMain.on("timer", (event: any, args: any) => {
     // append the startLogging event to the app data emitter.
     Emitter.appendEvent("startLogging", args.date, {projectId: args.projectId});
 
-    // current window on action.
-    ActiveWindow.current(0);
-
     idler.currentProject(args);
 
     // Take screenshot within a random time during the first 60 secs.
     shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
+
+    // current window on action.
+    ActiveWindow.current(0);
 
     // start the browser extension server.
     startServer();
@@ -538,7 +538,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         ActiveWindow.stopWindow();
 
         // append stop logging to the global app state.
-        Emitter.appendEvent("stopLogging", moment().milliseconds(0), {projectId: args.projectId});
+        Emitter.appendEvent("stopLogging", moment().milliseconds(-1000), {projectId: args.projectId});
 
         // upload files through the idler
         idler.stopUpload();

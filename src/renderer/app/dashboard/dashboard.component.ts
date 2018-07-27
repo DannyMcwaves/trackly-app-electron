@@ -370,8 +370,11 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      * Log user out of the application
      */
     logOut() {
-      ipcRenderer.send('isrunning', false);
-      ipcRenderer.send("timer", {action: "stop"});
+      if (this.activeProject.id) {
+        this.trackProject(this.activeProject)
+      }
+
+      // reset active workspace and log out the
       this.activeWorkspace = undefined;
       this.userService.logout();
     }

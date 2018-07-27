@@ -17,7 +17,7 @@ export class Uploader {
     logger.log('Upload started');
     setTimeout(() => {
       this.uploadActivities(() => {
-        this.uploadScreenshots();
+        // this.uploadScreenshots();
       });
       callback();
     }, this.uploadTimeout);

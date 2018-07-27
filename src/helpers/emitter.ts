@@ -8,6 +8,12 @@ export class Emitter {
 
   public static appState: any = {activities: [], events: []};
 
+  static currentProject: string = "";
+
+  static currentTime: string = "";
+
+  static lastSynced: any = "";
+
   static appendActivity(userActive: boolean, duration: number) {
     this.appState.activities.push({userActive, duration})
   }

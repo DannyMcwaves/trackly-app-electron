@@ -180,7 +180,7 @@ export class Fscs {
     const fp = jsonfile.readFileSync(currentActFile);
 
     // Take screenshot
-    this.takeScreenshot(ts);
+    // this.takeScreenshot(ts);
 
     const tempFile = this.generateActivityFile({
       timestamp: ts,

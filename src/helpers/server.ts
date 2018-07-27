@@ -3,9 +3,11 @@ import * as bodyParser from 'body-parser';
 import * as moment from 'moment';
 import { Emitter} from "./emitter";
 import {createServer} from 'net';
+const Store = require("electron-store");
 
 const app = express();
 let index = 0;
+const store = new Store();
 
 const portAvailable = (port: any) => new Promise((resolve, reject) => {
   const tester: any = createServer();
@@ -23,7 +25,6 @@ const portAvailable = (port: any) => new Promise((resolve, reject) => {
     .listen(port[index])
 });
 
-
 // avoid cases of CORS
 app.use(function(req: any, res: any, next: any) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -36,13 +37,25 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('*', (req: any, res: any) => {
-  res.send({message: "Trackly"});
+  res.send({
+    token: store.get('token'),
+    userId: store.get('userId'),
+    url: `https://trackly.com/app/dashboard?token${store.get('token')}`,
+    currentTime: Emitter.currentTime,
+    currentProject: Emitter.currentProject,
+    lastSynced: Emitter.lastSynced
+  });
 });
 
 app.post('*', (req: any, res: any) => {
-  console.log(req.body);
+
+  // append this to the emitter.
   Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), req.body);
-  res.send({message: "Trackly", status: "message received"});
+
+  res.send({
+    message: "Trackly",
+    status: "message received"
+  });
 });
 
 export { app, portAvailable };

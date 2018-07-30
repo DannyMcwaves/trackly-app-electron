@@ -261,52 +261,51 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
 
-        this.workspaces = response;
+        if (this.activeWorkspace) {
 
-        this.getProjects().subscribe((response: any) => {
+          this.getProjects().subscribe((response: any) => {
 
-          let oldActive = JSON.parse(JSON.stringify(this.activeProject));
+            let oldActive = JSON.parse(JSON.stringify(this.activeProject));
 
-          let newActive = response.filter((item: any) => item.id === oldActive.id)[0];
+            let newActive = response.filter((item: any) => item.id === oldActive.id)[0];
 
-          if(newActive) {
-            this.activeProject = newActive;
-          } else if(oldActive.id) {
-            this.trackProject(oldActive);
-          }
+            if(newActive) {
+              this.activeProject = newActive;
+            } else if(oldActive.id) {
+              this.trackProject(oldActive);
+            }
 
-          this.projects = response.filter((item: any) => !item.archived);
+            this.projects = response.filter((item: any) => !item.archived);
 
-          if(!this.projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
-            this.projects.push({
-              archived: false,
-              description: "(No desription)",
-              id: '0',
-              title: "(No project)",
-              workspaceId: this.activeWorkspace.id
+            if(!this.projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
+              this.projects.push({
+                archived: false,
+                description: "(No desription)",
+                id: '0',
+                title: "(No project)",
+                workspaceId: this.activeWorkspace.id
+              });
+            }
+
+            ipcRenderer.send('projects', this.projects);
+
+            this.projects.forEach((element: any) => {
+              this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+              this.perProjectCached[element.id] = this.perProject[element.id];
+              _totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+              this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
+              ipcRenderer.send("time:travel", this.totalIimeToday);
             });
-          }
 
-          ipcRenderer.send('projects', this.projects);
+            this.resize = true;
 
-          this.projects.forEach((element: any) => {
-            this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
-            this.perProjectCached[element.id] = this.perProject[element.id];
-            _totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
-            this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
-            ipcRenderer.send("time:travel", this.totalIimeToday);
+            this.lastSynced = Date.now();
+
+          }, error => {
+            console.log("error getting projects");
+            this.lastSynced = 'error';
           });
-
-          // this.startTime =  moment().milliseconds(0);
-
-          this.resize = true;
-
-          this.lastSynced = Date.now();
-
-        }, error => {
-          console.log("error getting projects");
-          this.lastSynced = 'error';
-        });
+        }
       }, error => {
           console.log("error getting workspaces");
           this.lastSynced = 'error';

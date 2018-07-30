@@ -112,13 +112,13 @@ export class LoginComponent implements OnInit {
       this.store.set('userId', res['userId']);
       this.router.navigate([""]);
     }, err => {
-      this.showAlert("warning", "Sign-in failed");
+      this.showAlert("warning", "Email and password don't match.");
     });
 
   }
 
   showAlert(id: string, text: string){
-    document.getElementById(id).getElementsByTagName("strong")[0].innerHTML = text;
+    document.getElementById(id).getElementsByTagName("span")[0].innerHTML = text;
     document.getElementById(id).style.display = "block";
    
     ipcRenderer.send("win:height", this.positionInfo - this.resetHeight + document.getElementById(id).offsetHeight + 20);

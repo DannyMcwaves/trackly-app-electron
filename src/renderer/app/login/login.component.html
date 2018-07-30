@@ -6,11 +6,8 @@
     </ul>
 </header>
 <section id="content">
-        <div id="warning" class="alert alert-warning" role="alert" style="display: none;">
-            <button (click)="closeAlert('warning')" type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <strong>Sign-in failed</strong>
+        <div id="warning" class="alert alert-danger" role="alert" style="display: none;">
+            <span>Email and password don't match.</span>
         </div>
     <form id="form" [hidden]="!hidden" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-control-group">

@@ -1,3 +1,5 @@
+import {Moment} from "moment";
+
 const Store = require("electron-store");
 
 import {Component, ViewEncapsulation, NgZone} from "@angular/core";
@@ -49,6 +51,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleDisplay: string = "none";
     private idleHeight: number = 10;
     private idleTime: number = 10;
+    private startTimeHolder: any = '';
     private currentIdleProject: string = "Madison Square";
 
     /**
@@ -251,7 +254,10 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      */
     refreshWorkSpace() {
       this.lastSynced = 'refresh';
-      ipcRenderer.send("resetTimer")
+      ipcRenderer.send("resetTimer");
+      if (this.startTime) {
+        this.startTimeHolder = this.getCurrentTime();
+      }
     }
 
     _refresher() {
@@ -287,15 +293,19 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
               });
             }
 
-            ipcRenderer.send('projects', this.projects);
+            // ipcRenderer.send('projects', this.projects);
 
-            this.projects.forEach((element: any) => {
-              this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
-              this.perProjectCached[element.id] = this.perProject[element.id];
-              _totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
-              this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
-              ipcRenderer.send("time:travel", this.totalIimeToday);
-            });
+            let tempTimeToday = 0, tempTimeTodayCached;
+
+            if (!this.startTime) {
+              this.projects.forEach((element: any) => {
+                this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+                this.perProjectCached[element.id] = this.perProject[element.id];
+                _totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+                this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
+                ipcRenderer.send("time:travel", this.totalIimeToday);
+              });
+            }
 
             this.resize = true;
 

@@ -277,6 +277,10 @@ function createDialog(url: string, defaults: object = {}) {
   notificationWindow = new BrowserWindow(appDefaults);
   notificationWindow.loadURL(`file://${__static}/${url}.html`);
 
+  windowFrame.on('closed', (event: any) => {
+    notificationWindow = null;
+  });
+
   return notificationWindow;
 }
 
@@ -325,7 +329,11 @@ app.on("ready", () => {
  * dialog to quit the desktop application.
  */
 ipcMain.on('quit', (event: any, res: any) => {
-  notificationWindow.close();
+
+  if(notificationWindow) {
+    notificationWindow.close();
+  }
+
   if (res.checked) {
     store.set("close", res.value);
   }
@@ -345,7 +353,9 @@ ipcMain.on('quit', (event: any, res: any) => {
  * close the dialog window
  */
 ipcMain.on('updateAvailable', (event: any) => {
-  notificationWindow.close();
+  if(notificationWindow) {
+    notificationWindow.close();
+  }
 });
 
 /**
@@ -353,7 +363,9 @@ ipcMain.on('updateAvailable', (event: any) => {
  */
 ipcMain.on('restart', (event: any, res: any) => {
 
-  notificationWindow.close();
+  if(notificationWindow) {
+    notificationWindow.close();
+  }
 
   if (res.restart) {
     store.delete('close');

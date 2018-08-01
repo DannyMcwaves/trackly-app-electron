@@ -158,9 +158,13 @@ export class Fscs {
    */
   private insertJsonNode(target: string, node: string, value: any) {
     fse.readFile(target, (err, data: any) => {
-      let json = JSON.parse(data);
-      json[node].push(value);
-      fse.writeFile(target, JSON.stringify(json), () => {});
+      try {
+        let json = JSON.parse(data);
+        json[node].push(value);
+        fse.writeFile(target, JSON.stringify(json), () => {});
+      } catch(err) {
+        logger.error(err);
+      }
     });
   }
 

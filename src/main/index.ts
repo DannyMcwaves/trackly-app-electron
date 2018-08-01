@@ -277,7 +277,7 @@ function createDialog(url: string, defaults: object = {}) {
   notificationWindow = new BrowserWindow(appDefaults);
   notificationWindow.loadURL(`file://${__static}/${url}.html`);
 
-  windowFrame.on('closed', (event: any) => {
+  notificationWindow.on('closed', (event: any) => {
     notificationWindow = null;
   });
 

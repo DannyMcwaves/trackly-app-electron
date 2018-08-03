@@ -40,9 +40,10 @@ app.get('*', (req: any, res: any) => {
   res.send({
     token: store.get('token'),
     userId: store.get('userId'),
-    url: `https://trackly.com/app/dashboard?token${store.get('token')}`,
+    url: `https://trackly.com/app/dashboard?token=${store.get('token')}`,
     currentTime: Emitter.currentTime,
     currentProject: Emitter.currentProject,
+    currentProjectId: Emitter.currentProjectId,
     lastSynced: Emitter.lastSynced
   });
 });

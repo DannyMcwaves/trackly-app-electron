@@ -518,6 +518,8 @@ ipcMain.on("timer", (event: any, args: any) => {
 
     Emitter.currentProject = args.title;
 
+    Emitter.currentProjectId = args.projectId;
+
     // Take screenshot within a random time during the first 60 secs.
     // shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);
 

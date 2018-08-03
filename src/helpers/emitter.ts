@@ -14,6 +14,8 @@ export class Emitter {
 
   static lastSynced: any = "";
 
+  static currentProjectId: any = "";
+
   static appendActivity(userActive: boolean, duration: number) {
     this.appState.activities.push({userActive, duration})
   }

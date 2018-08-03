@@ -62,6 +62,7 @@ export class Idler {
       if (returnValue) {
         // upload files within 10min interval after every rotation.
         this.uploader.upload(() => {
+          Emitter.lastSynced = moment().milliseconds(0);
           if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
         });
       }

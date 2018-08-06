@@ -19,7 +19,7 @@ import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
-import {createPrefWindow, addAppWindow} from "../helpers/pref";
+import {createPrefWindow} from "../helpers/pref";
 
 // Logger
 autoUpdater.logger = logger;
@@ -56,7 +56,7 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Stop Tracking',
     click() {
-      appWindow.webContents.send("timer:stop");
+      appWindow.webContents.send("stopTimeFromTray");
     }
   },
 
@@ -318,7 +318,7 @@ app.on("ready", () => {
   autoAppUpdater();
 
   // add the main window to the prefs page.
-  addAppWindow(appWindow);
+  Emitter.mainWindow = appWindow;
 
   // get the idler program up and running.
   idler.createParent(appWindow);
@@ -341,7 +341,7 @@ ipcMain.on('quit', (event: any, res: any) => {
     appWindow.minimize();
   } else if(res.value === 'Quit') {
     close = 'ya';
-    appWindow.webContents.send("timer:stop");
+    appWindow.webContents.send("stopTimeFromTray");
     setTimeout(() => {
       appWindow.close();
     }, 2000);
@@ -372,7 +372,7 @@ ipcMain.on('restart', (event: any, res: any) => {
     close = 'ya';
     restartAndInstall = true;
     if (timeIsRunning) {
-      appWindow.webContents.send("timer:stop");
+      appWindow.webContents.send("stopTimeFromTray");
     } else {
       autoUpdater.quitAndInstall();
     }

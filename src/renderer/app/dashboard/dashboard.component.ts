@@ -1,5 +1,3 @@
-import {Moment} from "moment";
-
 const Store = require("electron-store");
 
 import {Component, ViewEncapsulation, NgZone} from "@angular/core";
@@ -95,7 +93,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         });
 
         // stop the timer.
-        ipcRenderer.on("timer:stop", (event: any) => {
+        ipcRenderer.on("stopTimeFromTray", (event: any) => {
           // so the trick is to get the id of the element and then click on it.
           if (this.activeProject.id) {
             this.trackProject(this.activeProject);
@@ -118,8 +116,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           this._refresher();
         });
 
-        ipcRenderer.on("logout", (event: any) => {
-          this.logOut();
+        ipcRenderer.on("clickLoggingOut", (event: any) => {
+          document.getElementById("outOfLogging").click();
         });
 
         // before the window unloads clear the tracking next day interval

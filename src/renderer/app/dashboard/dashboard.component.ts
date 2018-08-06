@@ -244,7 +244,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
           this.today = (new Date()).getDate();
 
-          this._refresher();
+          // if there is no active project, then do not refresh this workspace.
+          // that's if the user is not tracking time.
+          // when there is no time tracking, then reset the timer.
+          if (!this.activeProject) {
+            this._refresher();
+          }
         }
       }, 10000);
     }
@@ -255,9 +260,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     refreshWorkSpace() {
       this.lastSynced = 'refresh';
       ipcRenderer.send("resetTimer");
-      if (this.startTime) {
-        this.startTimeHolder = this.getCurrentTime();
-      }
     }
 
     _refresher() {

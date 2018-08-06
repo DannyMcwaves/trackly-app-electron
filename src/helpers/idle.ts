@@ -85,7 +85,7 @@ export class Idler {
         if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
       });
     } else {
-      this._parentWindow.webContents.send("resetTimer");
+      if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
     }
   }
 

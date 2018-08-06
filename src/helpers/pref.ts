@@ -2,6 +2,7 @@
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 const Store = require("electron-store");
 import { autoUpdater } from "electron-updater";
+import {Emitter} from "./emitter";
 
 
 let windowDefaults = {
@@ -17,7 +18,6 @@ let windowDefaults = {
 };
 let windowURL = `file://${__static}/prefs.html`;
 let appWindow: BrowserWindow;
-let mainWindow: any;
 let store = new Store();
 let extensionUrl = 'https://trackly.com/browser';
 
@@ -114,9 +114,7 @@ ipcMain.on('openPref', (event: any) => {
 // when an event asks to be logout
 ipcMain.on('logout', (event: any) => {
   appWindow.close();
-  if (mainWindow) {
-    mainWindow.webContents.send('logout');
-  }
+  Emitter.mainWindow.webContents.send('clickLoggingOut');
 });
 
 ipcMain.on('update', (event: any) => {
@@ -141,8 +139,4 @@ export function createPrefWindow() {
   } else {
     appWindow.focus();
   }
-}
-
-export function addAppWindow(window: any) {
-  mainWindow = window;
 }

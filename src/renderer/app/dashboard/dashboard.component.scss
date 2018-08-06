@@ -129,6 +129,19 @@ figure {
     -ms-transform: translate(-50%,-50%);
 }
 
+#timer {
+  .timer-button {
+    span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.5;
+      font-family: Montserrat, sans-serif;
+      color: white;
+      margin-right: 5px;
+    }
+  }
+}
+
 footer {
   box-sizing: border-box;
   height: 36px;

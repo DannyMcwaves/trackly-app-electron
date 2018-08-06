@@ -112,7 +112,14 @@ export class LoginComponent implements OnInit {
       this.store.set('userId', res['userId']);
       this.router.navigate([""]);
     }, err => {
-      this.showAlert("warning", "Email and password don't match.");
+      console.log(err);
+      if (err.statusText === "Unknown Error") {
+        this.showAlert("warning", "Please check your internet connection");
+      } else if(err.error.error.message === "login failed") {
+        this.showAlert("warning", "Login Failed. Email/password mismatch");
+      } else {
+        this.showAlert("warning", err.message);
+      }
     });
 
   }
@@ -120,7 +127,7 @@ export class LoginComponent implements OnInit {
   showAlert(id: string, text: string){
     document.getElementById(id).getElementsByTagName("span")[0].innerHTML = text;
     document.getElementById(id).style.display = "block";
-   
+
     ipcRenderer.send("win:height", this.positionInfo - this.resetHeight + document.getElementById(id).offsetHeight + 20);
   }
 

@@ -16,6 +16,8 @@ export class Emitter {
 
   static currentProjectId: any = "";
 
+  static mainWindow: any = null;
+
   static appendActivity(userActive: boolean, duration: number) {
     this.appState.activities.push({userActive, duration})
   }

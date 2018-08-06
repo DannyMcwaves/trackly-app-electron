@@ -35,7 +35,6 @@ export class UserService {
    * Logout user from the application and remove the token.
    */
   logout() {
-    ipcRenderer.send("timer", {action: "stop"});
     setTimeout(() => {
       this.store.delete("token");
       this.store.delete("userId");

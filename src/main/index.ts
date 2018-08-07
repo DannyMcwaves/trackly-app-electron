@@ -341,7 +341,9 @@ ipcMain.on('quit', (event: any, res: any) => {
     appWindow.minimize();
   } else if(res.value === 'Quit') {
     close = 'ya';
-    appWindow.webContents.send("stopTimeFromTray");
+    if (appWindow) {
+      appWindow.webContents.send("stopTimeFromTray");
+    }
     setTimeout(() => {
       appWindow.close();
     }, 2000);

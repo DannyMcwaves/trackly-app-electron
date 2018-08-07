@@ -176,7 +176,7 @@ export class Idler {
     if(!this._idleInterval) {
 
       // when this happens start tracking the idle time by stopping the main tracker.
-      this._parentWindow.webContents.send("timer:stop");
+      this._parentWindow.webContents.send("stopTimeFromTray");
 
       Emitter.appendEvent("startIdle", moment().milliseconds(0).toISOString(), "");
 

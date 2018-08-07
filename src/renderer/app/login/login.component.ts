@@ -114,7 +114,7 @@ export class LoginComponent implements OnInit {
     }, err => {
       console.log(err);
       if (err.statusText === "Unknown Error") {
-        this.showAlert("warning", "Please check your internet connection");
+        this.showAlert("warning", "No internet connection available.");
       } else if(err.error.error.message === "login failed") {
         this.showAlert("warning", "Login Failed. Email/password mismatch");
       } else {

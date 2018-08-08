@@ -105,10 +105,8 @@ export class Idler {
         if (this._parentWindow) {
           if (res.reset) {
             this._parentWindow.webContents.send("resetTimer");
-            console.log('reset');
           } else {
             this._parentWindow.webContents.send("sync:update", Date.now());
-            console.log('synced');
           }
         }
       });

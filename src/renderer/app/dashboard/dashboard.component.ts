@@ -303,9 +303,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
             if (!this.startTime) {
               this.projects.forEach((element: any) => {
-                this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+                this.perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
                 this.perProjectCached[element.id] = this.perProject[element.id];
-                _totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+                _totalIimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
                 this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
                 ipcRenderer.send("time:travel", this.totalIimeToday);
               });
@@ -454,9 +454,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                 }
 
                 this.projects.forEach((element: any) => {
-                    this.perProject[element.id] = element.timeTracked ? element.timeTracked : 0;
+                    this.perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
                     this.perProjectCached[element.id] = this.perProject[element.id];
-                    this.totalIimeToday += element.timeTracked ? Math.round(element.timeTracked) : 0;
+                    this.totalIimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
                     this.totalIimeTodayCached = this.totalIimeToday;
                     ipcRenderer.send("time:travel", this.totalIimeToday);
                 });

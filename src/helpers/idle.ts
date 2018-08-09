@@ -4,7 +4,7 @@ import { Fscs } from './fscs';
 import { Emitter } from './emitter';
 import { Uploader } from './uploader';
 import { activityStorage } from "./activity";
-import { BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { ActiveWindow } from "./windows";
 import * as moment from "moment";
 
@@ -89,7 +89,7 @@ export class Idler {
     }
   }
 
-  stopUpload() {
+  stopUpload(res: any) {
     // delegate the uploader for the stopper program to the idler program.
     // when the user was idle and the idler kicks in, do not upload the activities file
     // on stop.
@@ -102,7 +102,15 @@ export class Idler {
 
       // upload activity files and screenshots to the backend.
       this.uploader.upload(() => {
-        if (this._parentWindow) { this._parentWindow.webContents.send("sync:update", Date.now()); }
+        if (this._parentWindow) {
+          if (res.reset) {
+            this._parentWindow.webContents.send("resetTimer");
+            console.log('reset');
+          } else {
+            this._parentWindow.webContents.send("sync:update", Date.now());
+            console.log('synced');
+          }
+        }
       });
     }
   }
@@ -112,7 +120,9 @@ export class Idler {
   }
 
   createWindow() {
-    this._parentWindow.webContents.send("idler");
+    if (this._parentWindow) {
+      this._parentWindow.webContents.send("idler");
+    }
   }
 
   private idleTime() {
@@ -120,7 +130,9 @@ export class Idler {
   }
 
   idleDialog(time: any) {
-    this._parentWindow.webContents.send("idletime", time);
+    if (this._parentWindow) {
+      this._parentWindow.webContents.send("idletime", time);
+    }
   }
 
   projects(projects: any) {
@@ -161,7 +173,7 @@ export class Idler {
 
   startIdleTime(time: any) {
 
-    if (this._interruptIdler && !this._idleOpen) {
+    if (!this._idleOpen) {
       this.createWindow();
       this._idleOpen = true;
     }
@@ -178,7 +190,17 @@ export class Idler {
       // when this happens start tracking the idle time by stopping the main tracker.
       this._parentWindow.webContents.send("stopTimeFromTray");
 
+      this._parentWindow.focus();
+
+      this._parentWindow.flashFrame(true);
+
+      app.dock.bounce("informational");
+
       Emitter.appendEvent("startIdle", moment().milliseconds(0).toISOString(), "");
+
+      setTimeout(() => {
+        this._parentWindow.flashFrame(false);
+      }, 2000);
 
       this._idleInterval = setInterval(() => {
         this.logTick({});
@@ -201,7 +223,7 @@ export class Idler {
     this._idleOpen = false;
     this._idleInterval = undefined;
 
-    this.stopUpload();
+    this.stopUpload(idleResponse);
   }
 
 }

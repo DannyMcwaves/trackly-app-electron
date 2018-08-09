@@ -49,7 +49,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleDisplay: string = "none";
     private idleHeight: number = 10;
     private idleTime: number = 10;
-    private startTimeHolder: any = '';
+    private isIdle: boolean = false;
     private currentIdleProject: string = "Madison Square";
 
     /**
@@ -102,7 +102,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
-          // this.idleDisplay = "block";
+          this.isIdle = true;
           document.getElementById("idler").classList.remove('d-none');
         });
 
@@ -163,7 +163,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     }
 
     closeIdleTime() {
-      // this.idleDisplay = 'none';
+      this.isIdle = false;
       document.getElementById("idler").classList.add('d-none');
       ipcRenderer.send('idleResponse', {});
     }
@@ -245,7 +245,11 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           // if there is no active project, then do not refresh this workspace.
           // that's if the user is not tracking time.
           // when there is no time tracking, then reset the timer.
-          if (!this.activeProject) {
+          if (this.isIdle) {
+            document.getElementById("idler").classList.add('d-none');
+            ipcRenderer.send('idleResponse', {reset: true});
+            this.isIdle = false;
+          } else if(!this.activeProject.id) {
             this._refresher();
           }
         }

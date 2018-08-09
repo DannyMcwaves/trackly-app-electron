@@ -297,7 +297,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
               });
             }
 
-            // ipcRenderer.send('projects', this.projects);
+            ipcRenderer.send('projects', this.projects);
 
             let tempTimeToday = 0, tempTimeTodayCached;
 

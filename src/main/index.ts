@@ -431,6 +431,8 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   tray.setContextMenu(trayMenu);
+
+  logger.error(projects);
 });
 
 /*

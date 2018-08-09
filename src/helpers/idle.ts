@@ -192,7 +192,7 @@ export class Idler {
 
       this._parentWindow.flashFrame(true);
 
-      app.dock.bounce("informational");
+      // app.dock.bounce("informational");
 
       Emitter.appendEvent("startIdle", moment().milliseconds(0).toISOString(), "");
 

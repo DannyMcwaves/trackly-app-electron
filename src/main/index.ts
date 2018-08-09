@@ -272,7 +272,7 @@ function closeServer() {
 function createDialog(url: string, defaults: object = {}) {
   // this function should create all the custom dialog boxes
   // from the Trackly static html template.
-  let appDefaults = {...{ show: true, center: true, useContentSize: true}, ...defaults};
+  let appDefaults = {...{ show: true, center: true, useContentSize: true, parent: appWindow}, ...defaults};
 
   notificationWindow = new BrowserWindow(appDefaults);
   notificationWindow.loadURL(`file://${__static}/${url}.html`);
@@ -561,7 +561,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         Emitter.appendEvent("stopLogging", stopTime, {projectId: args.projectId});
 
         // upload files through the idler
-        idler.stopUpload();
+        idler.stopUpload({});
 
         if (restartAndInstall) {
           autoUpdater.quitAndInstall();

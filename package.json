@@ -79,7 +79,7 @@
     "electron-unhandled": "^1.1.0",
     "electron-updater": "^3.0.3",
     "express": "^4.16.3",
-    "iohook": "https://gitlab.trackly.com/trackly/iohook.git",
+    "iohook": "https://gitlab.trackly.com/trackly/iohook.git#noSegfaultHandler",
     "jquery": "^3.3.1",
     "jsonfile": "^4.0.0",
     "moment": "^2.20.1",

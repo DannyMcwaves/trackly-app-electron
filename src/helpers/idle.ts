@@ -187,10 +187,10 @@ export class Idler {
 
       // when this happens start tracking the idle time by stopping the main tracker.
       this._parentWindow.webContents.send("stopTimeFromTray");
-
       this._parentWindow.focus();
-
       this._parentWindow.flashFrame(true);
+      this._parentWindow.setAlwaysOnTop(true, 'floating');
+      this._parentWindow.setVisibleOnAllWorkspaces(true);
 
       // app.dock.bounce("informational");
 
@@ -209,6 +209,8 @@ export class Idler {
     this._upload = true;
 
     this._parentWindow.flashFrame(false);
+    this._parentWindow.setAlwaysOnTop(false, 'floating');
+    this._parentWindow.setVisibleOnAllWorkspaces(false);
 
     Emitter.appendEvent("stopIdle", moment().milliseconds(600000).toISOString(), "");
 

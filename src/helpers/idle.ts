@@ -196,10 +196,6 @@ export class Idler {
 
       Emitter.appendEvent("startIdle", moment().milliseconds(0).toISOString(), "");
 
-      setTimeout(() => {
-        this._parentWindow.flashFrame(false);
-      }, 2000);
-
       this._idleInterval = setInterval(() => {
         this.logTick({});
       }, 2000);
@@ -211,6 +207,8 @@ export class Idler {
   processIdleAction(idleResponse: any) {
 
     this._upload = true;
+
+    this._parentWindow.flashFrame(false);
 
     Emitter.appendEvent("stopIdle", moment().milliseconds(600000).toISOString(), "");
 

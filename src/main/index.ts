@@ -272,13 +272,17 @@ function closeServer() {
 function createDialog(url: string, defaults: object = {}) {
   // this function should create all the custom dialog boxes
   // from the Trackly static html template.
-  let appDefaults = {...{ show: true, center: true, useContentSize: true, parent: appWindow}, ...defaults};
+  let appDefaults = {...{ center: true, useContentSize: true, show: false}, ...defaults};
 
   notificationWindow = new BrowserWindow(appDefaults);
   notificationWindow.loadURL(`file://${__static}/${url}.html`);
 
   notificationWindow.on('closed', (event: any) => {
     notificationWindow = null;
+  });
+
+  notificationWindow.on('ready-to-show', () => {
+    notificationWindow.show();
   });
 
   return notificationWindow;

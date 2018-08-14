@@ -11,7 +11,7 @@ let windowDefaults = {
   minWidth: 600,
   title: "Preferences",
   center: false,
-  show: true,
+  show: false,
   resizable: false,
   movable: true,
   maximizable: false
@@ -31,6 +31,18 @@ function createWindow() {
 
   windowFrame.on('closed', (event: any) => {
     appWindow = null;
+  });
+
+  windowFrame.once('ready-to-show', () => {
+    windowFrame.show();
+
+    // send the initial state of the store to the prefs page
+    let close = store.get('close');
+    let launch = store.get('launch');
+    setTimeout(() => {
+      windowFrame.webContents.send('init', {notification: close === 'Minimize', launch});
+    }, 100);
+
   });
 
   return windowFrame;
@@ -128,14 +140,6 @@ ipcMain.on('extension', (event: any) => {
 export function createPrefWindow() {
   if (!appWindow) {
     appWindow = createWindow();
-
-    // send the initial state of the store to the prefs page
-    let close = store.get('close');
-    let launch = store.get('launch');
-    setTimeout(() => {
-      appWindow.webContents.send('init', {notification: close === 'Minimize', launch});
-    }, 300);
-
   } else {
     appWindow.focus();
   }

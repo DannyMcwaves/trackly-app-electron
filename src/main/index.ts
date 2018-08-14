@@ -42,10 +42,17 @@ function AppendInputString(chunk : any) {
 
 // END NATIVE MESSAGING ----------------------------------->>>>>>>>>>>>>>>>>>>>>>>
 
-import * as logger from "electron-log";
+let logger = require('electron-log');
 const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
 const Store = require("electron-store");
+
+//setup logger with version number
+logger.transports.file.format = '{y}-{m}-{d} {h}:{i}:{s}:{ms} v1.0.36 {text}';
+
+// logger.transports.console = function(msg) {
+//   console.log(`[${msg.date.toLocaleTimeString()} ${msg.level} v1.0.36] ${msg.data}`);
+// };
 
 // moment addons
 const moment = require('moment');
@@ -69,6 +76,7 @@ import { NativeMessaging } from "../helpers/native-messaging";
 
 // Logger
 autoUpdater.logger = logger;
+
 
 // config environment variables in .env
 config();
@@ -246,6 +254,7 @@ function systemTray() {
 function autoAppUpdater() {
   // set autoDownload to true;
   autoUpdater.autoDownload = true;
+  autoUpdater.logger = logger;
 
   // Updater
   autoUpdater.checkForUpdates();
@@ -259,7 +268,10 @@ function autoAppUpdater() {
     }
   });
 
-  autoUpdater.on('update-not-available', (ev, info) => {});
+  autoUpdater.on('update-not-available', (ev, info) => {
+    // Squirrel for Windows should handle this, test for differential download issue
+    Utility.emptyUpdateInstallerDir();
+  });
 
   autoUpdater.on('error', (ev, err) => {
     logger.log(err);
@@ -318,13 +330,17 @@ function closeServer() {
 function createDialog(url: string, defaults: object = {}) {
   // this function should create all the custom dialog boxes
   // from the Trackly static html template.
-  let appDefaults = {...{ show: true, center: true, useContentSize: true}, ...defaults};
+  let appDefaults = {...{ center: true, useContentSize: true, show: false}, ...defaults};
 
   notificationWindow = new BrowserWindow(appDefaults);
   notificationWindow.loadURL(`file://${__static}/${url}.html`);
 
   notificationWindow.on('closed', (event: any) => {
     notificationWindow = null;
+  });
+
+  notificationWindow.on('ready-to-show', () => {
+    notificationWindow.show();
   });
 
   return notificationWindow;
@@ -613,7 +629,7 @@ ipcMain.on("timer", (event: any, args: any) => {
         Emitter.appendEvent("stopLogging", stopTime, {projectId: args.projectId});
 
         // upload files through the idler
-        idler.stopUpload();
+        idler.stopUpload({});
 
         if (restartAndInstall) {
           autoUpdater.quitAndInstall();

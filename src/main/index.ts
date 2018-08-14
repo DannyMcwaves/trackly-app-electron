@@ -19,7 +19,7 @@ import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
-import { createPrefWindow, addAppWindow } from "../helpers/pref";
+import { createPrefWindow } from "../helpers/pref";
 import { Utility } from "../helpers/utility";
 
 // config environment variables in .env
@@ -437,8 +437,6 @@ ipcMain.on('projects', (event: any, projects: [{}]) => {
   let trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   tray.setContextMenu(trayMenu);
-
-  logger.error(projects);
 });
 
 /*

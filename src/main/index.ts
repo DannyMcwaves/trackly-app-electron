@@ -19,10 +19,8 @@ import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
-import {createPrefWindow} from "../helpers/pref";
-
-// Logger
-autoUpdater.logger = logger;
+import { createPrefWindow, addAppWindow } from "../helpers/pref";
+import { Utility } from "../helpers/utility";
 
 // config environment variables in .env
 config();
@@ -200,6 +198,7 @@ function systemTray() {
 function autoAppUpdater() {
   // set autoDownload to true;
   autoUpdater.autoDownload = true;
+  autoUpdater.logger = logger;
 
   // Updater
   autoUpdater.checkForUpdates();
@@ -213,7 +212,10 @@ function autoAppUpdater() {
     }
   });
 
-  autoUpdater.on('update-not-available', (ev, info) => {});
+  autoUpdater.on('update-not-available', (ev, info) => {
+    // Squirrel for Windows should handle this, test for differential download issue
+    Utility.emptyUpdateInstallerDir();
+  });
 
   autoUpdater.on('error', (ev, err) => {
     logger.log(err);

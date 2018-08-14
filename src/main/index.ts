@@ -1,7 +1,14 @@
-import * as logger from "electron-log";
+var logger = require('electron-log');
 const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
 const Store = require("electron-store");
+
+//setup logger with version number
+logger.transports.file.format = '{y}-{m}-{d} {h}:{i}:{s}:{ms} v1.0.36 {text}';
+
+// logger.transports.console = function(msg) {
+//   console.log(`[${msg.date.toLocaleTimeString()} ${msg.level} v1.0.36] ${msg.data}`);
+// };
 
 // moment addons
 const moment = require('moment');

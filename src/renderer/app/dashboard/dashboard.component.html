@@ -93,23 +93,15 @@
       </div>
       <div class="idle-body bg-light p-2">
         <div class="mb-3">
-          <div>
-            You are on idle mode for <b>{{idleTime}} minutes</b>.
-          </div>
-          <div>
-            Last project worked on: <b>{{currentIdleProject}}</b>
-          </div>
-        </div>
-
-        <div class="mb-2">
-          <div>
-            <label>Tracking has automatically stopped and will not count towards your daily tracked time.</label>
-          </div>
+          <div class="text-center mb-1">You have been idle since {{idleHour}}:{{idleMinutes}}{{idleMode}}</div>
+          <div class="text-center mb-3"> ({{idleTime}} minutes) </div>
+          <div class="text-center mb-3">Tracked project: {{currentIdleProject}}</div>
+          <div class="text-center">This time will be discarded from your records.</div>
         </div>
 
         <div class="py-2">
-          <div class="pt-1 text-right">
-            <button id="idle-button" class="btn btn-sm btn-primary" (click)="closeIdleTime()"> OK </button>
+          <div class="pt-1 text-center">
+            <button id="idle-button" class="btn btn-sm px-4 btn-primary" (click)="closeIdleTime()"> OK </button>
           </div>
         </div>
       </div>

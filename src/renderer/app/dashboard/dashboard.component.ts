@@ -49,6 +49,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleDisplay: string = "none";
     private idleHeight: number = 10;
     private idleTime: number = 10;
+    private idleMinutes: any = 0;
+    private idleHour: any = 0;
+    private idleMode: string = "";
     private isIdle: boolean = false;
     private currentIdleProject: string = "Madison Square";
 
@@ -103,6 +106,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.isIdle = true;
+          let date = new Date(),
+            hour = date.getHours(),
+            mins = date.getMinutes();
+          this.idleHour = hour < 10 ? "0" + hour : hour;
+          this.idleMinutes = mins < 10 ? "0" + mins : mins;
+          this.idleMode = this.idleHour > 11 ? "PM" : "AM";
           document.getElementById("idler").classList.remove('d-none');
         });
 

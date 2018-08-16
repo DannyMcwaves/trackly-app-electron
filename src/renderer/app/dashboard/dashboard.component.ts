@@ -345,17 +345,26 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         return this.http.get(req);
     }
 
-  /**
-   *
-   * @returns {Observable<Object>}
-   */
-  cleanWorkSpace() {
+    /**
+    *
+    * @returns {Observable<Object>}
+    */
+    cleanWorkSpace() {
     this.getTodayProjects().subscribe((response: any) => {
       let projects = response.filter((project: any) => !project.archived),
         perProject = {},
         totalTime = 0;
 
       console.log(response);
+
+      projects.push({
+        archived: false,
+        description: "(No desription)",
+        id: '0',
+        title: "(No project)",
+        workspaceId: this.activeWorkspace.id,
+        timeTracked: 0
+      });
 
       projects.forEach((project: any) => {
         perProject[project.id] = project.timeTracked;
@@ -373,7 +382,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     })
   }
 
-  /**
+    /**
      * Get all projects for a specific time frame.
      * TODO: Move to a service
      */

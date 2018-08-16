@@ -180,6 +180,14 @@ let utiltiy = {
       // for linux, mac copy to folder
       // for win make registry key (chrome and ff use different keys and different locations )
       installNativeMessaging(file);
+
+      // mac and linux can stdio from main process in electron windows can't
+      // workaround
+      // create windows executable that will be called from extension and that will write to file
+      // or make a pipe to electron main process. then path in registry should be pointing to this app
+      // not to trackly.exe 
+      // this program can be created in the appDir by this utility on the first run
+
     }
   }
 }

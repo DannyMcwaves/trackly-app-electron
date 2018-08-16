@@ -1,3 +1,7 @@
+
+// NATIVE MESSAGING ----------------------------------->>>>>>>>>>>>>>>>>>>>>>>
+// this is working in node but not in electron main process,
+// see: https://www.notion.so/trackly/Native-Messaging-for-windows-f1ec4b9a26694ca79c586a8b6a827429
 let msgBacklog = "";
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (chunk) => {
@@ -47,13 +51,6 @@ const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
 const Store = require("electron-store");
 
-//setup logger with version number
-logger.transports.file.format = '{y}-{m}-{d} {h}:{i}:{s}:{ms} v1.0.36 {text}';
-
-// logger.transports.console = function(msg) {
-//   console.log(`[${msg.date.toLocaleTimeString()} ${msg.level} v1.0.36] ${msg.data}`);
-// };
-
 // moment addons
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
@@ -74,9 +71,11 @@ import {createPrefWindow} from "../helpers/pref";
 import { Utility } from "../helpers/utility";
 import { NativeMessaging } from "../helpers/native-messaging";
 
+//setup logger with version number, in dev mode this will log electron version
+logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
+
 // Logger
 autoUpdater.logger = logger;
-
 
 // config environment variables in .env
 config();

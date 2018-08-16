@@ -3,9 +3,6 @@ const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
 const Store = require("electron-store");
 
-//setup logger with version number, in dev mode this will log electron version
-logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
-
 // moment addons
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
@@ -27,6 +24,9 @@ import { Utility } from "../helpers/utility";
 
 // config environment variables in .env
 config();
+
+//setup logger with version number, in dev mode this will log electron version
+logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
 
 // Helpers
 const fscs = new Fscs();

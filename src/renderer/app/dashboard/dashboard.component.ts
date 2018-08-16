@@ -351,8 +351,23 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
    */
   cleanWorkSpace() {
     this.getTodayProjects().subscribe((response: any) => {
+      let projects = response.filter((project: any) => !project.archived),
+        perProject = {},
+        totalTime = 0;
+
       console.log(response);
-      this.totalIimeToday = 0;
+
+      projects.forEach((project: any) => {
+        perProject[project.id] = project.timeTracked;
+        this.perProjectCached[project.id] = project.timeTracked;
+        totalTime += project.timeTracked;
+      });
+
+      this.totalIimeToday = totalTime;
+      this.totalIimeTodayCached = totalTime;
+      this.perProject = perProject;
+      this.projects = projects;
+      ipcRenderer.send("time:travel", totalTime);
     }, (err: any) => {
       console.log("error");
     })
@@ -367,7 +382,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString(),
           endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 23, 59, 59, 999).toISOString();
         const uath = this._getUserAuth();
-        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?dateFrom=${startDate}&dateTo=${endDate}&mode=1&id=1&projectId=null&access_token=${uath.authToken}`;
+        // const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?dateFrom=${startDate}&dateTo=${endDate}&mode=1&id=1&projectId=null&access_token=${uath.authToken}`;
+        const req = "http://localhost:8080/api";
         return this.http.get(req);
     }
 

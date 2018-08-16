@@ -345,6 +345,32 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         return this.http.get(req);
     }
 
+  /**
+   *
+   * @returns {Observable<Object>}
+   */
+  cleanWorkSpace() {
+    this.getTodayProjects().subscribe((response: any) => {
+      console.log(response);
+      this.totalIimeToday = 0;
+    }, (err: any) => {
+      console.log("error");
+    })
+  }
+
+  /**
+     * Get all projects for a specific time frame.
+     * TODO: Move to a service
+     */
+    getTodayProjects() {
+        let today = new Date(),
+          startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString(),
+          endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 23, 59, 59, 999).toISOString();
+        const uath = this._getUserAuth();
+        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?dateFrom=${startDate}&dateTo=${endDate}&mode=1&id=1&projectId=null&access_token=${uath.authToken}`;
+        return this.http.get(req);
+    }
+
     /**
      * Get all workspaces
      * TODO: Move to a service

@@ -3,7 +3,7 @@
     <header class="py-0">
         <img src="../assets/logo.svg" alt="Trackly" id="logo">
         <ul class="list-inline" id="user-nav">
-            <li class="list-inline-item">
+            <li class="list-inline-item" style="cursor: pointer" (click)="cleanWorkSpace()">
                 <figure class="avatar avatar--sm">
                     <div class="initials">{{generateInitials()}}</div>
                 </figure>

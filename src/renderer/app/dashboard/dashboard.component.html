@@ -87,21 +87,41 @@
     <!-- / Footer -->
 
     <!--idler-->
-    <div id="idler" class="p-2 d-none" [ngStyle]="{'min-height.px': idleHeight}">
+    <div id="idler" class="p-2 d-non" [ngStyle]="{'min-height.px': idleHeight}">
       <div class="idle-header px-1">
         <div class="propmt"> &nbsp;Idle Notification </div>
       </div>
-      <div class="idle-body bg-light p-2">
+
+      <div [hidden]="!reAssign" class="idle-body bg-light p-3 text-center">
+        <div class="text-center mb-2">
+          current project: {{activeProjectCache.title}}
+        </div>
+        <select id="assignProject" (change)="selectChange($event)" class="text-center">
+          <option *ngFor="let project of projects" class="p-1" value="{{project.title}}" selected="{{project.title === activeProjectCache.title}}">
+            {{project.title}}
+          </option>
+        </select>
+        <div class="mt-4 mb-3 text-center">
+          <button id="reAssign-button" class="btn btn-sm px-5 btn-primary" (click)="reAssignIdleTime()"> &nbsp;Reassign time&nbsp;&nbsp;&nbsp; </button>
+        </div>
+      </div>
+
+      <div [hidden]="reAssign" class="idle-body bg-light p-2">
         <div class="mb-3">
           <div class="text-center mb-1">You have been idle since {{idleHour}}:{{idleMinutes}}{{idleMode}}</div>
           <div class="text-center mb-3"> ({{idleTime}} minutes) </div>
           <div class="text-center mb-3">Tracked project: {{currentIdleProject}}</div>
-          <div class="text-center">This time will be discarded from your records.</div>
         </div>
 
         <div class="py-2">
           <div class="pt-1 text-center">
-            <button id="idle-button" class="btn btn-sm px-4 btn-primary" (click)="closeIdleTime()"> OK </button>
+            <button id="idle-button" class="btn btn-sm px-5 btn-primary" (click)="closeIdleAndTrack()"> &nbsp;Keep time&nbsp;&nbsp;&nbsp; </button>
+          </div>
+          <div class="pt-1 text-center">
+            <button id="idle-butto" class="btn btn-sm px-5 btn-primary" (click)="closeIdleTime()"> Discard time </button>
+          </div>
+          <div class="pt-1 mb-2 text-center">
+            <button id="idle-buttn" class="btn btn-sm px-4 btn-primary" (click)="toggleAssigner()"> Add time to project </button>
           </div>
         </div>
       </div>

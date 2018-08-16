@@ -54,6 +54,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleMode: string = "";
     private isIdle: boolean = false;
     private currentIdleProject: string = "Madison Square";
+    private activeProjectCache: any = {};
+    private reAssign: boolean = false;
 
     /**
      * Dashboard component constructor with added protection
@@ -99,6 +101,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         ipcRenderer.on("stopTimeFromTray", (event: any) => {
           // so the trick is to get the id of the element and then click on it.
           if (this.activeProject.id) {
+            this.activeProjectCache = JSON.parse(JSON.stringify(this.activeProject));
             this.trackProject(this.activeProject);
           }
         });
@@ -175,6 +178,29 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       this.isIdle = false;
       document.getElementById("idler").classList.add('d-none');
       ipcRenderer.send('idleResponse', {});
+    }
+
+    closeIdleAndTrack() {
+      this.isIdle = false;
+      document.getElementById("idler").classList.add('d-none');
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache});
+
+      document.getElementById(this.activeProjectCache.id).click();
+    }
+
+    toggleAssigner() {
+      this.reAssign = true;
+    }
+
+    selectChange(event: any) {
+      this.activeProjectCache = this.projects.filter((project: any) => project.title === event.target.value)[0];
+    }
+
+    reAssignIdleTime() {
+      this.isIdle = false;
+      this.reAssign = true;
+      document.getElementById("idler").classList.add('d-none');
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache});
     }
 
     trackProject(project: any) {

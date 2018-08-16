@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation } from "@angular/core";
-import { ipcRenderer } from "electron";
+import { ipcRenderer, remote } from "electron";
 
 import "./styles.scss";
 
@@ -8,4 +8,6 @@ import "./styles.scss";
   templateUrl: "./app.component.html",
   encapsulation: ViewEncapsulation.None
 })
-export class AppComponent {}
+export class AppComponent {
+  appVersion = remote.app.getVersion();
+}

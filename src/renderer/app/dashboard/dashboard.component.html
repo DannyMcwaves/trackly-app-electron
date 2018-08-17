@@ -3,7 +3,7 @@
     <header class="py-0">
         <img src="../assets/logo.svg" alt="Trackly" id="logo">
         <ul class="list-inline" id="user-nav">
-            <li class="list-inline-item" style="cursor: pointer" (click)="cleanWorkSpace()">
+            <li class="list-inline-item">
                 <figure class="avatar avatar--sm">
                     <div class="initials">{{generateInitials()}}</div>
                 </figure>
@@ -87,7 +87,7 @@
     <!-- / Footer -->
 
     <!--idler-->
-    <div id="idler" class="p-2 d-non" [ngStyle]="{'min-height.px': idleHeight}">
+    <div id="idler" class="p-2 d-none" [ngStyle]="{'min-height.px': idleHeight}">
       <div class="idle-header px-1">
         <div class="propmt"> &nbsp;Idle Notification </div>
       </div>

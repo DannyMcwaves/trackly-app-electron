@@ -320,31 +320,37 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
               this.trackProject(oldActive);
             }
 
-            this.projects = response.filter((item: any) => !item.archived);
+            let projects = response.filter((item: any) => !item.archived);
 
-            if(!this.projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
-              this.projects.push({
+            if(!projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
+              projects.push({
                 archived: false,
                 description: "(No desription)",
                 id: '0',
                 title: "(No project)",
+                timeTracked: 0,
                 workspaceId: this.activeWorkspace.id
               });
             }
 
-            ipcRenderer.send('projects', this.projects);
+            ipcRenderer.send('projects', projects);
 
-            let tempTimeToday = 0, tempTimeTodayCached;
+            let tempTimeToday = 0, perProject = {};
 
             if (!this.startTime) {
               this.projects.forEach((element: any) => {
-                this.perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
-                this.perProjectCached[element.id] = this.perProject[element.id];
-                _totalIimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
-                this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
+                perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
+                this.perProjectCached[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
+                tempTimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
                 ipcRenderer.send("time:travel", this.totalIimeToday);
               });
             }
+
+            this.totalIimeTodayCached = this.totalIimeToday = tempTimeToday;
+
+            this.perProject = perProject;
+
+            this.projects = projects;
 
             this.resize = true;
 
@@ -384,8 +390,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         let projects = response.filter((project: any) => !project.archived),
           perProject = {},
           totalTime = 0;
-
-        console.log(response);
 
         projects.push({
         archived: false,

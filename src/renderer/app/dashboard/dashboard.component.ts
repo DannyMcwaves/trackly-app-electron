@@ -183,7 +183,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     closeIdleAndTrack() {
       this.isIdle = false;
       document.getElementById("idler").classList.add('d-none');
-      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache});
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache, same: true});
 
       document.getElementById(this.activeProjectCache.id).click();
     }
@@ -200,7 +200,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       this.isIdle = false;
       this.reAssign = true;
       document.getElementById("idler").classList.add('d-none');
-      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache});
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache, same: false});
     }
 
     trackProject(project: any) {

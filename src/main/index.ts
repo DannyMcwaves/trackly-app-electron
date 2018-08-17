@@ -1,51 +1,3 @@
-
-// NATIVE MESSAGING ----------------------------------->>>>>>>>>>>>>>>>>>>>>>>
-// this is working in node but not in electron main process,
-// see: https://www.notion.so/trackly/Native-Messaging-for-windows-f1ec4b9a26694ca79c586a8b6a827429
-let msgBacklog = "";
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (chunk) => {
-    AppendInputString(chunk);
-});
-
-function Send(message : object) {
-  let msgStr = JSON.stringify(message);
-  let lengthStr = String.fromCharCode(
-      msgStr.length & 0x000000ff,
-      (msgStr.length >> 8) & 0x000000ff,
-      (msgStr.length >> 16) & 0x000000ff,
-      (msgStr.length >> 24) & 0x000000ff
-  );
-  process.stdout.write(lengthStr+msgStr);
-}
-
-function recievedMessageHandle(msg : object){
-  Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), msg);
-  Send({
-    message: "Trackly",
-    status: "message received"
-  });
-}
-
-function AppendInputString(chunk : any) {
-    msgBacklog += chunk;
-    while (true) {
-        if (msgBacklog.length < 4)
-            return;
-        let msgLength = msgBacklog.charCodeAt(0) + (msgBacklog.charCodeAt(1) << 8) +
-            (msgBacklog.charCodeAt(2) << 16) + (msgBacklog.charCodeAt(3) << 24);
-        if (msgBacklog.length < msgLength + 4)
-            return;
-        try {
-            let msgObject = JSON.parse(msgBacklog.substring(4, 4 + msgLength));
-            recievedMessageHandle(msgObject);
-        } catch (e) {}
-        msgBacklog = msgBacklog.substring(4 + msgLength);
-    }
-} 
-
-// END NATIVE MESSAGING ----------------------------------->>>>>>>>>>>>>>>>>>>>>>>
-
 let logger = require('electron-log');
 const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
@@ -69,7 +21,7 @@ import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
 import {createPrefWindow} from "../helpers/pref";
 import { Utility } from "../helpers/utility";
-import { NativeMessaging } from "../helpers/native-messaging";
+import { NativeMessaging } from "../helpers/native-messaging"
 
 //setup logger with version number, in dev mode this will log electron version
 logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
@@ -378,8 +330,8 @@ app.on("ready", () => {
   // check the comm with the browsers
   Utility.checkNativeMessaging();
 
-  // start stdio nativeMessaging
-  //NativeMessaging();
+  // start listening for messages
+  //NativeMessaging.start();
 
   // start the autoUpdater
   autoAppUpdater();
@@ -596,7 +548,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     ActiveWindow.current(0);
 
     // start the browser extension server.
-    //startServer();
+    startServer();
 
     timer.ticker.subscribe(
       async tick => {

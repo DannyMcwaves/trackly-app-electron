@@ -189,7 +189,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     }
 
     toggleAssigner() {
-      this.reAssign = true;
+      this.reAssign = !this.reAssign;
     }
 
     selectChange(event: any) {
@@ -285,7 +285,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
             ipcRenderer.send('idleResponse', {reset: true});
             this.isIdle = false;
           } else if(!this.activeProject.id) {
-            this._refresher();
+            this.cleanWorkSpace();
           }
         }
       }, 10000);
@@ -367,7 +367,11 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      */
     getProjects() {
         const uath = this._getUserAuth();
-        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?access_token=${uath.authToken}`;
+        let today = new Date(),
+          startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString(),
+          endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString();
+
+        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?dateFrom=${startDate}&dateTo=${endDate}&access_token=${uath.authToken}`;
         return this.http.get(req);
     }
 
@@ -376,14 +380,14 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     * @returns {Observable<Object>}
     */
     cleanWorkSpace() {
-    this.getTodayProjects().subscribe((response: any) => {
-      let projects = response.filter((project: any) => !project.archived),
-        perProject = {},
-        totalTime = 0;
+      this.getProjects().subscribe((response: any) => {
+        let projects = response.filter((project: any) => !project.archived),
+          perProject = {},
+          totalTime = 0;
 
-      console.log(response);
+        console.log(response);
 
-      projects.push({
+        projects.push({
         archived: false,
         description: "(No desription)",
         id: '0',
@@ -392,34 +396,20 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         timeTracked: 0
       });
 
-      projects.forEach((project: any) => {
+        projects.forEach((project: any) => {
         perProject[project.id] = project.timeTracked;
         this.perProjectCached[project.id] = project.timeTracked;
         totalTime += project.timeTracked;
       });
 
-      this.totalIimeToday = totalTime;
-      this.totalIimeTodayCached = totalTime;
-      this.perProject = perProject;
-      this.projects = projects;
-      ipcRenderer.send("time:travel", totalTime);
-    }, (err: any) => {
+        this.totalIimeToday = totalTime;
+        this.totalIimeTodayCached = totalTime;
+        this.perProject = perProject;
+        this.projects = projects;
+        ipcRenderer.send("time:travel", totalTime);
+      }, (err: any) => {
       console.log("error");
     })
-  }
-
-    /**
-     * Get all projects for a specific time frame.
-     * TODO: Move to a service
-     */
-    getTodayProjects() {
-        let today = new Date(),
-          startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString(),
-          endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 23, 59, 59, 999).toISOString();
-        const uath = this._getUserAuth();
-        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?dateFrom=${startDate}&dateTo=${endDate}&mode=1&id=1&projectId=null&access_token=${uath.authToken}`;
-        // const req = "http://localhost:8080/api";
-        return this.http.get(req);
     }
 
     /**

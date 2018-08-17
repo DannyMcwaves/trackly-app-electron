@@ -163,8 +163,15 @@ function createApplicationWindow() {
     } else if(val === 'Cancel') {
       event.preventDefault();
     } else if(val === 'Quit' && close === 'na') {
+      event.preventDefault();
       close = 'ya';
-      windowFrame.close();
+      console.log(timeIsRunning);
+      if (windowFrame) {
+        windowFrame.webContents.send("stopTimeFromTray");
+      }
+      setTimeout(() => {
+        windowFrame.close();
+      }, 2000);
     } else if(close === 'na') {
       event.preventDefault();
       createDialog('quit', {height: 140, width: 450});
@@ -530,6 +537,8 @@ ipcMain.on("timer", (event: any, args: any) => {
     Emitter.currentProject = args.title;
 
     Emitter.currentProjectId = args.projectId;
+
+    timeIsRunning = true;
 
     // Take screenshot within a random time during the first 60 secs.
     // shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);

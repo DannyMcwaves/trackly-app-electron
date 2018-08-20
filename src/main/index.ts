@@ -79,7 +79,7 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Quit',
     click() {
-      app.quit();
+      app.exit();
     },
     accelerator: 'CmdOrCtrl+Q',
     role: 'quit'
@@ -136,7 +136,7 @@ const isSecondInstance = app.makeSingleInstance(
 );
 
 if (isSecondInstance) {
-  app.quit();
+  app.exit();
 }
 
 // Dev & Production settings
@@ -311,7 +311,7 @@ app.on("window-all-closed", () => {
   // On macOS it is common for applications to stay open
   // until the user explicitly quits
   if (process.platform !== "darwin") {
-    setTimeout(() => { app.quit() }, 1000);
+    setTimeout(() => { app.exit() }, 1000);
   }
 });
 

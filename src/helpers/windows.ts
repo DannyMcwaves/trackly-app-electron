@@ -12,6 +12,7 @@ export class ActiveWindow {
 
   public static _currentName: string;
   public static _currentTitle: string;
+  private static browserList: string[] = ["chrome", "google chrome", "firefox", "safari", "opera", "iexplore"];
 
   static currentWindow() {
     return activeWin();
@@ -33,8 +34,7 @@ export class ActiveWindow {
 
       logger.log(name, title);
 
-      if ((name !== this._currentName) || (title !== this._currentTitle)) {
-
+      if (((name !== this._currentName) || (title !== this._currentTitle)) && !this.browserList.includes(name.toLocaleLowerCase())) {
         Emitter.appendEvent("startActiveWindow",
           moment().milliseconds(0).toISOString(),
           {title: name, windowTitle: title}

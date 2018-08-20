@@ -165,7 +165,6 @@ function createApplicationWindow() {
     } else if(val === 'Quit' && close === 'na') {
       event.preventDefault();
       close = 'ya';
-      console.log(timeIsRunning);
       if (windowFrame) {
         windowFrame.webContents.send("stopTimeFromTray");
       }

@@ -92,7 +92,7 @@
         <div class="propmt"> &nbsp;Idle Notification </div>
       </div>
 
-      <div [hidden]="!reAssign" class="idle-body bg-light p-3 text-center">
+      <div class="idle-body d-none bg-light p-3 text-center">
         <div class="text-center mb-2">
           Add time to:
         </div>
@@ -123,7 +123,7 @@
           <div class="pt-1 text-center">
             <button id="idle-butto" class="btn btn-sm rounded-0 px-5 btn-primary" (click)="closeIdleTime()"> Discard time </button>
           </div>
-          <div class="pt-1 mb-2 text-center">
+          <div class="pt-1 d-none mb-2 text-center">
             <button id="idle-buttn" class="btn btn-sm rounded-0 px-4 btn-primary" (click)="toggleAssigner()"> Add time to project </button>
           </div>
         </div>

@@ -86,7 +86,7 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Quit',
     click() {
-      app.quit();
+      app.exit();
     },
     accelerator: 'CmdOrCtrl+Q',
     role: 'quit'
@@ -143,7 +143,7 @@ const isSecondInstance = app.makeSingleInstance(
 );
 
 if (isSecondInstance) {
-  app.quit();
+  app.exit();
 }
 
 // Dev & Production settings
@@ -170,8 +170,15 @@ function createApplicationWindow() {
     } else if(val === 'Cancel') {
       event.preventDefault();
     } else if(val === 'Quit' && close === 'na') {
+      event.preventDefault();
       close = 'ya';
-      windowFrame.close();
+      console.log(timeIsRunning);
+      if (windowFrame) {
+        windowFrame.webContents.send("stopTimeFromTray");
+      }
+      setTimeout(() => {
+        windowFrame.close();
+      }, 2000);
     } else if(close === 'na') {
       event.preventDefault();
       createDialog('quit', {height: 140, width: 450});
@@ -311,7 +318,7 @@ app.on("window-all-closed", () => {
   // On macOS it is common for applications to stay open
   // until the user explicitly quits
   if (process.platform !== "darwin") {
-    setTimeout(() => { app.quit() }, 1000);
+    setTimeout(() => { app.exit() }, 1000);
   }
 });
 
@@ -543,6 +550,8 @@ ipcMain.on("timer", (event: any, args: any) => {
     Emitter.currentProject = args.title;
 
     Emitter.currentProjectId = args.projectId;
+
+    timeIsRunning = true;
 
     // Take screenshot within a random time during the first 60 secs.
     // shotOut = setTimeout(() => {fscs.takeScreenshot(args.timestamp);}, Math.random() * 60000);

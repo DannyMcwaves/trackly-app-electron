@@ -23,6 +23,7 @@ export class Idler {
   private _interruptIdler: boolean = false;
   private _isIdle: boolean = false;
   private _idleOpen: boolean = false;
+  private _tempEvent: any = [];
 
   constructor(fscs: any, uploader: any) {
     this.uploader = uploader;
@@ -192,9 +193,11 @@ export class Idler {
       this._parentWindow.setAlwaysOnTop(true, 'floating');
       this._parentWindow.setVisibleOnAllWorkspaces(true);
 
-      // app.dock.bounce("informational");
-
-      Emitter.appendEvent("startIdle", moment().milliseconds(0).toISOString(), "");
+      this._tempEvent.push({
+        type: "startIdle",
+        timestamp: moment().milliseconds(0).toISOString(),
+        payload: ""
+      });
 
       this._idleInterval = setInterval(() => {
         this.logTick({});
@@ -206,15 +209,35 @@ export class Idler {
 
   processIdleAction(idleResponse: any) {
 
-    console.log(idleResponse);
-
     this._upload = true;
 
     this._parentWindow.flashFrame(false);
     this._parentWindow.setAlwaysOnTop(false, 'floating');
     this._parentWindow.setVisibleOnAllWorkspaces(false);
 
-    Emitter.appendEvent("stopIdle", moment().milliseconds(600000).toISOString(), "");
+    const stopEvent: any = {
+      type: "stopIdle",
+      timestamp: moment().milliseconds(600000).toISOString(),
+      payload: ""
+    };
+
+    if (!idleResponse.keepIdle) {
+      this._tempEvent.push(stopEvent);
+      Emitter.extendEvent(this._tempEvent);
+    } else if(idleResponse.same === true) {
+      stopEvent.payload = {projectId: idleResponse.project.id};
+      stopEvent.type = "stopLogging";
+      Emitter.ignoreIdle(stopEvent);
+    } else if (idleResponse.same === false) {
+      this._tempEvent[0].type = "startLogging";
+      this._tempEvent[0].payload = {projectId: idleResponse.project.id};
+      stopEvent.type = "stopLogging";
+      stopEvent.payload = {projectId: idleResponse.project.id};
+      this._tempEvent.push(stopEvent);
+      Emitter.extendEvent(this._tempEvent);
+    }
+
+    this._tempEvent = [];
 
     clearInterval(this._idleInterval);
     this._interruptIdler = false;

@@ -331,7 +331,7 @@ app.on("ready", () => {
   systemTray();
 
   // start the autoUpdater
-  autoAppUpdater();
+  //autoAppUpdater();
 
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;

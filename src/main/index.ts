@@ -32,6 +32,9 @@ autoUpdater.logger = logger;
 // config environment variables in .env
 config();
 
+//setup logger with version number, in dev mode this will log electron version
+logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
+
 // Helpers
 const fscs = new Fscs();
 const timer = new Timer();

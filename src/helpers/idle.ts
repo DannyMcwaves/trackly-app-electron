@@ -206,6 +206,8 @@ export class Idler {
 
   processIdleAction(idleResponse: any) {
 
+    console.log(idleResponse);
+
     this._upload = true;
 
     this._parentWindow.flashFrame(false);

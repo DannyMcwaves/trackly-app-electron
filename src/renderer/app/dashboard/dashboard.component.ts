@@ -49,8 +49,13 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleDisplay: string = "none";
     private idleHeight: number = 10;
     private idleTime: number = 10;
+    private idleMinutes: any = 0;
+    private idleHour: any = 0;
+    private idleMode: string = "";
     private isIdle: boolean = false;
     private currentIdleProject: string = "Madison Square";
+    private activeProjectCache: any = {};
+    private reAssign: boolean = false;
 
     /**
      * Dashboard component constructor with added protection
@@ -96,6 +101,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         ipcRenderer.on("stopTimeFromTray", (event: any) => {
           // so the trick is to get the id of the element and then click on it.
           if (this.activeProject.id) {
+            this.activeProjectCache = JSON.parse(JSON.stringify(this.activeProject));
             this.trackProject(this.activeProject);
           }
         });
@@ -103,6 +109,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.isIdle = true;
+          let date = new Date(),
+            hour = date.getHours(),
+            mins = date.getMinutes();
+          this.idleHour = hour < 10 ? "0" + hour : hour;
+          this.idleMinutes = mins < 10 ? "0" + mins : mins;
+          this.idleMode = this.idleHour > 11 ? "PM" : "AM";
           document.getElementById("idler").classList.remove('d-none');
         });
 
@@ -166,6 +178,29 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       this.isIdle = false;
       document.getElementById("idler").classList.add('d-none');
       ipcRenderer.send('idleResponse', {});
+    }
+
+    closeIdleAndTrack() {
+      this.isIdle = false;
+      document.getElementById("idler").classList.add('d-none');
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache});
+
+      document.getElementById(this.activeProjectCache.id).click();
+    }
+
+    toggleAssigner() {
+      this.reAssign = !this.reAssign;
+    }
+
+    selectChange(event: any) {
+      this.activeProjectCache = this.projects.filter((project: any) => project.title === event.target.value)[0];
+    }
+
+    reAssignIdleTime() {
+      this.isIdle = false;
+      this.reAssign = true;
+      document.getElementById("idler").classList.add('d-none');
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache});
     }
 
     trackProject(project: any) {
@@ -250,7 +285,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
             ipcRenderer.send('idleResponse', {reset: true});
             this.isIdle = false;
           } else if(!this.activeProject.id) {
-            this._refresher();
+            this.cleanWorkSpace();
           }
         }
       }, 10000);
@@ -285,31 +320,37 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
               this.trackProject(oldActive);
             }
 
-            this.projects = response.filter((item: any) => !item.archived);
+            let projects = response.filter((item: any) => !item.archived);
 
-            if(!this.projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
-              this.projects.push({
+            if(!projects.find( (prj: any): boolean => { return prj.title === "(No project)" }) ) {
+              projects.push({
                 archived: false,
                 description: "(No desription)",
                 id: '0',
                 title: "(No project)",
+                timeTracked: 0,
                 workspaceId: this.activeWorkspace.id
               });
             }
 
-            ipcRenderer.send('projects', this.projects);
+            ipcRenderer.send('projects', projects);
 
-            let tempTimeToday = 0, tempTimeTodayCached;
+            let tempTimeToday = 0, perProject = {};
 
             if (!this.startTime) {
               this.projects.forEach((element: any) => {
-                this.perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
-                this.perProjectCached[element.id] = this.perProject[element.id];
-                _totalIimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
-                this.totalIimeTodayCached = this.totalIimeToday = _totalIimeToday;
+                perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
+                this.perProjectCached[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
+                tempTimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
                 ipcRenderer.send("time:travel", this.totalIimeToday);
               });
             }
+
+            this.totalIimeTodayCached = this.totalIimeToday = tempTimeToday;
+
+            this.perProject = perProject;
+
+            this.projects = projects;
 
             this.resize = true;
 
@@ -332,8 +373,47 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      */
     getProjects() {
         const uath = this._getUserAuth();
-        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?access_token=${uath.authToken}`;
+        let today = new Date(),
+          startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString(),
+          endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString();
+
+        const req = `${this.baseURL}/workspaces/${this.activeWorkspace.id}/projects?dateFrom=${startDate}&dateTo=${endDate}&access_token=${uath.authToken}`;
         return this.http.get(req);
+    }
+
+    /**
+    *
+    * @returns {Observable<Object>}
+    */
+    cleanWorkSpace() {
+      this.getProjects().subscribe((response: any) => {
+        let projects = response.filter((project: any) => !project.archived),
+          perProject = {},
+          totalTime = 0;
+
+        projects.push({
+        archived: false,
+        description: "(No desription)",
+        id: '0',
+        title: "(No project)",
+        workspaceId: this.activeWorkspace.id,
+        timeTracked: 0
+      });
+
+        projects.forEach((project: any) => {
+        perProject[project.id] = project.timeTracked;
+        this.perProjectCached[project.id] = project.timeTracked;
+        totalTime += project.timeTracked;
+      });
+
+        this.totalIimeToday = totalTime;
+        this.totalIimeTodayCached = totalTime;
+        this.perProject = perProject;
+        this.projects = projects;
+        ipcRenderer.send("time:travel", totalTime);
+      }, (err: any) => {
+      console.log("error");
+    })
     }
 
     /**

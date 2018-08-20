@@ -187,6 +187,7 @@ let utiltiy = {
       // or make a pipe to electron main process. then path in registry should be pointing to this app
       // not to trackly.exe 
       // this program can be created in the appDir by this utility on the first run
+      // create exchange dir nativeMessages on same location
 
     }
   }

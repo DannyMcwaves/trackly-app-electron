@@ -49,7 +49,7 @@ app.get('*', (req: any, res: any) => {
 });
 
 app.post('*', (req: any, res: any) => {
-
+  console.log(req.body, typeof(req.body));
   // append this to the emitter.
   Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), req.body);
 

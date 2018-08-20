@@ -21,8 +21,12 @@ export class ActiveWindow {
 
     this.currentWindow().then((data: any) => {
 
-      let name = data.owner.name;
+      //if ( data.owner.name === "" || data.title === "" ) logger.error(data);
+
+      let name = data.owner.name.replace(/\.[^/.]+$/, "");
       let title = data.title;
+
+      logger.log(name, title);
 
       if ((name !== this._currentName) || (title !== this._currentTitle)) {
 

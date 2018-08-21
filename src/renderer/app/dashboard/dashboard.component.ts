@@ -52,6 +52,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleMinutes: any = 0;
     private idleHour: any = 0;
     private idleMode: string = "";
+    private idleStartTime: any = undefined;
+    private idleStopTime: any = undefined;
     private isIdle: boolean = false;
     private currentIdleProject: string = "Madison Square";
     private activeProjectCache: any = {};
@@ -115,6 +117,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           this.idleHour = hour < 10 ? "0" + hour : hour;
           this.idleMinutes = mins < 10 ? "0" + mins : mins;
           this.idleMode = this.idleHour > 11 ? "PM" : "AM";
+          this.idleStartTime = moment().milliseconds(0);
           document.getElementById("idler").classList.remove('d-none');
         });
 
@@ -176,14 +179,36 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
     closeIdleTime() {
       this.isIdle = false;
+      this.idleStopTime = moment().milliseconds(0);
+      let idle = Math.round(this.idleStopTime.diff(this.idleStartTime) / 1000);
+      this.idleStartTime.milliseconds(-600000);
+
+      this.perProject[this.activeProjectCache.id] -= 600;
+      this.perProjectCached[this.activeProjectCache.id] -= 600;
+      this.totalIimeToday -= 600;
+      this.currentSession += idle;
+      ipcRenderer.send("time:travel", this.totalIimeToday);
+
       document.getElementById("idler").classList.add('d-none');
-      ipcRenderer.send('idleResponse', {});
+      ipcRenderer.send('idleResponse', {stopIdle: this.idleStartTime.toISOString(), project: this.activeProjectCache});
     }
 
     closeIdleAndTrack() {
       this.isIdle = false;
+      this.idleStopTime = moment().milliseconds(0);
+
+      // adjust the timers on the desktop app.
+      let idle = Math.round(this.idleStopTime.diff(this.idleStartTime) / 1000);
+      console.log(idle);
+
+      this.perProject[this.activeProjectCache.id] += idle;
+      this.perProjectCached[this.activeProjectCache.id] += idle;
+      this.totalIimeToday += idle;
+      this.currentSession += idle;
+      ipcRenderer.send("time:travel", this.totalIimeToday);
+
       document.getElementById("idler").classList.add('d-none');
-      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache, same: true});
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache, stopIdle: this.idleStopTime.toISOString()});
 
       document.getElementById(this.activeProjectCache.id).click();
     }

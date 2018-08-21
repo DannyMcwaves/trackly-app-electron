@@ -12,6 +12,7 @@ export class ActiveWindow {
 
   public static _currentName: string;
   public static _currentTitle: string;
+  private static browserList: string[] = ["chrome", "google chrome", "firefox", "safari", "opera", "iexplore"];
 
   static currentWindow() {
     return activeWin();

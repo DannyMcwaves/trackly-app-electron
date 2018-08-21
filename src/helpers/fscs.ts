@@ -114,6 +114,7 @@ export class Fscs {
       userId: blueprint.userId,
       workspaceId: blueprint.workspaceId,
       projectId: blueprint.projectId,
+      appVersion: app.getVersion(),
       createdAt: moment().milliseconds(0).toISOString(),
       events: [] as any[],
       activities: [] as any[]

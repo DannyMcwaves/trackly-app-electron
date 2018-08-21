@@ -28,7 +28,7 @@ export class ActiveWindow {
         }, 600); // usually window needs 600ms to refresh
       }
 
-      let name = data.owner.name.replace(/\.[^/.]+$/, "");
+      let name = data.owner.name;
       let title = data.title;
 
       logger.log(name, title);

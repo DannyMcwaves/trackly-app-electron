@@ -66,6 +66,8 @@ export class Fscs {
     fileData.events = data.events;
     fileData.activities = data.activities;
 
+    console.log(fileData);
+
     fse.writeFileSync(file, JSON.stringify(fileData));
 
     return true;

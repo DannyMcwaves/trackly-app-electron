@@ -532,7 +532,7 @@ ipcMain.on("resetTimer", (event: any) => {
  * == TIMER ==
  * ===========
  */
-ipcMain.on("timer", (event: any, args: any) => { console.error("timer");
+ipcMain.on("timer", (event: any, args: any) => {
   // Start timer
   if (args.action == "start") {
     // Get a file
@@ -607,7 +607,7 @@ ipcMain.on("timer", (event: any, args: any) => { console.error("timer");
   }
 
   // Stop timer and clear the uploads interval.
-  if (args.action == "stop") { console.error("stop");
+  if (args.action == "stop") {
     stopMoment = args.date;
     timeIsRunning = false;
     idler.clearInterval();

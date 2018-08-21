@@ -22,10 +22,10 @@ const nm = {
                 try {
                     await sleep(300);
                     const fileData = await fs.readJson(nativeMessagesDir + '/' + filename);
-                    console.log("file data:" , JSON.stringify(fileData), typeof(fileData));
+                    //console.log("file data:" , JSON.stringify(fileData), typeof(fileData));
                     Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), fileData);
                 } catch (err) {
-                    console.error(err)
+                    logger.error(err)
                 }
             }
         });
@@ -46,8 +46,8 @@ const nm = {
                 if (err) logger.error(err);
                 });
             }
-        }
-    },
+        });
+    }
 }
 
 export const NativeMessaging = nm;

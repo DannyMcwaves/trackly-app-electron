@@ -31,8 +31,6 @@ export class ActiveWindow {
       let name = data.owner.name;
       let title = data.title;
 
-      logger.log(name, title);
-
       if ((name !== this._currentName) || (title !== this._currentTitle)) {
 
         Emitter.appendEvent("startActiveWindow",

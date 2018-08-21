@@ -62,14 +62,9 @@ export class Fscs {
     let fileData = JSON.parse(fse.readFileSync(file).toString());
     fileData.events = data.events;
     fileData.activities = data.activities;
-
-    console.error(json);
-    console.error(fse.readFileSync(file).toString());
     
     fileData.events = data.events;
     fileData.activities = data.activities;
-
-    console.log(JSON.parse(fileData));
 
     fse.writeFileSync(file, JSON.stringify(fileData));
 

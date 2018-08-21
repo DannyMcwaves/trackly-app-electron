@@ -341,7 +341,7 @@ app.on("ready", () => {
   Utility.checkNativeMessaging();
 
   // start listening for messages
-  //NativeMessaging.start();
+  NativeMessaging.start();
 
   // start the autoUpdater
   autoAppUpdater();
@@ -532,7 +532,7 @@ ipcMain.on("resetTimer", (event: any) => {
  * == TIMER ==
  * ===========
  */
-ipcMain.on("timer", (event: any, args: any) => {
+ipcMain.on("timer", (event: any, args: any) => { console.error("timer");
   // Start timer
   if (args.action == "start") {
     // Get a file
@@ -560,8 +560,10 @@ ipcMain.on("timer", (event: any, args: any) => {
     ActiveWindow.current(0);
 
     // start the browser extension server.
-    startServer();
-
+    //startServer();
+    // native messsages
+    NativeMessaging.start();
+    
     timer.ticker.subscribe(
       async tick => {
         // measure activity
@@ -605,12 +607,14 @@ ipcMain.on("timer", (event: any, args: any) => {
   }
 
   // Stop timer and clear the uploads interval.
-  if (args.action == "stop") {
+  if (args.action == "stop") { console.error("stop");
     stopMoment = args.date;
     timeIsRunning = false;
     idler.clearInterval();
     clearTimeout(shotOut);
     timer.complete();
-    closeServer();
+    //closeServer();
+    // native messaging
+    NativeMessaging.stop();
   }
 });

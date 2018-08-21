@@ -31,7 +31,7 @@ export class ActiveWindow {
       let name = data.owner.name.replace(/\.[^/.]+$/, "");
       let title = data.title;
 
-      logger.log(name, title);
+      //logger.log(name, title);
 
       if ((name !== this._currentName) || (title !== this._currentTitle)) {
 

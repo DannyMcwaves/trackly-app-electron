@@ -341,10 +341,10 @@ app.on("ready", () => {
   Utility.checkNativeMessaging();
 
   // start listening for messages
-  NativeMessaging.start();
+  //NativeMessaging.start();
 
   // start the autoUpdater
-  autoAppUpdater();
+  //autoAppUpdater();
 
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;

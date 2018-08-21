@@ -111,9 +111,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.isIdle = true;
-          let date = new Date(),
-            hour = date.getHours(),
-            mins = date.getMinutes();
+          let date = moment().milliseconds(-600000),
+            hour = date.hour(),
+            mins = date.minute();
           this.idleHour = hour < 10 ? "0" + hour : hour;
           this.idleMinutes = mins < 10 ? "0" + mins : mins;
           this.idleMode = this.idleHour > 11 ? "PM" : "AM";

@@ -23,7 +23,6 @@ export class Idler {
   private _interruptIdler: boolean = false;
   private _isIdle: boolean = false;
   private _idleOpen: boolean = false;
-  private _tempEvent: any = [];
 
   constructor(fscs: any, uploader: any) {
     this.uploader = uploader;
@@ -193,12 +192,6 @@ export class Idler {
       this._parentWindow.setAlwaysOnTop(true, 'floating');
       this._parentWindow.setVisibleOnAllWorkspaces(true);
 
-      this._tempEvent.push({
-        type: "startIdle",
-        timestamp: moment().milliseconds(0).toISOString(),
-        payload: ""
-      });
-
       this._idleInterval = setInterval(() => {
         this.logTick({});
       }, 2000);
@@ -215,29 +208,21 @@ export class Idler {
     this._parentWindow.setAlwaysOnTop(false, 'floating');
     this._parentWindow.setVisibleOnAllWorkspaces(false);
 
-    const stopEvent: any = {
-      type: "stopIdle",
-      timestamp: moment().milliseconds(600000).toISOString(),
-      payload: ""
-    };
-
     if (!idleResponse.keepIdle) {
-      this._tempEvent.push(stopEvent);
-      Emitter.extendEvent(this._tempEvent);
-    } else if(idleResponse.same === true) {
-      stopEvent.payload = {projectId: idleResponse.project.id};
-      stopEvent.type = "stopLogging";
+      const stopEvent: any = {
+        type: "stopLogging",
+        timestamp: idleResponse.stopIdle,
+        payload: {projectId: idleResponse.project.id}
+      };
       Emitter.ignoreIdle(stopEvent);
-    } else if (idleResponse.same === false) {
-      this._tempEvent[0].type = "startLogging";
-      this._tempEvent[0].payload = {projectId: idleResponse.project.id};
-      stopEvent.type = "stopLogging";
-      stopEvent.payload = {projectId: idleResponse.project.id};
-      this._tempEvent.push(stopEvent);
-      Emitter.extendEvent(this._tempEvent);
+    } else if(idleResponse.keepIdle) {
+      const stopEvent: any = {
+        type: "stopLogging",
+        timestamp: idleResponse.stopIdle,
+        payload: {projectId: idleResponse.project.id}
+      };
+      Emitter.ignoreIdle(stopEvent);
     }
-
-    this._tempEvent = [];
 
     clearInterval(this._idleInterval);
     this._interruptIdler = false;

@@ -6,9 +6,9 @@ const { exec } = require('child_process');
 
 const appDir = app.getPath("userData");
 const installerDir = appDir + path.sep + "Trackly";
-// see if same file name could do for win,mac
 const nmInstallationSuccess = appDir + path.sep + 'nmInstallSucess';
-const nmManifestFile = appDir + path.sep + 'trackly.json';
+const nmChromeManifestFile = appDir + path.sep + 'trackly_c.json';
+const nmFirefoxManifestFile = appDir + path.sep + 'trackly_ff.json';
 const chromeRegistryFile = appDir + path.sep + 'chrome.reg';
 const firefoxRegistryFile = appDir + path.sep + 'firefox.reg';
 const nmProxyExe = appDir + path.sep + 'trackly_nm_proxy.exe';
@@ -17,7 +17,6 @@ const nmSwapFileDir = appDir + path.sep + 'nativeMessages'
 function createManifest() {
 
   const manifest : any = {
-    name: "trackly",
     description: "Host proxy for native messaging",
     type: "stdio"
   };
@@ -31,7 +30,6 @@ function createManifest() {
 
     console.error("OS not supported.");
     return;
-
   };
 
   if(process.platform === 'darwin'){
@@ -50,17 +48,20 @@ function createManifest() {
     manifest.path = nmProxyExe;
   }
 
-  // try to use single file for both browsers since there are one key difference
   const manifestChrome = Object.assign({}, manifest);
   const manifestFirefox = Object.assign({}, manifest);
-  manifestChrome.allowed_origins = ["chrome-extension://knldjmfmopnpolahpmmgbagdohdnhkik/"];
+
+  manifestChrome.name =  'com.trackly.trackly',
+  manifestChrome.allowed_origins = ["chrome-extension://npojdaolnandcgbilnehlplhpffclpnb/"];
+  
+  manifestFirefox.name =  'trackly',
   manifestFirefox.allowed_extensions = ["dev@trackly.com"];
 
   try {
-    fse.writeJsonSync(nmManifestFile , manifest);
-    logger.log('Native messaging manifest file created at: ' + nmManifestFile);
-    fse.writeJsonSync(nmManifestFile , manifest);
-    logger.log('Native messaging manifest file created at: ' + nmManifestFile);
+    fse.writeJsonSync(nmChromeManifestFile , manifestChrome);
+    logger.log('Native messaging manifest file created at: ' + nmChromeManifestFile);
+    fse.writeJsonSync(nmFirefoxManifestFile , manifestFirefox);
+    logger.log('Native messaging manifest file created at: ' + nmFirefoxManifestFile);
   } catch (err) {
     logger.error(err);
   }
@@ -88,11 +89,11 @@ function createRegistryFiles() {
     // prepare registry files
     const chromeRegistry = `Windows Registry Editor Version 5.00
     [HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.trackly.trackly]
-    @="${nmManifestFile.replace(regex, '\\\\')}"`;
+    @="${nmChromeManifestFile.replace(regex, '\\\\')}"`;
 
     const firefoxRegistry = `Windows Registry Editor Version 5.00
     [HKEY_CURRENT_USER\\SOFTWARE\\Mozilla\\NativeMessagingHosts\\trackly]
-    @="${nmManifestFile.replace(regex, '\\\\')}"`;
+    @="${nmFirefoxManifestFile.replace(regex, '\\\\')}"`;
 
     // make file chrome
     try {
@@ -111,7 +112,7 @@ function createRegistryFiles() {
   }
 }
 
-function installNativeMessaging(file : any) {
+function installNativeMessaging() {
 
   if(process.platform === 'darwin'){
 
@@ -152,7 +153,6 @@ function installNativeMessaging(file : any) {
         // node couldn't execute the command
         logger.error(err);
         // write the installation success file so the application do this on first run only
-        fse.writeFileSync(nmInstallationSuccess , true);
         return;
       }
 
@@ -171,12 +171,13 @@ function installNativeMessaging(file : any) {
       if (err) {
         // node couldn't execute the command
         logger.error(err);
-        fse.writeFileSync(nmInstallationSuccess , true);
         return;
       }
        // the *entire* stdout and stderr (buffered)
        logger.log(`stdout: ${stdout}`);
        logger.log(`stderr: ${stderr}`);
+       fse.writeFileSync(nmInstallationSuccess , true);
+       logger.log(`=== Native messaging instalation success ===`);
     });
     // user
     // HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\NativeMessagingHosts\com.my_company.my_application
@@ -233,7 +234,7 @@ let utiltiy = {
 
       // for linux, mac copy to folder
       // for win add registry key (chrome and ff use different keys and different locations )
-      installNativeMessaging(nmManifestFile);
+      installNativeMessaging();
 
       // mac and linux can stdio from main process in electron windows can't
       // workaround

@@ -1,4 +1,4 @@
-var logger = require('electron-log');
+const logger = require('electron-log');
 const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
 const Store = require("electron-store");
@@ -122,7 +122,7 @@ let server: any;
 let port: any;
 let close: string = 'na';
 let restartAndInstall = false;
-let dir = join(__static, '/trackly.png');
+let dir = join(__static, '/trackly@1.5x.png');
 let image = nativeImage.createFromPath(dir);
 
 // Ensure only one instance of the application gets run

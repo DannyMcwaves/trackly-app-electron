@@ -306,10 +306,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           // that's if the user is not tracking time.
           // when there is no time tracking, then reset the timer.
           if (this.isIdle) {
-            document.getElementById("idler").classList.add('d-none');
-            ipcRenderer.send('idleResponse', {reset: true});
             this.isIdle = false;
-          } else if(!this.activeProject.id) {
+            document.getElementById("idle-butto").click();
+          }
+
+          // reset the timers if there is currently no project tracking.
+          if(!this.activeProject.id) {
             this.cleanWorkSpace();
           }
         }
@@ -426,9 +428,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       });
 
         projects.forEach((project: any) => {
-        perProject[project.id] = project.timeTracked;
-        this.perProjectCached[project.id] = project.timeTracked;
-        totalTime += project.timeTracked;
+        perProject[project.id] = Math.abs(project.timeTracked);
+        this.perProjectCached[project.id] = Math.abs(project.timeTracked);
+        totalTime += Math.abs(project.timeTracked);
       });
 
         this.totalIimeToday = totalTime;
@@ -436,9 +438,27 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         this.perProject = perProject;
         this.projects = projects;
         ipcRenderer.send("time:travel", totalTime);
+
+        this.lastSynced = Date.now()
       }, (err: any) => {
-      console.log("error");
-    })
+        let projects = JSON.parse(JSON.stringify(this.projects)),
+          perProject = {},
+          totalTime = 0;
+
+        projects.forEach((project: any) => {
+          perProject[project.id] = 0;
+          this.perProjectCached[project.id] = 0;
+          totalTime += 0;
+        });
+
+        this.totalIimeToday = totalTime;
+        this.totalIimeTodayCached = totalTime;
+        this.perProject = perProject;
+        this.projects = projects;
+        ipcRenderer.send("time:travel", totalTime);
+
+        this.lastSynced = Date.now()
+      })
     }
 
     /**

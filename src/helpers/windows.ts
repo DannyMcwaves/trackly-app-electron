@@ -32,7 +32,7 @@ export class ActiveWindow {
       let name = data.owner.name;
       let title = data.title;
 
-      if ((name !== this._currentName) || (title !== this._currentTitle)) {
+      if ((name !== this._currentName || title !== this._currentTitle) && !this.browserList.includes(name.toLocaleLowerCase())) {
 
         Emitter.appendEvent("startActiveWindow",
           moment().milliseconds(0).toISOString(),

@@ -15,20 +15,21 @@ function sleep(ms: number){
     })
 }
 
-const nm = {
+const nmWindows = {
     start: () => {
         watch = fs.watch(nativeMessagesDir, async (eventType, filename) => {
             if(eventType === 'change'){
                 try {
                     await sleep(300);
                     const fileData = await fs.readJson(nativeMessagesDir + '/' + filename);
-                    //console.log("file data:" , JSON.stringify(fileData), typeof(fileData));
+                    logger.log("file data:" , JSON.stringify(fileData), typeof(fileData));
                     Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), fileData);
                 } catch (err) {
                     logger.error(err)
                 }
             }
         });
+        logger.log('=== Native Messaging listener started ===');
     },
     stop: () => {
         try {
@@ -47,7 +48,24 @@ const nm = {
                 });
             }
         });
+        logger.log('=== Native Messaging listener stopped ===');
     }
 }
 
-export const NativeMessaging = nm;
+// logic for nm on mac can go here
+const nmMac = {
+    start: () => {
+        
+    },
+    stop: () => {
+        
+    }
+}
+
+if(process.platform === 'win32'){
+    var nativeMessages = nmWindows;
+}else{
+    var nativeMessages = nmMac;
+}
+
+export const NativeMessaging = nativeMessages;

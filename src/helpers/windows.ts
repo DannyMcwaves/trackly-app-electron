@@ -21,11 +21,15 @@ export class ActiveWindow {
 
     this.currentWindow().then((data: any) => {
 
-      if ( data.owner.name === "" || data.title === "" ){
+      if ( data.owner.name === "" && data.title === "" ){
         logger.error(data); // if there is no required data ask again
         return setTimeout(() => {
           this.current(duration);
         }, 600); // usually window needs 600ms to refresh
+      }
+
+      if(data.title === ""){
+        data.title = data.owner.name
       }
 
       let name = data.owner.name.replace(/\.[^/.]+$/, "");

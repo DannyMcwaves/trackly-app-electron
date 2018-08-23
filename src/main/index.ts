@@ -7,7 +7,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions, Notification } from "electron";
 import { config } from 'dotenv';
 import { join } from 'path';
 import { autoUpdater } from "electron-updater";
@@ -341,6 +341,16 @@ app.on("ready", () => {
 
   // get the idler program up and running.
   idler.createParent(appWindow);
+
+  if (Notification.isSupported()) {
+    let notes = new Notification({
+      title: "Trackly is trying to notify you",
+      body: "have you seen this body",
+      icon: image
+    });
+    notes.show();
+  }
+
 
 });
 

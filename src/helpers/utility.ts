@@ -11,8 +11,9 @@ const nmChromeManifestFile = appDir + path.sep + 'trackly_c.json';
 const nmFirefoxManifestFile = appDir + path.sep + 'trackly_ff.json';
 const chromeRegistryFile = appDir + path.sep + 'chrome.reg';
 const firefoxRegistryFile = appDir + path.sep + 'firefox.reg';
-const nmProxyExe = appDir + path.sep + 'trackly_nm_proxy.exe';
-const nmSwapFileDir = appDir + path.sep + 'nativeMessages'
+// const nmProxyExe = appDir + path.sep + 'trackly_nm_proxy.exe';
+const nmSwapFileDir = appDir + path.sep + 'nativeMessages';
+const nmProxyExeInstallationPath = 'C:\\Program Files\\Trackly\\' + 'trackly_nm_proxy.exe';
 
 function createManifest() {
 
@@ -45,7 +46,7 @@ function createManifest() {
     
     // Path to the proxy application.
     // On Windows, this may be relative to the manifest itself. On OS X and Linux it must be absolute.
-    manifest.path = nmProxyExe;
+    manifest.path = nmProxyExeInstallationPath;
   }
 
   const manifestChrome = Object.assign({}, manifest);
@@ -176,13 +177,13 @@ function installNativeMessaging() {
        // the *entire* stdout and stderr (buffered)
        logger.log(`stdout: ${stdout}`);
        logger.log(`stderr: ${stderr}`);
-       fse.writeFileSync(nmInstallationSuccess , true);
-       logger.log(`=== Native messaging instalation success ===`);
     });
     // user
     // HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\NativeMessagingHosts\com.my_company.my_application
     // value is a path to the manifest file
-
+    
+    fse.writeFileSync(nmInstallationSuccess , true);
+    logger.log(`=== Native messaging instalation success ===`);
   }
 }
 

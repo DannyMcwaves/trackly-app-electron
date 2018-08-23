@@ -122,7 +122,7 @@ let server: any;
 let port: any;
 let close: string = 'na';
 let restartAndInstall = false;
-let dir = join(__static, '/trackly@1.5x.png');
+let dir = join(__static, '/tracklyTemplate@4x.png');
 let image = nativeImage.createFromPath(dir);
 
 // Ensure only one instance of the application gets run
@@ -202,6 +202,8 @@ function systemTray() {
       appWindow.focus();
     }
   });
+
+  return tray;
 }
 
 function autoAppUpdater() {
@@ -327,7 +329,9 @@ app.on("ready", () => {
   appWindow = createApplicationWindow();
 
   // initiate the system tray program.
-  systemTray();
+  const appTray = systemTray();
+
+  appTray.displayBalloon({title: "Trackly", content: "this is the main content of the web app."});
 
   // start the autoUpdater
   autoAppUpdater();

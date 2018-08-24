@@ -53,6 +53,8 @@ app.post('*', (req: any, res: any) => {
   // append this to the emitter.
   Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), req.body);
 
+  store.set("extInstalled", true);
+
   res.send({
     message: "Trackly",
     status: "message received"

@@ -58,6 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private currentIdleProject: string = "Madison Square";
     private activeProjectCache: any = {};
     private reAssign: boolean = false;
+    private showNotification: boolean = true;
 
     /**
      * Dashboard component constructor with added protection
@@ -284,7 +285,14 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     trackNextDay() {
       this.nextInterval = setInterval(() => {
 
-        if (this.today !== (new Date()).getDate()) {
+        let newDate = new Date();
+
+        if (newDate.getHours() === 9 && this.showNotification && !this.activeProject.id) {
+          ipcRenderer.send("show:notification");
+          this.showNotification = false;
+        }
+
+        if (this.today !== newDate.getDate()) {
 
           ipcRenderer.send('checkUpdates');
 
@@ -300,7 +308,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
           this.totalIimeTodayCached = 0;
 
-          this.today = (new Date()).getDate();
+          this.showNotification = true;
+
+          this.today = newDate.getDate();
 
           // if there is no active project, then do not refresh this workspace.
           // that's if the user is not tracking time.

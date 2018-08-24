@@ -122,6 +122,8 @@ let server: any;
 let port: any;
 let close: string = 'na';
 let restartAndInstall = false;
+let appTray: any;
+let appStarted: boolean;
 let dir = join(__static, '/tracklyTemplate@4x.png');
 let image = nativeImage.createFromPath(dir);
 
@@ -301,6 +303,30 @@ function createDialog(url: string, defaults: object = {}) {
   return notificationWindow;
 }
 
+function showNotification(title: string, body: string) {
+  if (process.platform === 'win32') {
+    if (appTray) {
+      appTray.displayBalloon({title, content: body});
+    }
+  } else {
+    if (Notification.isSupported()) {
+      let notes = new Notification({ title, body });
+      notes.show();
+    }
+  }
+}
+
+function initializeStoreVars() {
+  appStarted = true;
+  let extRuntime = store.get('extRuntime'),
+    extInstalled = store.get('extInstalled');
+
+  if (extRuntime === undefined && extInstalled === undefined) {
+    shell.openExternal('https://trackly.com/browser');
+    store.set("extRuntime", true);
+  }
+}
+
 app.on("window-all-closed", () => {
 
   // before the window is finally closed, complete all timers.
@@ -329,9 +355,7 @@ app.on("ready", () => {
   appWindow = createApplicationWindow();
 
   // initiate the system tray program.
-  const appTray = systemTray();
-
-  appTray.displayBalloon({title: "Trackly", content: "this is the main content of the web app."});
+  appTray = systemTray();
 
   // start the autoUpdater
   autoAppUpdater();
@@ -339,18 +363,11 @@ app.on("ready", () => {
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;
 
+  // initialize startup variables.
+  initializeStoreVars();
+
   // get the idler program up and running.
   idler.createParent(appWindow);
-
-  if (Notification.isSupported()) {
-    let notes = new Notification({
-      title: "Trackly is trying to notify you",
-      body: "have you seen this body",
-      icon: image
-    });
-    notes.show();
-  }
-
 
 });
 
@@ -377,6 +394,13 @@ ipcMain.on('quit', (event: any, res: any) => {
       appWindow.close();
     }, 2000);
   }
+});
+
+/**
+ * show notification for tracking time and for extension install
+ */
+ipcMain.on("show:notification", (event: any, res: any) => {
+  showNotification("Reminder from Trackly", "Don't forget to track your time and own the day")
 });
 
 /**

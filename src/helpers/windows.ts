@@ -6,6 +6,8 @@ import * as activeWin from 'active-win';
 import * as logger from "electron-log";
 import {Emitter} from './emitter';
 import * as moment from 'moment';
+const Store = require("electron-store");
+const store = new Store();
 
 
 export class ActiveWindow {
@@ -13,6 +15,7 @@ export class ActiveWindow {
   public static _currentName: string;
   public static _currentTitle: string;
   private static browserList: string[] = ["chrome", "google chrome", "firefox", "safari", "opera", "iexplore", "chrome.exe", "google chrome.exe", "firefox.exe", "iexplore.exe", "opera.exe", "safari.exe"];
+  private static showMessage: boolean = true;
 
   static currentWindow() {
     return activeWin();

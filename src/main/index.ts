@@ -79,10 +79,10 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Quit',
     click() {
+      close = 'ya';
       app.exit();
     },
-    accelerator: 'CmdOrCtrl+Q',
-    role: 'quit'
+    accelerator: 'CmdOrCtrl+Q'
   }
 ];
 const idler = new Idler(fscs, uploader);
@@ -160,10 +160,14 @@ function createApplicationWindow() {
     let val = store.get('close');
 
     if(val === 'Minimize') {
-      event.preventDefault();
-      windowFrame.minimize();
+      if (close !== "ya") {
+        event.preventDefault();
+        windowFrame.minimize();
+      }
     } else if(val === 'Cancel') {
-      event.preventDefault();
+      if (close !== "ya") {
+        event.preventDefault();
+      }
     } else if(val === 'Quit' && close === 'na') {
       event.preventDefault();
       close = 'ya';

@@ -7,6 +7,7 @@ import { activityStorage } from "./activity";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { ActiveWindow } from "./windows";
 import * as moment from "moment";
+import { CONSTANTS } from "../constants";
 
 
 export class Idler {
@@ -151,9 +152,9 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    this._upload = !(idle >= 598);
+    this._upload = !(idle >=  CONSTANTS.IDLE_TRESHOLD - 2);
 
-    if (idle >= 600) {
+    if (idle >=  CONSTANTS.IDLE_TRESHOLD) {
       let time;
       if (this._interruptIdler) {
         time = this._idled + 2;

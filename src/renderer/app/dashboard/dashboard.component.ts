@@ -8,6 +8,7 @@ import {UserService} from "../services/user.service";
 import {OnInit, AfterViewChecked} from "@angular/core/src/metadata/lifecycle_hooks";
 import {Router} from "@angular/router";
 import {HttpClient, HttpParams} from "@angular/common/http";
+import { CONSTANTS } from "../../../constants";
 
 import * as moment from "moment";
 
@@ -49,9 +50,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleDisplay: string = "none";
     private idleHeight: number = 10;
     private idleTime: number = 10;
-    private idleMinutes: any = 0;
-    private idleHour: any = 0;
-    private idleMode: string = "";
     private idleStartTime: any = undefined;
     private idleStopTime: any = undefined;
     private isIdle: boolean = false;
@@ -59,6 +57,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private activeProjectCache: any = {};
     private reAssign: boolean = false;
     private showNotification: boolean = true;
+    private IdleFrom: string;
 
     /**
      * Dashboard component constructor with added protection
@@ -112,12 +111,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.isIdle = true;
-          let date = moment().milliseconds(-600000),
-            hour = date.hour(),
-            mins = date.minute();
-          this.idleHour = hour < 10 ? "0" + hour : hour;
-          this.idleMinutes = mins < 10 ? "0" + mins : mins;
-          this.idleMode = this.idleHour > 11 ? "PM" : "AM";
+          this.IdleFrom = moment().format("h:mm A");
           this.idleStartTime = moment().milliseconds(0);
           document.getElementById("idler").classList.remove('d-none');
         });
@@ -182,11 +176,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       this.isIdle = false;
       this.idleStopTime = moment().milliseconds(0);
       let idle = Math.round(this.idleStopTime.diff(this.idleStartTime) / 1000);
-      this.idleStartTime.milliseconds(-600000);
-
-      this.perProject[this.activeProjectCache.id] -= 600;
-      this.perProjectCached[this.activeProjectCache.id] -= 600;
-      this.totalIimeToday -= 600;
+      this.idleStartTime.milliseconds(-CONSTANTS.IDLE_TRESHOLD*1000);
+      
+      this.perProject[this.activeProjectCache.id] -= CONSTANTS.IDLE_TRESHOLD;
+      this.perProjectCached[this.activeProjectCache.id] -= CONSTANTS.IDLE_TRESHOLD;
+      this.totalIimeToday -= CONSTANTS.IDLE_TRESHOLD;
+      if(this.totalIimeToday < 0)  this.totalIimeToday = 0;
       this.currentSession += idle;
       ipcRenderer.send("time:travel", this.totalIimeToday);
 

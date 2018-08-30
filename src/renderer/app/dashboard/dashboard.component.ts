@@ -184,7 +184,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       this.idleStopTime = moment().milliseconds(0);
       let idle = Math.round(this.idleStopTime.diff(this.idleStartTime) / 1000);
       this.idleStartTime.milliseconds(-CONSTANTS.IDLE_TRESHOLD*1000);
-      
+
       this.perProject[this.activeProjectCache.id] -= CONSTANTS.IDLE_TRESHOLD;
       this.perProjectCached[this.activeProjectCache.id] -= CONSTANTS.IDLE_TRESHOLD;
       this.totalIimeToday -= CONSTANTS.IDLE_TRESHOLD;
@@ -344,8 +344,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
     _refresher() {
 
-      let _totalIimeToday = 0;
-
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
 
@@ -378,24 +376,26 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
             ipcRenderer.send('projects', projects);
 
-            let tempTimeToday = 0, perProject = {};
-
             if (!this.startTime) {
+              let tempTimeToday = 0, perProject = {};
+
               this.projects.forEach((element: any) => {
                 perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
                 this.perProjectCached[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
                 tempTimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
                 ipcRenderer.send("time:travel", this.totalIimeToday);
               });
+
+              this.totalIimeTodayCached = this.totalIimeToday = tempTimeToday;
+              
+              this.perProject = perProject;
+
+              this.projects = projects;
+
+              this.resize = true;
             }
 
-            this.totalIimeTodayCached = this.totalIimeToday = tempTimeToday;
 
-            this.perProject = perProject;
-
-            this.projects = projects;
-
-            this.resize = true;
 
             this.lastSynced = Date.now();
 

@@ -224,9 +224,7 @@ function autoAppUpdater() {
   autoUpdater.on('checking-for-update', () => {});
 
   autoUpdater.on('update-available', (ev, info) => {
-    if (autoUpdater.autoDownload) {
-      createDialog('new_version', {height: 130, width: 450});
-    }
+ 
   });
 
   autoUpdater.on('update-not-available', (ev, info) => {
@@ -241,7 +239,8 @@ function autoAppUpdater() {
   autoUpdater.on('download-progress', (ev, progressObj) => {});
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
-    createDialog('restart', {height: 135, width: 450});
+    if(appWindow) { appWindow.webContents.send("updateReady"); }
+    showNotification("Update from Trackly", "Update is available.")
   });
 }
 
@@ -425,7 +424,7 @@ ipcMain.on('restart', (event: any, res: any) => {
   if(notificationWindow) {
     notificationWindow.close();
   }
-
+ console.log(res);
   if (res.restart) {
     store.delete('close');
     close = 'ya';

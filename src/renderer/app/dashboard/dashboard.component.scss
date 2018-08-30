@@ -224,8 +224,24 @@ footer {
       border: 1px solid #c0c0c0;
     }
   }
+}
+#newVersion {
+  position: relative;
+  z-index: 101;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgb(236, 100, 75) !important;
+  color: #fff !important;
+  border-color: #f5c6cb !important;
+  text-align: center !important;
+  line-height: 2;
+  overflow: hidden; 
+  box-shadow:         0 0 2px rgba(0,0,0,0.5);
+  font-size: 0.9rem;
+}
 
-  #idle-button {
-
-  }
+.btn-primary{
+  background-color: #0074ef;
+  border-color: #0074ef;
 }

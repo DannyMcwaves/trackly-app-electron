@@ -135,6 +135,13 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           clearInterval(this.nextInterval);
         };
 
+        // Show update bar
+        ipcRenderer.on("updateReady", (event: any) => {
+          document.getElementById("newVersion").classList.remove('d-none');
+          this.baseProjectHeight += 5;
+          this._resizeFrame();
+        });
+
     }
 
     /**
@@ -321,6 +328,10 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           }
         }
       }, 10000);
+    }
+    
+    appRestart(){
+      ipcRenderer.send("restart", {restart: true});
     }
 
     /*

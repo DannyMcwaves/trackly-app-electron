@@ -79,8 +79,12 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Quit',
     click() {
-      close = 'ya';
-      app.exit();
+      forceQuit = true;
+      if(appWindow) {
+        appWindow.close();
+      } else {
+        app.exit();
+      }
     },
     accelerator: 'CmdOrCtrl+Q'
   }
@@ -121,6 +125,7 @@ let shotOut: any;
 let server: any;
 let port: any;
 let close: string = 'na';
+let forceQuit = false;
 let restartAndInstall = false;
 let appTray: any;
 let appStarted: boolean;
@@ -164,9 +169,18 @@ function createApplicationWindow() {
     let val = store.get('close');
 
     if(val === 'Minimize') {
-      if (close !== "ya") {
+      if (close !== "ya" && !forceQuit) {
         event.preventDefault();
         windowFrame.minimize();
+      } else if(forceQuit) {
+        event.preventDefault();
+        close = 'ya';
+        if (windowFrame) {
+          windowFrame.webContents.send("stopTimeFromTray");
+        }
+        setTimeout(() => {
+          app.exit();
+        }, 2000);
       }
     } else if(val === 'Cancel') {
       if (close !== "ya") {
@@ -228,7 +242,7 @@ function autoAppUpdater() {
   autoUpdater.on('checking-for-update', () => {});
 
   autoUpdater.on('update-available', (ev, info) => {
- 
+
   });
 
   autoUpdater.on('update-not-available', (ev, info) => {
@@ -538,6 +552,13 @@ ipcMain.on('checkUpdates', (event: any) => {
  */
 ipcMain.on("open:link", (event: any, link: string) => {
   shell.openExternal(link);
+});
+
+/**
+ *
+ */
+ipcMain.on("upload:docs", (event: any, link: string) => {
+  uploader.upload(() => {});
 });
 
 /**

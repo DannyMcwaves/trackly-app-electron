@@ -25,14 +25,7 @@ export class ActiveWindow {
 
     this.currentWindow().then((data: any) => {
 
-      if ( data.owner.name === "" || data.title === "" ){
-        logger.error(data); // if there is no required data ask again
-        return setTimeout(() => {
-          this.current(duration);
-        }, 600); // usually window needs 600ms to refresh
-      }
-
-      let name = data.owner.name;
+      let name = data.owner.name || "System";
       let title = data.title;
 
       if ((name !== this._currentName || title !== this._currentTitle) && !this.browserList.includes(name.toLocaleLowerCase())) {
@@ -44,6 +37,25 @@ export class ActiveWindow {
 
         this._currentName = name;
         this._currentTitle = title;
+
+      }
+    }).catch((err: any) => {
+      logger.log(err);
+    });
+  }
+
+  public static forceCurrent() {
+    this.currentWindow().then((data: any) => {
+
+      let name = data.owner.name || "System";
+      let title = data.title;
+
+      if (!this.browserList.includes(name.toLocaleLowerCase())) {
+
+        Emitter.appendEvent("startActiveWindow",
+          moment().milliseconds(0).toISOString(),
+          {title: name, windowTitle: title}
+        );
 
       }
     }).catch((err: any) => {

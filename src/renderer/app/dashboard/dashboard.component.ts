@@ -71,9 +71,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
         this.store = new Store();
 
-        if (!this.store.has('token') && !this.store.has('userId')) {
-            this.router.navigate(['login']);
-        }
+        this._checkStoredUser();
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
@@ -142,6 +140,10 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           this._resizeFrame();
         });
 
+        // Check user session status
+        ipcRenderer.on("checkUser", (event: any) => { console.log("checking user!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+          this._checkStoredUser();
+        });
     }
 
     /**
@@ -156,11 +158,24 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     }
 
     /**
+     * If there is no user data in store navigate to login
+     * @returns void
+     * @private
+     */
+    private _checkStoredUser() {
+      if (!this.store.has('token') && !this.store.has('userId')) {
+        this.router.navigate(['login']);
+      }
+    }
+
+    /**
      * Get logged in user ID and Token
      * @returns {userId: string | null; authToken: string | null}
      * @private
      */
     _getUserAuth() {
+        this._checkStoredUser();
+        
         const authToken = this.store.get("token");
         const userId = this.store.get("userId");
 

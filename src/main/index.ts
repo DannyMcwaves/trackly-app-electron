@@ -32,7 +32,7 @@ logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()
 const fscs = new Fscs();
 const timer = new Timer();
 const activity = new Activity(fscs);
-const uploader = new Uploader(fscs);
+const uploader = new Uploader(fscs, onUserFailCb);
 const store = new Store();
 const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
@@ -147,6 +147,10 @@ if (isDevelopment) {
 } else {
   windowURL = `file://${__dirname}/index.html`;
   windowDefaults.resizable = false;
+}
+
+function onUserFailCb(){
+  if(appWindow) { appWindow.webContents.send('checkUser'); }
 }
 
 /**

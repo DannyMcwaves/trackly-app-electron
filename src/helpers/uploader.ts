@@ -1,16 +1,19 @@
+const Store = require("electron-store");
 import * as logger from "electron-log";
 import * as req from "request";
 import * as fse from "fs-extra";
 import { ApiService } from "../renderer/app/services/api.service";
 import { Fscs } from "./fscs";
-
 export class Uploader {
   private store: any;
   private api: any;
   private uploadTimeout = 500;
+  private onUserFailCb: Function;
 
-  constructor(private fscs: Fscs) {
+  constructor(private fscs: Fscs, onUserFail: Function) {
     this.api = new ApiService();
+    this.store = new Store();
+    this.onUserFailCb = onUserFail;
   }
 
   public upload(callback: any) {
@@ -44,7 +47,10 @@ export class Uploader {
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
             callback();
+          } else if (res.statusCode === 401) {
+            this.checkUser();
           } else {
+            console.log(this.api.uploadActivitiesURL(),err, res.statusCode, res.body);
             logger.warn(`File upload failed: ${file}`);
             logger.error(err);
           }
@@ -73,7 +79,9 @@ export class Uploader {
           if (!err && res.statusCode == 200) {
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
-          } else {
+          }else if(res.statusCode === 401){
+            this.checkUser();
+          }else {
             logger.warn(`File upload failed: ${file}`);
             logger.error(err);
           }
@@ -101,5 +109,11 @@ export class Uploader {
       fse.unlinkSync(logFile);
     }
   }
+   private checkUser() {
+     // token exired new login needed
+     this.store.delete("token");
+     this.store.delete("userId");
+     this.onUserFailCb();
+   }
 
 }

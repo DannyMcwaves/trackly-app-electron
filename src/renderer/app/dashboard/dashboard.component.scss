@@ -161,10 +161,6 @@ footer {
     line-height: 36px;
   }
 
-  i {
-    cursor: pointer;
-  }
-
   i:hover + #tooltip {
     display: inline;
   }
@@ -172,6 +168,9 @@ footer {
   span {
     position: relative;
     bottom: 3px;
+  }
+  .clickable {
+    cursor: pointer;
   }
 
   #tooltip {

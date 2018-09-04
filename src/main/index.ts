@@ -551,6 +551,13 @@ ipcMain.on("open:link", (event: any, link: string) => {
 });
 
 /**
+ *
+ */
+ipcMain.on("upload:docs", (event: any, link: string) => {
+  uploader.upload(() => {});
+});
+
+/**
  * ===================
  * == WINDOW HEIGHT ==
  * ===================

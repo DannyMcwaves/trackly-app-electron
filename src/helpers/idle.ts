@@ -75,19 +75,15 @@ export class Idler {
 
     this.appendAllToJson();
 
-    let returnValue = this.fscs.rotate();
+    this.fscs.rotate();
     // start upload when activity file are successfully rotated.
 
     Emitter.lastSynced = moment().milliseconds(0);
 
     // upload files within 10min interval after every rotation.
-    if (returnValue) {
-      this.uploader.upload(() => {
-        if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
-      });
-    } else {
+    this.uploader.upload(() => {
       if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
-    }
+    });
   }
 
   stopUpload(res: any) {

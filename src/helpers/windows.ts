@@ -25,8 +25,8 @@ export class ActiveWindow {
 
     this.currentWindow().then((data: any) => {
 
-      let name = data.owner.name || "System";
-      let title = data.title;
+      let name = data.owner.name || "system";
+      let title = data.title || "system";
 
       if ((name !== this._currentName || title !== this._currentTitle) && !this.browserList.includes(name.toLocaleLowerCase())) {
 

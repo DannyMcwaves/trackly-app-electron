@@ -24,6 +24,7 @@ export class Idler {
   private _interruptIdler: boolean = false;
   private _isIdle: boolean = false;
   private _idleOpen: boolean = false;
+  private _discardIdleActivity: boolean = false;
 
   constructor(fscs: any, uploader: any) {
     this.uploader = uploader;
@@ -36,8 +37,11 @@ export class Idler {
   appendAllToJson() {
 
     // append new activities if available before generating new file.
-    if(activityStorage.duration > 0) {
+    if(activityStorage.duration > 0 && !this._discardIdleActivity) {
       Emitter.appendActivity(activityStorage.userStatus, activityStorage.duration);
+    } else {
+      Emitter.appendActivity(false, 0);
+      this._discardIdleActivity = false;
     }
 
     let temp = JSON.stringify(Emitter.appState),
@@ -212,6 +216,7 @@ export class Idler {
         payload: {projectId: idleResponse.project.id}
       };
       Emitter.ignoreIdle(stopEvent);
+      this._discardIdleActivity = true;
     } else if(idleResponse.keepIdle) {
       const stopEvent: any = {
         type: "stopLogging",

@@ -1,10 +1,15 @@
+@font-face {
+    font-family: 'MavenPro';
+    src: url(./assets/MavenPro-Regular.ttf);
+}
+
 $blue: #125BED;
 $font-size-base: 1rem;
 
 @import "~bootstrap/scss/bootstrap.scss";
 
 body {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'MavenPro', sans-serif;
     user-select: none;  // Disable user from selecting text
 }
 

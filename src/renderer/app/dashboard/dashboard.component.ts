@@ -109,7 +109,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.isIdle = true;
-          this.IdleFrom = moment().format("h:mm A");
+          this.IdleFrom = moment().subtract(CONSTANTS.IDLE_TRESHOLD, "seconds").format("h:mm A");
           this.idleStartTime = moment().milliseconds(0);
           document.getElementById("idler").classList.remove('d-none');
         });

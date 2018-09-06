@@ -47,7 +47,7 @@ export class Uploader {
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
             callback();
-          } else if (res.statusCode === 401) {
+          } else if (!err && res.statusCode === 401) {
             this.checkUser();
           } else {
             console.log(this.api.uploadActivitiesURL(),err, res.statusCode, res.body);
@@ -79,7 +79,7 @@ export class Uploader {
           if (!err && res.statusCode == 200) {
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
-          }else if(res.statusCode === 401){
+          }else if(!err && res.statusCode === 401){
             this.checkUser();
           }else {
             logger.warn(`File upload failed: ${file}`);

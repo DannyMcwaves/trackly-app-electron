@@ -43,16 +43,22 @@ export class Uploader {
         };
 
         req.post(this.api.uploadActivitiesURL(), { formData: data }, (err, res, data) => {
-          if (!err && res.statusCode == 200) {
+          if(err || !res || typeof res === "undefined" || typeof res.statusCode === "undefined"){
+            logger.warn(`File upload failed: ${file}`);
+            logger.error(res);
+            logger.error(err);
+            return;
+          } 
+          if(res.statusCode == 200){
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
             callback();
-          } else if (!err && res.statusCode === 401) {
+          }else if(res.statusCode === 401) {
             this.checkUser();
-          } else {
-            console.log(this.api.uploadActivitiesURL(),err, res.statusCode, res.body);
-            logger.warn(`File upload failed: ${file}`);
-            logger.error(err);
+          }else{
+            logger.warn(`Unhandeled response on uploading: ${file}`);
+            logger.warn(res.statusCode);
+            logger.warn(res.body);
           }
         });
       });
@@ -76,14 +82,21 @@ export class Uploader {
         };
 
         req.post(this.api.uploadScreenshotsURL(), { formData: data }, (err, res, data) => {
-          if (!err && res.statusCode == 200) {
+          if(err || !res || typeof res === "undefined" || typeof res.statusCode === "undefined"){
+            logger.warn(`File upload failed: ${file}`);
+            logger.error(res);
+            logger.error(err);
+            return;
+          }
+          if (res.statusCode == 200) {
             fse.unlink(`${dir}/${file}`, () => { });
             logger.log(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
-          }else if(!err && res.statusCode === 401){
+          }else if(res.statusCode === 401){
             this.checkUser();
           }else {
-            logger.warn(`File upload failed: ${file}`);
-            logger.error(err);
+            logger.warn(`Unhandeled response on uploading: ${file}`);
+            logger.warn(res.statusCode);
+            logger.warn(res.body);
           }
         });
       });
@@ -98,11 +111,18 @@ export class Uploader {
         res: fse.createReadStream(logFile)
       };
       req.post(this.api.uploadErrorReportsURL(), {formData: data}, (err, res, data) => {
-        if (!err && res.statusCode == 200) {
+        if(err || !res || typeof res === "undefined" || typeof res.statusCode === "undefined"){
+          logger.warn(`Log File upload failed: ${logFile}`);
+          logger.error(res);
+          logger.error(err);
+          return;
+        }
+        if (res.statusCode == 200) {
           fse.unlink(logFile, () => { });
         } else {
-          logger.warn(`Log File upload failed: ${logFile}`);
-          logger.error(err);
+          logger.warn(`Unhandeled response on uploading log file: ${logFile}`);
+          logger.warn(res.statusCode);
+          logger.warn(res.body);
         }
       })
     } else if(fileSize !== null) {

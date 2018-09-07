@@ -141,7 +141,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         });
 
         // Check user session status
-        ipcRenderer.on("checkUser", (event: any) => { console.log("checking user!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        ipcRenderer.on("checkUser", (event: any) => {
           this._checkStoredUser();
         });
     }

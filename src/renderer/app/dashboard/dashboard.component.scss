@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'MavenPro';
-  src: url(../assets/MavenPro-Regular.ttf);
+  font-family: 'Montserrat';
+  src: url(../assets/Montserrat-Regular.ttf);
 }
 
 #timer {
@@ -75,7 +75,7 @@ figure {
 
     .project-title, .project-timer {
       margin: 0;
-      font-size: 12px;
+      font-size: 0.8rem;
       font-weight: 500;
       color: #727f8c;
     }
@@ -140,7 +140,7 @@ figure {
       font-size: 0.8rem;
       font-weight: 600;
       line-height: 1.5;
-      font-family: 'MavenPro', sans-serif;
+      font-family: 'Montserrat', sans-serif;
       color: white;
       margin-right: 5px;
     }
@@ -204,14 +204,14 @@ footer {
     background-color: #0074ee;
     color: #ffffff;
     font-size: 0.8em;
-    font-family: 'MavenPro', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     text-transform: uppercase;
   }
 
   .idle-body{
     font-size: 0.8em;
     font-weight: 300;
-    font-family: 'MavenPro', sans-serif;
+    font-family: 'Montserrat', sans-serif;
 
     b {
       font-weight: 600;

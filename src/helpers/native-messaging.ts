@@ -3,12 +3,10 @@ import * as moment from 'moment';
 import { Emitter} from "./emitter";
 import * as logger from "electron-log";
 import * as fs from "fs-extra";
-const Store = require("electron-store");
 
 const path = require('path');
 
 const appDir = app.getPath("userData");
-const store = new Store();
 const nativeMessagesDir = appDir + "/nativeMessages";
 let watch : any = null;
 
@@ -27,7 +25,6 @@ const nmWindows = {
                     const fileData = await fs.readJson(nativeMessagesDir + '/' + filename);
                     logger.log("file data:" , fileData, typeof(JSON.parse(fileData)));
                     Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), JSON.parse(fileData));
-                    store.set("extInstalled", true);
                 } catch (err) {
                     logger.error(err)
                 }
@@ -84,7 +81,6 @@ const nmMac = {
 
       function recievedMessageHandle(msg : object){
         Emitter.appendEvent("URLLoaded", moment().milliseconds(0).toISOString(), msg);
-        store.set("extInstalled", true);
         Send({
           message: "Trackly",
           status: "message received"

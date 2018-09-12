@@ -388,6 +388,9 @@ app.on("ready", () => {
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;
 
+  // make the notification window accessible through emitter.
+  Emitter.notificationFunction = showNotification;
+
   // initialize startup variables.
   initializeStoreVars();
 

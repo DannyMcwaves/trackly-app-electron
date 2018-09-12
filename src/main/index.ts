@@ -310,16 +310,20 @@ function createDialog(url: string, defaults: object = {}) {
   // from the Trackly static html template.
   let appDefaults = {...{ center: true, useContentSize: true, show: false}, ...defaults};
 
-  notificationWindow = new BrowserWindow(appDefaults);
-  notificationWindow.loadURL(`file://${__static}/${url}.html`);
-
-  notificationWindow.on('closed', (event: any) => {
-    notificationWindow = null;
-  });
-
-  notificationWindow.on('ready-to-show', () => {
+  if(notificationWindow) {
     notificationWindow.show();
-  });
+  } else {
+    notificationWindow = new BrowserWindow(appDefaults);
+    notificationWindow.loadURL(`file://${__static}/${url}.html`);
+
+    notificationWindow.on('closed', (event: any) => {
+      notificationWindow = null;
+    });
+
+    notificationWindow.on('ready-to-show', () => {
+      notificationWindow.show();
+    });
+  }
 
   return notificationWindow;
 }

@@ -1,11 +1,9 @@
 import { app } from "electron";
 import * as fse from "fs-extra";
 import * as logger from "electron-log";
-const Store = require("electron-store");
 
 const path = require('path');
 const { exec } = require('child_process');
-const store = new Store();
 
 const appDir = app.getPath("userData");
 const installerDir = appDir + path.sep + "Trackly";
@@ -278,9 +276,19 @@ let utiltiy = {
 
       // ----- TODO -----
       // show notification to the user to reminding him/her to install browser extension.
-    } else {
-      store.set("extInstalled", true);
     }
+  },
+  checkForExtensions: () => {
+    fse.readdir(nmSwapFileDir, function(err, files) {
+        if (err) {
+           return false;
+        } else {
+           if (!files.length) {
+               return false;
+           }
+           return true;
+        }
+    });
   }
 };
 

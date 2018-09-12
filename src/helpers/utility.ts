@@ -54,7 +54,7 @@ function createManifest() {
 
   // TODO: Change extension ID for chrome
   manifestChrome.name =  'com.trackly.trackly',
-  manifestChrome.allowed_origins = ["chrome-extension://npojdaolnandcgbilnehlplhpffclpnb/"];
+  manifestChrome.allowed_origins = ["chrome-extension://jjpplliahjjcpeiajcbogbofhgbkiflb/"];
 
   manifestFirefox.name =  'trackly',
   manifestFirefox.allowed_extensions = ["dev@trackly.com"];

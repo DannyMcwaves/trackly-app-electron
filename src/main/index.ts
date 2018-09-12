@@ -339,6 +339,7 @@ app.on("ready", () => {
 
   // check the comm with the browsers
   Utility.checkNativeMessaging();
+  Utility.checkForExtensions();
 
   // start listening for messages
   NativeMessaging.start();

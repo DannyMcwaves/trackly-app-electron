@@ -15,7 +15,7 @@ const firefoxRegistryFile = appDir + path.sep + 'firefox.reg';
 // const nmProxyExe = appDir + path.sep + 'trackly_nm_proxy.exe';
 const nmSwapFileDir = appDir + path.sep + 'nativeMessages';
 const nmProxyExeInstallationPath = 'C:\\Program Files\\Trackly\\' + 'trackly_nm_proxy.exe';
-const nmProxyMacInstallationPath = appDir + path.sep + 'trackly_nm_proxy';
+const nmProxyMacInstallationPath = '/Applications/Trackly.app/Contents/trackly_nm_proxy';
 const homedir = require('os').homedir();
 
 function createManifest() {

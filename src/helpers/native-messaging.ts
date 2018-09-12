@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import { Emitter} from "./emitter";
 import * as logger from "electron-log";
 import * as fs from "fs-extra";
+
 const path = require('path');
 
 const appDir = app.getPath("userData");
@@ -41,7 +42,7 @@ const nativeMessages = {
         // empty out exchangeDir dir
         fs.readdir(nativeMessagesDir, (err, files) => {
             if (err) logger.error(err);
-            
+
             for (let file of files) {
                 fs.unlink(path.join(nativeMessagesDir, file), err => {
                 if (err) logger.error(err);
@@ -50,6 +51,6 @@ const nativeMessages = {
         });
         logger.log('=== Native Messaging listener stopped ===');
     }
-}
+};
 
 export const NativeMessaging = nativeMessages;

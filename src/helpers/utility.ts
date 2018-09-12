@@ -1,8 +1,11 @@
 import { app } from "electron";
 import * as fse from "fs-extra";
 import * as logger from "electron-log";
+const Store = require("electron-store");
+
 const path = require('path');
 const { exec } = require('child_process');
+const store = new Store();
 
 const appDir = app.getPath("userData");
 const installerDir = appDir + path.sep + "Trackly";
@@ -42,7 +45,7 @@ function createManifest() {
   }
 
   if(process.platform === 'win32'){
-    
+
     // Path to the proxy application.
     // On Windows, this may be relative to the manifest itself. On OS X and Linux it must be absolute.
     manifest.path = nmProxyExeInstallationPath;
@@ -54,7 +57,7 @@ function createManifest() {
   // TODO: Change extension ID for chrome
   manifestChrome.name =  'com.trackly.trackly',
   manifestChrome.allowed_origins = ["chrome-extension://npojdaolnandcgbilnehlplhpffclpnb/"];
-  
+
   manifestFirefox.name =  'trackly',
   manifestFirefox.allowed_extensions = ["dev@trackly.com"];
 
@@ -102,7 +105,7 @@ function createRegistryFiles() {
       logger.log('Chrome registry file created at: ' + chromeRegistryFile);
     } catch (err) {
       logger.error(err);
-    } 
+    }
     // firefox
     try {
       fse.writeFileSync(firefoxRegistryFile , firefoxRegistry);
@@ -188,7 +191,7 @@ function installNativeMessaging() {
       logger.log(`stdout: ${stdout}`);
       logger.log(`stderr: ${stderr}`);
     });
- 
+
     // per user
     // HKEY_CURRENT_USER\SOFTWARE\Mozilla\NativeMessagingHosts\<name>
 
@@ -208,7 +211,7 @@ function installNativeMessaging() {
     // user
     // HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\NativeMessagingHosts\com.my_company.my_application
     // value is a path to the manifest file
-    
+
     fse.writeFileSync(nmInstallationSuccess , true);
     logger.log(`=== Native messaging instalation success ===`);
   }
@@ -219,7 +222,7 @@ let utiltiy = {
     // empty out installer dir
     fse.readdir(installerDir, (err, files) => {
       if (err) logger.error(err);
-    
+
       for (let file of files) {
         fse.unlink(path.join(installerDir, file), err => {
           if (err) logger.error(err);
@@ -230,20 +233,20 @@ let utiltiy = {
     // delete installers from app dir
     fse.readdir(appDir, (err, files) => {
       if (err) logger.error(err);
-    
+
       for (let file of files) {
         let regexp = /installer/gi;
         if(file.match(regexp)){console.log(file);
           fse.unlink(path.join(appDir, file), err => {
             if (err) logger.error(err);
           });
-        } 
+        }
       }
     });
   },
   checkNativeMessaging: () => {
     const exists = fse.existsSync(nmInstallationSuccess);
-    
+
     // fire on the first run only
     if(!exists){
       // split by os
@@ -253,7 +256,7 @@ let utiltiy = {
       createManifest();
 
       //create file in userData folder
-      
+
       // for win make registry key (chrome and ff use different keys and different locations )
       createRegistryFiles();
 
@@ -268,12 +271,17 @@ let utiltiy = {
       // workaround
       // create windows executable that will be called from extension and that will write to file
       // or make a pipe to electron main process. then path in registry should be pointing to this app
-      // not to trackly.exe 
+      // not to trackly.exe
       // this program can be created in the appDir by this utility on the first run
       // create exchange dir nativeMessages on same location
 
+
+      // ----- TODO -----
+      // show notification to the user to reminding him/her to install browser extension.
+    } else {
+      store.set("extInstalled", true);
     }
   }
-}
+};
 
 export const Utility = utiltiy;

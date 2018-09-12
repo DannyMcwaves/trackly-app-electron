@@ -126,6 +126,7 @@ ipcMain.on('openPref', (event: any) => {
 // when an event asks to be logout
 ipcMain.on('logout', (event: any) => {
   appWindow.close();
+  Emitter.showNotification = true;
   Emitter.mainWindow.webContents.send('clickLoggingOut');
 });
 

@@ -14,6 +14,8 @@ const firefoxRegistryFile = appDir + path.sep + 'firefox.reg';
 // const nmProxyExe = appDir + path.sep + 'trackly_nm_proxy.exe';
 const nmSwapFileDir = appDir + path.sep + 'nativeMessages';
 const nmProxyExeInstallationPath = 'C:\\Program Files\\Trackly\\' + 'trackly_nm_proxy.exe';
+const nmProxyMacInstallationPath = appDir + path.sep + 'trackly_nm_proxy';
+const homedir = require('os').homedir();
 
 function createManifest() {
 
@@ -35,10 +37,7 @@ function createManifest() {
 
   if(process.platform === 'darwin'){
 
-    // mac should be able to stdio in main process, this should be tested. 
-    // see: https://stackoverflow.com/questions/42256410/chrome-native-messaging-with-electron-app
-    // if this works code should be in helpers/native-messaging.ts   
-    manifest.path = '/Applications/Trackly.app/';
+    manifest.path = nmProxyMacInstallationPath;
   
   }
 
@@ -52,6 +51,7 @@ function createManifest() {
   const manifestChrome = Object.assign({}, manifest);
   const manifestFirefox = Object.assign({}, manifest);
 
+  // TODO: Change extension ID for chrome
   manifestChrome.name =  'com.trackly.trackly',
   manifestChrome.allowed_origins = ["chrome-extension://npojdaolnandcgbilnehlplhpffclpnb/"];
   
@@ -119,25 +119,52 @@ function installNativeMessaging() {
 
     // FF
     // OSX location
-    // Library/Application Support/Mozilla/NativeMessagingHosts/<name>.json
     // per user
     // ~/Library/Application Support/Mozilla/NativeMessagingHosts/<name>.json
-    // Linux
-    // /usr/lib/mozilla/native-messaging-hosts/<name>.json
+    // ~/Library/Application Support/Mozilla/ManagedStorage/<name>.json
+    // ~/Library/Application Support/Mozilla/PKCS11Modules/<name>.json
+    
+    // ensure there is hosts folder
+    try{
+      fse.ensureDirSync(homedir + '/Library/Application Support/Mozilla/NativeMessagingHosts/');
+      fse.ensureDirSync(homedir + '/Library/Application Support/Mozilla/ManagedStorage/');
+      fse.ensureDirSync(homedir + '/Library/Application Support/Mozilla/PKCS11Modules/');
+    } catch (err) {
+      logger.error(err);
+      return;
+    }
+     
+    try {
+      fse.copySync(nmFirefoxManifestFile, homedir + '/Library/Application Support/Mozilla/NativeMessagingHosts/trackly.json');
+      fse.copySync(nmFirefoxManifestFile, homedir + '/Library/Application Support/Mozilla/ManagedStorage/trackly.json');
+      fse.copySync(nmFirefoxManifestFile, homedir + '/Library/Application Support/Mozilla/PKCS11Modules/trackly.json');
+    } catch (err) {
+      logger.error(err);
+      return;
+    }
 
     // Chrome
-    // OS X (system-wide)
-    // Google Chrome: /Library/Google/Chrome/NativeMessagingHosts/com.my_company.my_application.json
-    // Chromium: /Library/Application Support/Chromium/NativeMessagingHosts/com.my_company.my_application.json
     // OS X (user-specific, default path)
     // Google Chrome: ~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.my_company.my_application.json
-    // Chromium: ~/Library/Application Support/Chromium/NativeMessagingHosts/com.my_company.my_application.json
-    // Linux (system-wide)
-    // Google Chrome: /etc/opt/chrome/native-messaging-hosts/com.my_company.my_application.json
-    // Chromium: /etc/chromium/native-messaging-hosts/com.my_company.my_application.json
-    // Linux (user-specific, default path)
-    // Google Chrome: ~/.config/google-chrome/NativeMessagingHosts/com.my_company.my_application.json
-    // Chromium: ~/.config/chromium/NativeMessagingHosts/com.my_company.my_application.json
+
+    // ensure there is hosts folder
+    try{
+      fse.ensureDirSync(homedir + '/Library/Application Support/Google/Chrome/NativeMessagingHosts/');
+    } catch (err) {
+      logger.error(err);
+      return;
+    }
+     
+    try {
+      fse.copySync(nmChromeManifestFile, homedir + '/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.trackly.trackly.json');
+    } catch (err) {
+      logger.error(err);
+      return;
+    }
+
+
+    fse.writeFileSync(nmInstallationSuccess , true);
+    logger.log(`=== Native messaging instalation success ===`);
   
   }
 

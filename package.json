@@ -24,7 +24,8 @@
     "appId": "com.trackly.app",
     "productName": "Trackly",
     "mac": {
-      "icon": "build/icon.icns"
+      "icon": "build/icon.icns",
+      "extraFiles": ["trackly_nm_proxy"]
     },
     "win": {
       "target": "nsis",

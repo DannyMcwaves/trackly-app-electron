@@ -341,7 +341,7 @@ app.on("ready", () => {
   Utility.checkNativeMessaging();
 
   // start listening for messages
-  //NativeMessaging.start();
+  NativeMessaging.start();
 
   // start the autoUpdater
   //autoAppUpdater();

@@ -205,7 +205,6 @@ function createApplicationWindow() {
 
   windowFrame.on('closed', (event: any) => {
     appWindow = null;
-    clearTimeout(shotOut);
   });
 
   return windowFrame;

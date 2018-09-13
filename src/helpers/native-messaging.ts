@@ -9,6 +9,9 @@ const path = require('path');
 const appDir = app.getPath("userData");
 const nativeMessagesDir = appDir + "/nativeMessages";
 let watch : any = null;
+// mac have the same event on creation and on file write so we are using the switch not to duplicae events
+// Event Horizon - it this somehow changes trough osx vesions we will log every other event.
+let macSwitch: boolean = true;
 
 function sleep(ms: number){
     return new Promise(resolve=>{
@@ -19,7 +22,8 @@ function sleep(ms: number){
 const nativeMessages = {
     start: () => {
         watch = fs.watch(nativeMessagesDir, async (eventType, filename) => {
-            if(eventType === 'change'){
+            macSwitch = !macSwitch; // Event Horizon
+            if(eventType === 'change' || (process.platform === 'darwin' && eventType === 'rename' && macSwitch)){
                 try {
                     await sleep(300);
                     const fileData = await fs.readJson(nativeMessagesDir + '/' + filename);

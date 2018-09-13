@@ -6,12 +6,15 @@ import * as activeWin from 'active-win';
 import * as logger from "electron-log";
 import {Emitter} from './emitter';
 import * as moment from 'moment';
+const Store = require("electron-store");
+const store = new Store();
 
 
 export class ActiveWindow {
 
   public static _currentName: string;
   public static _currentTitle: string;
+  private static browserList: string[] = ["chrome", "google chrome", "firefox", "safari", "opera", "iexplore", "chrome.exe", "google chrome.exe", "firefox.exe", "iexplore.exe", "opera.exe", "safari.exe"];
 
   static currentWindow() {
     return activeWin();
@@ -21,23 +24,10 @@ export class ActiveWindow {
 
     this.currentWindow().then((data: any) => {
 
-      if ( data.owner.name === "" && data.title === "" ){
-        logger.error(data); // if there is no required data ask again
-        return setTimeout(() => {
-          this.current(duration);
-        }, 600); // usually window needs 600ms to refresh
-      }
+      let name = data.owner.name || "system";
+      let title = data.title || "system";
 
-      if(data.title === ""){
-        data.title = data.owner.name
-      }
-
-      let name = data.owner.name.replace(/\.[^/.]+$/, "");
-      let title = data.title;
-
-      //logger.log(name, title);
-
-      if ((name !== this._currentName) || (title !== this._currentTitle)) {
+      if ((name !== this._currentName || title !== this._currentTitle) && !this.browserList.includes(name.toLocaleLowerCase())) {
 
         Emitter.appendEvent("startActiveWindow",
           moment().milliseconds(0).toISOString(),
@@ -46,6 +36,27 @@ export class ActiveWindow {
 
         this._currentName = name;
         this._currentTitle = title;
+
+      } else if(this.browserList.includes(name.toLocaleLowerCase())) {
+        this.showNotification();
+      }
+    }).catch((err: any) => {
+      logger.log(err);
+    });
+  }
+
+  public static forceCurrent() {
+    this.currentWindow().then((data: any) => {
+
+      let name = data.owner.name || "System";
+      let title = data.title;
+
+      if (!this.browserList.includes(name.toLocaleLowerCase())) {
+
+        Emitter.appendEvent("startActiveWindow",
+          moment().milliseconds(0).toISOString(),
+          {title: name, windowTitle: title}
+        );
 
       }
     }).catch((err: any) => {
@@ -58,6 +69,14 @@ export class ActiveWindow {
       moment().milliseconds(0).toISOString(),
       {title: this._currentName, windowTitle:this._currentTitle}
     );
+  }
+
+  public static showNotification() {
+    let ext = store.get('extIntsalled');
+    if (!ext && Emitter.showNotification) {
+      Emitter.notificationFunction("Reminder from Trackly", "Please install Trackly browser extension");
+      Emitter.showNotification = false;
+    }
   }
 
 }

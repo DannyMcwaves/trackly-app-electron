@@ -117,6 +117,7 @@ export class Fscs {
       userId: blueprint.userId,
       workspaceId: blueprint.workspaceId,
       projectId: blueprint.projectId,
+      appVersion: app.getVersion(),
       createdAt: moment().milliseconds(0).toISOString(),
       events: [] as any[],
       activities: [] as any[]
@@ -199,11 +200,12 @@ export class Fscs {
     // append Continue logging to the json file.
     Emitter.appendEvent("continueLogging", moment().milliseconds(0).toISOString(), {projectId: fp.projectId});
 
-    // get the current active window.
-    ActiveWindow.current(0);
-
     // Swap files
     this.loadActFile(tempFile);
+
+    // after uploading file to the backend and time us tracking, add the current window
+    ActiveWindow.forceCurrent();
+
     logger.info(`File rotation completed. New file is ${tempFile}`);
     return Date.now();
   }

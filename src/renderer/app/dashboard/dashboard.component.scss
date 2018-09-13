@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Montserrat';
+  src: url(../assets/Montserrat-Regular.ttf);
+}
+
 #timer {
   height: 60px;
   width: 100%;
@@ -70,7 +75,7 @@ figure {
 
     .project-title, .project-timer {
       margin: 0;
-      font-size: 12px;
+      font-size: 0.8rem;
       font-weight: 500;
       color: #727f8c;
     }
@@ -135,7 +140,7 @@ figure {
       font-size: 0.8rem;
       font-weight: 600;
       line-height: 1.5;
-      font-family: Montserrat, sans-serif;
+      font-family: 'Montserrat', sans-serif;
       color: white;
       margin-right: 5px;
     }
@@ -161,10 +166,6 @@ footer {
     line-height: 36px;
   }
 
-  i {
-    cursor: pointer;
-  }
-
   i:hover + #tooltip {
     display: inline;
   }
@@ -172,6 +173,9 @@ footer {
   span {
     position: relative;
     bottom: 3px;
+  }
+  .clickable {
+    cursor: pointer;
   }
 
   #tooltip {
@@ -224,8 +228,24 @@ footer {
       border: 1px solid #c0c0c0;
     }
   }
+}
+#newVersion {
+  position: relative;
+  z-index: 101;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgb(236, 100, 75) !important;
+  color: #fff !important;
+  border-color: #f5c6cb !important;
+  text-align: center !important;
+  line-height: 2;
+  overflow: hidden; 
+  box-shadow:         0 0 2px rgba(0,0,0,0.5);
+  font-size: 0.9rem;
+}
 
-  #idle-button {
-
-  }
+.btn-primary{
+  background-color: #0074ef;
+  border-color: #0074ef;
 }

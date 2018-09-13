@@ -8,6 +8,7 @@ import {UserService} from "../services/user.service";
 import {OnInit, AfterViewChecked} from "@angular/core/src/metadata/lifecycle_hooks";
 import {Router} from "@angular/router";
 import {HttpClient, HttpParams} from "@angular/common/http";
+import { CONSTANTS } from "../../../constants";
 
 import * as moment from "moment";
 
@@ -49,13 +50,14 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private idleDisplay: string = "none";
     private idleHeight: number = 10;
     private idleTime: number = 10;
-    private idleMinutes: any = 0;
-    private idleHour: any = 0;
-    private idleMode: string = "";
+    private idleStartTime: any = undefined;
+    private idleStopTime: any = undefined;
     private isIdle: boolean = false;
     private currentIdleProject: string = "Madison Square";
     private activeProjectCache: any = {};
     private reAssign: boolean = false;
+    private showNotification: boolean = true;
+    private IdleFrom: string;
 
     /**
      * Dashboard component constructor with added protection
@@ -69,9 +71,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
         this.store = new Store();
 
-        if (!this.store.has('token') && !this.store.has('userId')) {
-            this.router.navigate(['login']);
-        }
+        this._checkStoredUser();
 
         // Subscribe to main timer
         ipcRenderer.on("timer:tick", (event: any, projectId: string) => {
@@ -109,12 +109,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
           this.isIdle = true;
-          let date = new Date(),
-            hour = date.getHours(),
-            mins = date.getMinutes();
-          this.idleHour = hour < 10 ? "0" + hour : hour;
-          this.idleMinutes = mins < 10 ? "0" + mins : mins;
-          this.idleMode = this.idleHour > 11 ? "PM" : "AM";
+          this.IdleFrom = moment().subtract(CONSTANTS.IDLE_TRESHOLD, "seconds").format("h:mm A");
+          this.idleStartTime = moment().milliseconds(0);
           document.getElementById("idler").classList.remove('d-none');
         });
 
@@ -137,6 +133,17 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           clearInterval(this.nextInterval);
         };
 
+        // Show update bar
+        ipcRenderer.on("updateReady", (event: any) => {
+          document.getElementById("newVersion").classList.remove('d-none');
+          this.baseProjectHeight += 5;
+          this._resizeFrame();
+        });
+
+        // Check user session status
+        ipcRenderer.on("checkUser", (event: any) => {
+          this._checkStoredUser();
+        });
     }
 
     /**
@@ -151,11 +158,24 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     }
 
     /**
+     * If there is no user data in store navigate to login
+     * @returns void
+     * @private
+     */
+    private _checkStoredUser() {
+      if (!this.store.has('token') && !this.store.has('userId')) {
+        this.router.navigate(['login']);
+      }
+    }
+
+    /**
      * Get logged in user ID and Token
      * @returns {userId: string | null; authToken: string | null}
      * @private
      */
     _getUserAuth() {
+        this._checkStoredUser();
+        
         const authToken = this.store.get("token");
         const userId = this.store.get("userId");
 
@@ -176,14 +196,37 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
     closeIdleTime() {
       this.isIdle = false;
+      this.idleStopTime = moment().milliseconds(0);
+      let idle = Math.round(this.idleStopTime.diff(this.idleStartTime) / 1000);
+      this.idleStartTime.milliseconds(-CONSTANTS.IDLE_TRESHOLD*1000);
+
+      this.perProject[this.activeProjectCache.id] -= CONSTANTS.IDLE_TRESHOLD;
+      this.perProjectCached[this.activeProjectCache.id] -= CONSTANTS.IDLE_TRESHOLD;
+      this.totalIimeToday -= CONSTANTS.IDLE_TRESHOLD;
+      if(this.totalIimeToday < 0)  this.totalIimeToday = 0;
+      this.currentSession += idle;
+      ipcRenderer.send("time:travel", this.totalIimeToday);
+
       document.getElementById("idler").classList.add('d-none');
-      ipcRenderer.send('idleResponse', {});
+      ipcRenderer.send('idleResponse', {stopIdle: this.idleStartTime.toISOString(), project: this.activeProjectCache});
     }
 
     closeIdleAndTrack() {
       this.isIdle = false;
+      this.idleStopTime = moment().milliseconds(0);
+
+      // adjust the timers on the desktop app.
+      let idle = Math.round(this.idleStopTime.diff(this.idleStartTime) / 1000);
+      console.log(idle);
+
+      this.perProject[this.activeProjectCache.id] += idle;
+      this.perProjectCached[this.activeProjectCache.id] += idle;
+      this.totalIimeToday += idle;
+      this.currentSession += idle;
+      ipcRenderer.send("time:travel", this.totalIimeToday);
+
       document.getElementById("idler").classList.add('d-none');
-      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache, same: true});
+      ipcRenderer.send('idleResponse', {keepIdle: true, project: this.activeProjectCache, stopIdle: this.idleStopTime.toISOString()});
 
       document.getElementById(this.activeProjectCache.id).click();
     }
@@ -259,7 +302,14 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     trackNextDay() {
       this.nextInterval = setInterval(() => {
 
-        if (this.today !== (new Date()).getDate()) {
+        let newDate = new Date();
+
+        if (newDate.getHours() === 9 && this.showNotification && !this.activeProject.id) {
+          ipcRenderer.send("show:notification");
+          this.showNotification = false;
+        }
+
+        if (this.today !== newDate.getDate()) {
 
           ipcRenderer.send('checkUpdates');
 
@@ -275,20 +325,28 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
           this.totalIimeTodayCached = 0;
 
-          this.today = (new Date()).getDate();
+          this.showNotification = true;
+
+          this.today = newDate.getDate();
 
           // if there is no active project, then do not refresh this workspace.
           // that's if the user is not tracking time.
           // when there is no time tracking, then reset the timer.
           if (this.isIdle) {
-            document.getElementById("idler").classList.add('d-none');
-            ipcRenderer.send('idleResponse', {reset: true});
             this.isIdle = false;
-          } else if(!this.activeProject.id) {
+            document.getElementById("idle-butto").click();
+          }
+
+          // reset the timers if there is currently no project tracking.
+          if(!this.activeProject.id) {
             this.cleanWorkSpace();
           }
         }
       }, 10000);
+    }
+    
+    appRestart(){
+      ipcRenderer.send("restart", {restart: true});
     }
 
     /*
@@ -300,8 +358,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     }
 
     _refresher() {
-
-      let _totalIimeToday = 0;
 
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
@@ -335,24 +391,26 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
             ipcRenderer.send('projects', projects);
 
-            let tempTimeToday = 0, perProject = {};
-
             if (!this.startTime) {
+              let tempTimeToday = 0, perProject = {};
+
               this.projects.forEach((element: any) => {
                 perProject[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
                 this.perProjectCached[element.id] = element.timeTracked ? Math.abs(element.timeTracked) : 0;
                 tempTimeToday += element.timeTracked ? Math.round(Math.abs(element.timeTracked)) : 0;
                 ipcRenderer.send("time:travel", this.totalIimeToday);
               });
+
+              this.totalIimeTodayCached = this.totalIimeToday = tempTimeToday;
+              
+              this.perProject = perProject;
+
+              this.projects = projects;
+
+              this.resize = true;
             }
 
-            this.totalIimeTodayCached = this.totalIimeToday = tempTimeToday;
 
-            this.perProject = perProject;
-
-            this.projects = projects;
-
-            this.resize = true;
 
             this.lastSynced = Date.now();
 
@@ -401,9 +459,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       });
 
         projects.forEach((project: any) => {
-        perProject[project.id] = project.timeTracked;
-        this.perProjectCached[project.id] = project.timeTracked;
-        totalTime += project.timeTracked;
+        perProject[project.id] = Math.abs(project.timeTracked);
+        this.perProjectCached[project.id] = Math.abs(project.timeTracked);
+        totalTime += Math.abs(project.timeTracked);
       });
 
         this.totalIimeToday = totalTime;
@@ -411,9 +469,27 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         this.perProject = perProject;
         this.projects = projects;
         ipcRenderer.send("time:travel", totalTime);
+
+        this.lastSynced = Date.now()
       }, (err: any) => {
-      console.log("error");
-    })
+        let projects = JSON.parse(JSON.stringify(this.projects)),
+          perProject = {},
+          totalTime = 0;
+
+        projects.forEach((project: any) => {
+          perProject[project.id] = 0;
+          this.perProjectCached[project.id] = 0;
+          totalTime += 0;
+        });
+
+        this.totalIimeToday = totalTime;
+        this.totalIimeTodayCached = totalTime;
+        this.perProject = perProject;
+        this.projects = projects;
+        ipcRenderer.send("time:travel", totalTime);
+
+        this.lastSynced = Date.now()
+      })
     }
 
     /**

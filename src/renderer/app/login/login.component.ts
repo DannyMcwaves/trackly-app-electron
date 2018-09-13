@@ -111,8 +111,8 @@ export class LoginComponent implements OnInit {
       this.store.set('token', res['id']);
       this.store.set('userId', res['userId']);
       this.router.navigate([""]);
+      ipcRenderer.send("upload:docs");
     }, err => {
-      console.log(err);
       if (err.statusText === "Unknown Error") {
         this.showAlert("warning", "No internet connection available.");
       } else if(err.error.error.message === "login failed") {

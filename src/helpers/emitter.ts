@@ -18,6 +18,10 @@ export class Emitter {
 
   static mainWindow: any = null;
 
+  static notificationFunction: any;
+
+  static showNotification: boolean = true;
+
   static appendActivity(userActive: boolean, duration: number) {
     this.appState.activities.push({userActive, duration})
   }

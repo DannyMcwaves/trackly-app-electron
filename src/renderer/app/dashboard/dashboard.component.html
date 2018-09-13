@@ -69,11 +69,15 @@
         </div>
     </section>
     <!-- / Content -->
-
+    <!-- newVersion -->
+    <div id="newVersion" class="d-none" (click)="appRestart()">
+      Update available, restart now.
+    </div>
+    <!-- / newVersion -->
     <!-- Footer -->
     <footer>
         <div class="footer-sync">
-          <i (click)="refreshWorkSpace()" class="fa fa-fw fa-2x fa-refresh mr-1"></i>
+          <i (click)="refreshWorkSpace()" class="fa fa-fw fa-2x fa-refresh mr-1 clickable"></i>
           <div id="tooltip" class="pb-2 pt-1 px-2">
             Refresh Workspace
           </div>
@@ -92,7 +96,7 @@
         <div class="propmt"> &nbsp;Idle Notification </div>
       </div>
 
-      <div [hidden]="!reAssign" class="idle-body bg-light p-3 text-center">
+      <div class="idle-body d-none bg-light p-3 text-center">
         <div class="text-center mb-2">
           Add time to:
         </div>
@@ -111,7 +115,8 @@
 
       <div [hidden]="reAssign" class="idle-body bg-light p-2">
         <div class="mb-3">
-          <div class="text-center mb-1">You have been idle since {{idleHour}}:{{idleMinutes}}{{idleMode}}</div>
+          <!-- <div class="text-center mb-1">You have been idle since {{idleHour}}:{{idleMinutes}}{{idleMode}}</div> -->
+          <div class="text-center mb-1">You have been idle since {{IdleFrom}}</div>
           <div class="text-center mb-3"> ({{idleTime}} minutes) </div>
           <div class="text-center mb-3">Tracked project: {{currentIdleProject}}</div>
         </div>
@@ -123,7 +128,7 @@
           <div class="pt-1 text-center">
             <button id="idle-butto" class="btn btn-sm rounded-0 px-5 btn-primary" (click)="closeIdleTime()"> Discard time </button>
           </div>
-          <div class="pt-1 mb-2 text-center">
+          <div class="pt-1 d-none mb-2 text-center">
             <button id="idle-buttn" class="btn btn-sm rounded-0 px-4 btn-primary" (click)="toggleAssigner()"> Add time to project </button>
           </div>
         </div>

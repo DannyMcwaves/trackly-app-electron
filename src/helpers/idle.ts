@@ -7,6 +7,7 @@ import { activityStorage } from "./activity";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { ActiveWindow } from "./windows";
 import * as moment from "moment";
+import { CONSTANTS } from "../constants";
 
 
 export class Idler {
@@ -23,7 +24,7 @@ export class Idler {
   private _interruptIdler: boolean = false;
   private _isIdle: boolean = false;
   private _idleOpen: boolean = false;
-  private _tempEvent: any = [];
+  private _discardIdleActivity: boolean = false;
 
   constructor(fscs: any, uploader: any) {
     this.uploader = uploader;
@@ -36,8 +37,11 @@ export class Idler {
   appendAllToJson() {
 
     // append new activities if available before generating new file.
-    if(activityStorage.duration > 0) {
+    if(activityStorage.duration > 0 && !this._discardIdleActivity) {
       Emitter.appendActivity(activityStorage.userStatus, activityStorage.duration);
+    } else {
+      Emitter.appendActivity(false, 0);
+      this._discardIdleActivity = false;
     }
 
     let temp = JSON.stringify(Emitter.appState),
@@ -75,19 +79,15 @@ export class Idler {
 
     this.appendAllToJson();
 
-    let returnValue = this.fscs.rotate();
+    this.fscs.rotate();
     // start upload when activity file are successfully rotated.
 
     Emitter.lastSynced = moment().milliseconds(0);
 
     // upload files within 10min interval after every rotation.
-    if (returnValue) {
-      this.uploader.upload(() => {
-        if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
-      });
-    } else {
+    this.uploader.upload(() => {
       if (this._parentWindow) { this._parentWindow.webContents.send("resetTimer"); }
-    }
+    });
   }
 
   stopUpload(res: any) {
@@ -152,9 +152,9 @@ export class Idler {
 
   public logTick(tick:any) {
     const idle = this.idleTime();
-    this._upload = !(idle >= 598);
+    this._upload = !(idle >=  CONSTANTS.IDLE_TRESHOLD - 2);
 
-    if (idle >= 600) {
+    if (idle >=  CONSTANTS.IDLE_TRESHOLD) {
       let time;
       if (this._interruptIdler) {
         time = this._idled + 2;
@@ -193,12 +193,6 @@ export class Idler {
       this._parentWindow.setAlwaysOnTop(true, 'floating');
       this._parentWindow.setVisibleOnAllWorkspaces(true);
 
-      this._tempEvent.push({
-        type: "startIdle",
-        timestamp: moment().milliseconds(0).toISOString(),
-        payload: ""
-      });
-
       this._idleInterval = setInterval(() => {
         this.logTick({});
       }, 2000);
@@ -215,29 +209,22 @@ export class Idler {
     this._parentWindow.setAlwaysOnTop(false, 'floating');
     this._parentWindow.setVisibleOnAllWorkspaces(false);
 
-    const stopEvent: any = {
-      type: "stopIdle",
-      timestamp: moment().milliseconds(600000).toISOString(),
-      payload: ""
-    };
-
     if (!idleResponse.keepIdle) {
-      this._tempEvent.push(stopEvent);
-      Emitter.extendEvent(this._tempEvent);
-    } else if(idleResponse.same === true) {
-      stopEvent.payload = {projectId: idleResponse.project.id};
-      stopEvent.type = "stopLogging";
+      const stopEvent: any = {
+        type: "stopLogging",
+        timestamp: idleResponse.stopIdle,
+        payload: {projectId: idleResponse.project.id}
+      };
       Emitter.ignoreIdle(stopEvent);
-    } else if (idleResponse.same === false) {
-      this._tempEvent[0].type = "startLogging";
-      this._tempEvent[0].payload = {projectId: idleResponse.project.id};
-      stopEvent.type = "stopLogging";
-      stopEvent.payload = {projectId: idleResponse.project.id};
-      this._tempEvent.push(stopEvent);
-      Emitter.extendEvent(this._tempEvent);
+      this._discardIdleActivity = true;
+    } else if(idleResponse.keepIdle) {
+      const stopEvent: any = {
+        type: "stopLogging",
+        timestamp: idleResponse.stopIdle,
+        payload: {projectId: idleResponse.project.id}
+      };
+      Emitter.ignoreIdle(stopEvent);
     }
-
-    this._tempEvent = [];
 
     clearInterval(this._idleInterval);
     this._interruptIdler = false;

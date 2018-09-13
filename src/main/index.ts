@@ -1,4 +1,4 @@
-let logger = require('electron-log');
+const logger = require('electron-log');
 const unhandled = require('electron-unhandled');
 unhandled(logger.error, true);
 const Store = require("electron-store");
@@ -7,7 +7,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions, Notification } from "electron";
 import { config } from 'dotenv';
 import { join } from 'path';
 import { autoUpdater } from "electron-updater";
@@ -39,7 +39,7 @@ logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()
 const fscs = new Fscs();
 const timer = new Timer();
 const activity = new Activity(fscs);
-const uploader = new Uploader(fscs);
+const uploader = new Uploader(fscs, onUserFailCb);
 const store = new Store();
 const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
@@ -86,10 +86,14 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   {
     label: 'Quit',
     click() {
-      app.exit();
+      forceQuit = true;
+      if(appWindow) {
+        appWindow.close();
+      } else {
+        app.exit();
+      }
     },
-    accelerator: 'CmdOrCtrl+Q',
-    role: 'quit'
+    accelerator: 'CmdOrCtrl+Q'
   }
 ];
 const idler = new Idler(fscs, uploader);
@@ -128,8 +132,11 @@ let shotOut: any;
 let server: any;
 let port: any;
 let close: string = 'na';
+let forceQuit = false;
 let restartAndInstall = false;
-let dir = join(__static, '/trackly.png');
+let appTray: any;
+let appStarted: boolean;
+let dir = join(__static, '/tracklyTemplate@4x.png');
 let image = nativeImage.createFromPath(dir);
 
 // Ensure only one instance of the application gets run
@@ -154,6 +161,10 @@ if (isDevelopment) {
   windowDefaults.resizable = false;
 }
 
+function onUserFailCb(){
+  if(appWindow) { appWindow.webContents.send('checkUser'); }
+}
+
 /**
  * Create application wind
  */
@@ -165,14 +176,26 @@ function createApplicationWindow() {
     let val = store.get('close');
 
     if(val === 'Minimize') {
-      event.preventDefault();
-      windowFrame.minimize();
+      if (close !== "ya" && !forceQuit) {
+        event.preventDefault();
+        windowFrame.minimize();
+      } else if(forceQuit) {
+        event.preventDefault();
+        close = 'ya';
+        if (windowFrame) {
+          windowFrame.webContents.send("stopTimeFromTray");
+        }
+        setTimeout(() => {
+          app.exit();
+        }, 2000);
+      }
     } else if(val === 'Cancel') {
-      event.preventDefault();
+      if (close !== "ya") {
+        event.preventDefault();
+      }
     } else if(val === 'Quit' && close === 'na') {
       event.preventDefault();
       close = 'ya';
-      console.log(timeIsRunning);
       if (windowFrame) {
         windowFrame.webContents.send("stopTimeFromTray");
       }
@@ -182,12 +205,13 @@ function createApplicationWindow() {
     } else if(close === 'na') {
       event.preventDefault();
       createDialog('quit', {height: 140, width: 450});
+    } else {
+      app.quit();
     }
   });
 
   windowFrame.on('closed', (event: any) => {
     appWindow = null;
-    clearTimeout(shotOut);
   });
 
   return windowFrame;
@@ -210,6 +234,8 @@ function systemTray() {
       appWindow.focus();
     }
   });
+
+  return tray;
 }
 
 function autoAppUpdater() {
@@ -224,9 +250,7 @@ function autoAppUpdater() {
   autoUpdater.on('checking-for-update', () => {});
 
   autoUpdater.on('update-available', (ev, info) => {
-    if (autoUpdater.autoDownload) {
-      createDialog('new_version', {height: 130, width: 450});
-    }
+
   });
 
   autoUpdater.on('update-not-available', (ev, info) => {
@@ -241,7 +265,8 @@ function autoAppUpdater() {
   autoUpdater.on('download-progress', (ev, progressObj) => {});
 
   autoUpdater.on('update-downloaded', (ev, releaseNotes, releaseName) => {
-    createDialog('restart', {height: 135, width: 450});
+    if(appWindow) { appWindow.webContents.send("updateReady"); }
+    showNotification("Update from Trackly", "Update is available.")
   });
 }
 
@@ -293,18 +318,46 @@ function createDialog(url: string, defaults: object = {}) {
   // from the Trackly static html template.
   let appDefaults = {...{ center: true, useContentSize: true, show: false}, ...defaults};
 
-  notificationWindow = new BrowserWindow(appDefaults);
-  notificationWindow.loadURL(`file://${__static}/${url}.html`);
-
-  notificationWindow.on('closed', (event: any) => {
-    notificationWindow = null;
-  });
-
-  notificationWindow.on('ready-to-show', () => {
+  if(notificationWindow) {
     notificationWindow.show();
-  });
+  } else {
+    notificationWindow = new BrowserWindow(appDefaults);
+    notificationWindow.loadURL(`file://${__static}/${url}.html`);
+
+    notificationWindow.on('closed', (event: any) => {
+      notificationWindow = null;
+    });
+
+    notificationWindow.on('ready-to-show', () => {
+      notificationWindow.show();
+    });
+  }
 
   return notificationWindow;
+}
+
+function showNotification(title: string, body: string) {
+  if (process.platform === 'win32') {
+    if (appTray) {
+      appTray.displayBalloon({title, content: body});
+    }
+  } else {
+    if (Notification.isSupported()) {
+      let notes = new Notification({ title, body });
+      notes.show();
+    }
+  }
+}
+
+function initializeStoreVars() {
+  appStarted = true;
+  let extRuntime = store.get('extRuntime'),
+    extInstalled = store.get('extInstalled');
+
+  if (extRuntime === undefined && extInstalled === undefined) {
+    shell.openExternal('https://trackly.com/browser');
+    store.set("extRuntime", true);
+  }
 }
 
 app.on("window-all-closed", () => {
@@ -335,7 +388,7 @@ app.on("ready", () => {
   appWindow = createApplicationWindow();
 
   // initiate the system tray program.
-  systemTray();
+  appTray = systemTray();
 
   // check the comm with the browsers
   Utility.checkNativeMessaging();
@@ -349,6 +402,12 @@ app.on("ready", () => {
 
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;
+
+  // make the notification window accessible through emitter.
+  Emitter.notificationFunction = showNotification;
+
+  // initialize startup variables.
+  initializeStoreVars();
 
   // get the idler program up and running.
   idler.createParent(appWindow);
@@ -381,6 +440,13 @@ ipcMain.on('quit', (event: any, res: any) => {
 });
 
 /**
+ * show notification for tracking time and for extension install
+ */
+ipcMain.on("show:notification", (event: any, res: any) => {
+  showNotification("Reminder from Trackly", "Don't forget to track your time and own the day")
+});
+
+/**
  * when an update is available
  * close the dialog window
  */
@@ -398,7 +464,7 @@ ipcMain.on('restart', (event: any, res: any) => {
   if(notificationWindow) {
     notificationWindow.close();
   }
-
+ console.log(res);
   if (res.restart) {
     store.delete('close');
     close = 'ya';
@@ -508,6 +574,13 @@ ipcMain.on('checkUpdates', (event: any) => {
  */
 ipcMain.on("open:link", (event: any, link: string) => {
   shell.openExternal(link);
+});
+
+/**
+ *
+ */
+ipcMain.on("upload:docs", (event: any, link: string) => {
+  uploader.upload(() => {});
 });
 
 /**

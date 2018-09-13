@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'Montserrat';
+    src: url(./assets/Montserrat-Regular.ttf);
+}
+
 $blue: #125BED;
 $font-size-base: 1rem;
 
@@ -6,6 +11,7 @@ $font-size-base: 1rem;
 body {
     font-family: 'Montserrat', sans-serif;
     user-select: none;  // Disable user from selecting text
+    font-size: 16px;
 }
 
 ul {

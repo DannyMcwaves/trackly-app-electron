@@ -219,8 +219,14 @@ let utiltiy = {
   emptyUpdateInstallerDir:  () => {
     // empty out installer dir
     fse.readdir(installerDir, (err, files) => {
-      if (err) logger.error(err);
-
+      if (err){
+        logger.error(err);
+        return;
+      } 
+      
+      // if object is empty, exit mac fix
+      if(Object.keys(files).length === 0) return;
+    
       for (let file of files) {
         fse.unlink(path.join(installerDir, file), err => {
           if (err) logger.error(err);
@@ -230,11 +236,15 @@ let utiltiy = {
 
     // delete installers from app dir
     fse.readdir(appDir, (err, files) => {
-      if (err) logger.error(err);
-
+      if (err){
+        logger.error(err);
+        return;
+      }
+    
       for (let file of files) {
         let regexp = /installer/gi;
-        if(file.match(regexp)){console.log(file);
+        //let regexp = '/installer/gi';
+        if(file.match(regexp)){
           fse.unlink(path.join(appDir, file), err => {
             if (err) logger.error(err);
           });

@@ -12,7 +12,8 @@
     "build": "yarn build-mac && yarn build-win",
     "build-mac": "yarn compile && electron-builder --mac --p always",
     "build-win": "yarn compile && electron-builder --win --x64 --ia32 --p always",
-    "postinstall": "electron-rebuild"
+    "postinstall": "electron-rebuild",
+    "test:e2e": "./node_modules/mocha/bin/mocha tests/test.js"
   },
   "build": {
     "publish": [
@@ -108,10 +109,13 @@
     "node-cypher": "^0.1.4",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
-    "spectron": "^3.8.0",
     "typescript": "^2.5.3",
     "webpack": "^3.8.1",
-    "webpack-sources": "1.0.1"
+    "webpack-sources": "1.0.1",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^5.2.0",
+    "spectron": "^3.8.0"
   },
   "electronWebpack": {
     "renderer": {

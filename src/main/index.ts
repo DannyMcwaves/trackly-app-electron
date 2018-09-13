@@ -198,6 +198,8 @@ function createApplicationWindow() {
     } else if(close === 'na') {
       event.preventDefault();
       createDialog('quit', {height: 140, width: 450});
+    } else {
+      app.quit();
     }
   });
 

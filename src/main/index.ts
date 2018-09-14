@@ -108,6 +108,7 @@ let windowDefaults = {
   height: 0,
   width: 400,
   minWidth: 400,
+  useContentSize: true,
   title: "Trackly",
   center: true,
   show: false,

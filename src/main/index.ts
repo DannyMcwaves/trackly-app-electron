@@ -353,9 +353,9 @@ function showNotification(title: string, body: string) {
 function initializeStoreVars() {
   appStarted = true;
   let extRuntime = store.get('extRuntime'),
-    extInstalled = store.get('extInstalled');
+    extInstalled = Utility.checkForExtensions();
 
-  if (extRuntime === undefined && extInstalled === undefined) {
+  if (extRuntime === undefined && !extInstalled) {
     shell.openExternal('https://trackly.com/browser');
     store.set("extRuntime", true);
   }
@@ -638,7 +638,7 @@ ipcMain.on("timer", (event: any, args: any) => {
     //startServer();
     // native messsages
     NativeMessaging.start();
-    
+
     timer.ticker.subscribe(
       async tick => {
         // measure activity

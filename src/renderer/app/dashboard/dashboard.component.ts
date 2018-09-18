@@ -136,7 +136,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // Show update bar
         ipcRenderer.on("updateReady", (event: any) => {
           document.getElementById("newVersion").classList.remove('d-none');
-          this.baseProjectHeight += 5;
+          this.baseProjectHeight += 7;
           this._resizeFrame();
         });
 

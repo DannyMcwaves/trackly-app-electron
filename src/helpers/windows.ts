@@ -5,6 +5,7 @@
 import * as activeWin from 'active-win';
 import * as logger from "electron-log";
 import {Emitter} from './emitter';
+import { Utility } from "./utility";
 import * as moment from 'moment';
 const Store = require("electron-store");
 const store = new Store();
@@ -72,8 +73,7 @@ export class ActiveWindow {
   }
 
   public static showNotification() {
-    let ext = store.get('extIntsalled');
-    if (!ext && Emitter.showNotification) {
+    if (Utility.checkForExtensions() && Emitter.showNotification) {
       Emitter.notificationFunction("Reminder from Trackly", "Please install Trackly browser extension");
       Emitter.showNotification = false;
     }

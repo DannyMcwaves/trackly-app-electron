@@ -112,6 +112,7 @@ let windowDefaults = {
   height: 0,
   width: 400,
   minWidth: 400,
+  useContentSize: true,
   title: "Trackly",
   center: true,
   show: false,
@@ -309,9 +310,9 @@ function showNotification(title: string, body: string) {
 function initializeStoreVars() {
   appStarted = true;
   let extRuntime = store.get('extRuntime'),
-    extInstalled = store.get('extInstalled');
+    extInstalled = Utility.checkForExtensions();
 
-  if (extRuntime === undefined && extInstalled === undefined) {
+  if (extRuntime === undefined && !extInstalled) {
     shell.openExternal('https://trackly.com/browser');
     store.set("extRuntime", true);
   }
@@ -608,7 +609,7 @@ ipcMain.on("timer", (event: any, args: any) => {
 
     // native messsages
     NativeMessaging.start();
-    
+
     timer.ticker.subscribe(
       async tick => {
         // measure activity

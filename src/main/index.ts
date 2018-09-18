@@ -7,7 +7,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions, Notification } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions, Notification, PowerMonitor, powerMonitor } from "electron";
 import { config } from 'dotenv';
 import { join } from 'path';
 import { autoUpdater } from "electron-updater";
@@ -18,7 +18,6 @@ import { Uploader } from "../helpers/uploader";
 import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
-import { app as appServer, portAvailable } from '../helpers/server';
 import {createPrefWindow} from "../helpers/pref";
 import { Utility } from "../helpers/utility";
 import { NativeMessaging } from "../helpers/native-messaging"
@@ -97,8 +96,6 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   }
 ];
 const idler = new Idler(fscs, uploader);
-const ports = [14197, 24197, 34197, 44197, 54197, 64197];
-
 
 // setup file logger to contain all error logs from elctron-logger.
 fscs.logger(logger);
@@ -129,8 +126,6 @@ let stopMoment: string;
 let tray: any = null;
 let timeIsRunning: boolean = false;
 let shotOut: any;
-let server: any;
-let port: any;
 let close: string = 'na';
 let forceQuit = false;
 let restartAndInstall = false;
@@ -275,44 +270,6 @@ function transform(value: number) {
   return moment.duration(Math.round(value), "seconds").format();
 }
 
-function startServer() {
-  // start the browser extension server.
-  if (port) {
-
-    server = appServer.listen(port, () => {
-      logger.log("extension sever listening on", port);
-    });
-
-    server.on('error', (err: any) => {
-      logger.log("port in use error");
-      logger.log(err);
-    });
-  } else {
-    portAvailable(ports).then(p => {
-      if (p) {
-        port = p;
-
-        server = appServer.listen(p, () => {
-          logger.log("extension sever listening on", p);
-        });
-
-        server.on('error', (err: any) => {
-          logger.log("port in use error");
-          logger.log(err);
-        });
-      }
-    }).catch(err => {
-      console.log(err);
-    })
-  }
-}
-
-function closeServer() {
-  if(server) {
-    server.close();
-  }
-}
-
 function createDialog(url: string, defaults: object = {}) {
   // this function should create all the custom dialog boxes
   // from the Trackly static html template.
@@ -384,6 +341,22 @@ app.on("activate", () => {
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
 
+  powerMonitor.on('suspend', () => {
+    // if(notificationWindow) {
+    //   notificationWindow.close();
+    // }
+    // uploader.upload(() => {});
+    // check about desired functionality
+    // we will need refactoring here to reuse same behavior on
+    // stop timer and on system suspend
+    // this should also cover cases when system is on idle or notification is 
+    // pending
+  });
+
+  powerMonitor.on('resume', () => {
+    // resume should probably pull data from backend same as on application start
+  });
+
   // create the main window application
   appWindow = createApplicationWindow();
 
@@ -398,7 +371,7 @@ app.on("ready", () => {
   NativeMessaging.start();
 
   // start the autoUpdater
-  //autoAppUpdater();
+  autoAppUpdater();
 
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;
@@ -633,8 +606,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     // current window on action.
     ActiveWindow.current(0);
 
-    // start the browser extension server.
-    //startServer();
     // native messsages
     NativeMessaging.start();
     
@@ -687,8 +658,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     idler.clearInterval();
     clearTimeout(shotOut);
     timer.complete();
-    //closeServer();
-    // native messaging
     NativeMessaging.stop();
   }
 });

@@ -343,19 +343,17 @@ app.on("activate", () => {
 app.on("ready", () => {
 
   powerMonitor.on('suspend', () => {
-    // if(notificationWindow) {
-    //   notificationWindow.close();
-    // }
-    // uploader.upload(() => {});
-    // check about desired functionality
-    // we will need refactoring here to reuse same behavior on
-    // stop timer and on system suspend
-    // this should also cover cases when system is on idle or notification is 
-    // pending
+    if(notificationWindow) {
+      notificationWindow.close();
+    }
+    
+    if(appWindow) { appWindow.webContents.send("suspend"); }
+    
+    uploader.upload(() => {});
   });
 
   powerMonitor.on('resume', () => {
-    // resume should probably pull data from backend same as on application start
+    if(appWindow) { appWindow.webContents.send("resetTimer"); }
   });
 
   // create the main window application

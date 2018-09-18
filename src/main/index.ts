@@ -19,8 +19,15 @@ import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
 import { app as appServer, portAvailable } from '../helpers/server';
-import { createPrefWindow } from "../helpers/pref";
+import {createPrefWindow} from "../helpers/pref";
 import { Utility } from "../helpers/utility";
+import { NativeMessaging } from "../helpers/native-messaging"
+
+//setup logger with version number, in dev mode this will log electron version
+logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
+
+// Logger
+autoUpdater.logger = logger;
 
 // config environment variables in .env
 config();
@@ -384,8 +391,15 @@ app.on("ready", () => {
   // initiate the system tray program.
   appTray = systemTray();
 
+  // check the comm with the browsers
+  Utility.checkNativeMessaging();
+  Utility.checkForExtensions();
+
+  // start listening for messages
+  NativeMessaging.start();
+
   // start the autoUpdater
-  autoAppUpdater();
+  //autoAppUpdater();
 
   // add the main window to the prefs page.
   Emitter.mainWindow = appWindow;
@@ -621,8 +635,10 @@ ipcMain.on("timer", (event: any, args: any) => {
     ActiveWindow.current(0);
 
     // start the browser extension server.
-    startServer();
-
+    //startServer();
+    // native messsages
+    NativeMessaging.start();
+    
     timer.ticker.subscribe(
       async tick => {
         // measure activity
@@ -672,6 +688,8 @@ ipcMain.on("timer", (event: any, args: any) => {
     idler.clearInterval();
     clearTimeout(shotOut);
     timer.complete();
-    closeServer();
+    //closeServer();
+    // native messaging
+    NativeMessaging.stop();
   }
 });

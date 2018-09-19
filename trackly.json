@@ -1,0 +1,7 @@
+{
+    "name": "trackly",
+    "description": "Trackly Desktop Application",
+    "path": "C:\\Program Files\\Trackly",
+    "type": "stdio",
+    "allowed_extensions": [ "dev@trackly.com" ]
+  }

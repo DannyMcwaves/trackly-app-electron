@@ -7,7 +7,7 @@ const Store = require("electron-store");
 const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 
-import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions, Notification } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, nativeImage, MenuItemConstructorOptions, Notification, PowerMonitor, powerMonitor } from "electron";
 import { config } from 'dotenv';
 import { join } from 'path';
 import { autoUpdater } from "electron-updater";
@@ -18,9 +18,15 @@ import { Uploader } from "../helpers/uploader";
 import { Emitter } from "../helpers/emitter";
 import { ActiveWindow } from "../helpers/windows";
 import { Idler } from '../helpers/idle';
-import { app as appServer, portAvailable } from '../helpers/server';
-import { createPrefWindow } from "../helpers/pref";
+import {createPrefWindow} from "../helpers/pref";
 import { Utility } from "../helpers/utility";
+import { NativeMessaging } from "../helpers/native-messaging"
+
+//setup logger with version number, in dev mode this will log electron version
+logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
+
+// Logger
+autoUpdater.logger = logger;
 
 // config environment variables in .env
 config();
@@ -90,8 +96,6 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
   }
 ];
 const idler = new Idler(fscs, uploader);
-const ports = [14197, 24197, 34197, 44197, 54197, 64197];
-
 
 // setup file logger to contain all error logs from elctron-logger.
 fscs.logger(logger);
@@ -123,8 +127,6 @@ let stopMoment: string;
 let tray: any = null;
 let timeIsRunning: boolean = false;
 let shotOut: any;
-let server: any;
-let port: any;
 let close: string = 'na';
 let forceQuit = false;
 let restartAndInstall = false;
@@ -269,44 +271,6 @@ function transform(value: number) {
   return moment.duration(Math.round(value), "seconds").format();
 }
 
-function startServer() {
-  // start the browser extension server.
-  if (port) {
-
-    server = appServer.listen(port, () => {
-      logger.log("extension sever listening on", port);
-    });
-
-    server.on('error', (err: any) => {
-      logger.log("port in use error");
-      logger.log(err);
-    });
-  } else {
-    portAvailable(ports).then(p => {
-      if (p) {
-        port = p;
-
-        server = appServer.listen(p, () => {
-          logger.log("extension sever listening on", p);
-        });
-
-        server.on('error', (err: any) => {
-          logger.log("port in use error");
-          logger.log(err);
-        });
-      }
-    }).catch(err => {
-      console.log(err);
-    })
-  }
-}
-
-function closeServer() {
-  if(server) {
-    server.close();
-  }
-}
-
 function createDialog(url: string, defaults: object = {}) {
   // this function should create all the custom dialog boxes
   // from the Trackly static html template.
@@ -346,9 +310,9 @@ function showNotification(title: string, body: string) {
 function initializeStoreVars() {
   appStarted = true;
   let extRuntime = store.get('extRuntime'),
-    extInstalled = store.get('extInstalled');
+    extInstalled = Utility.checkForExtensions();
 
-  if (extRuntime === undefined && extInstalled === undefined) {
+  if (extRuntime === undefined && !extInstalled) {
     shell.openExternal('https://trackly.com/browser');
     store.set("extRuntime", true);
   }
@@ -378,11 +342,32 @@ app.on("activate", () => {
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
 
+  powerMonitor.on('suspend', () => {
+    if(notificationWindow) {
+      notificationWindow.close();
+    }
+    
+    if(appWindow) { appWindow.webContents.send("suspend"); }
+    
+    uploader.upload(() => {});
+  });
+
+  powerMonitor.on('resume', () => {
+    if(appWindow) { appWindow.webContents.send("resetTimer"); }
+  });
+
   // create the main window application
   appWindow = createApplicationWindow();
 
   // initiate the system tray program.
   appTray = systemTray();
+
+  // check the comm with the browsers
+  Utility.checkNativeMessaging();
+  Utility.checkForExtensions();
+
+  // start listening for messages
+  NativeMessaging.start();
 
   // start the autoUpdater
   autoAppUpdater();
@@ -620,8 +605,8 @@ ipcMain.on("timer", (event: any, args: any) => {
     // current window on action.
     ActiveWindow.current(0);
 
-    // start the browser extension server.
-    startServer();
+    // native messsages
+    NativeMessaging.start();
 
     timer.ticker.subscribe(
       async tick => {
@@ -672,6 +657,6 @@ ipcMain.on("timer", (event: any, args: any) => {
     idler.clearInterval();
     clearTimeout(shotOut);
     timer.complete();
-    closeServer();
+    NativeMessaging.stop();
   }
 });

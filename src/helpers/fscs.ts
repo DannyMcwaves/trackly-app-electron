@@ -57,9 +57,12 @@ export class Fscs {
    * if time tracked is less than 1 minute, unlink the json and jpeg files.
    */
   public appendMain(file: string, json: string) {
-    let data = JSON.parse(json),
-      fileData = JSON.parse(fse.readFileSync(file).toString());
 
+    let data = JSON.parse(json);
+    let fileData = JSON.parse(fse.readFileSync(file).toString());
+    fileData.events = data.events;
+    fileData.activities = data.activities;
+    
     fileData.events = data.events;
     fileData.activities = data.activities;
 

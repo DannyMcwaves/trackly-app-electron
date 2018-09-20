@@ -291,7 +291,13 @@ let utiltiy = {
   checkForExtensions: () => {
     fse.readdir(nmSwapFileDir, function(err, files) {
         if (err) {
-           return false;
+          // if there is no folder reinstall
+          if (err.code === 'ENOENT'){
+             fse.unlink(nmInstallationSuccess, err => {
+                if (err) logger.error(err);
+              }); 
+          }
+          return false;
         } else {
            if (!files.length) {
                return false;

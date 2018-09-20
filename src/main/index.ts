@@ -634,6 +634,8 @@ ipcMain.on("timer", (event: any, args: any) => {
 
         Emitter.lastSynced = stopTime;
 
+        NativeMessaging.stop();
+
         // append stop logging to the global app state.
         Emitter.appendEvent("stopLogging", stopTime, {projectId: args.projectId});
 

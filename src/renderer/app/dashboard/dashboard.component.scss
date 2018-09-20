@@ -175,7 +175,10 @@ footer {
     bottom: 3px;
   }
   .clickable {
-    cursor: pointer;
+    &:hover{
+      color: #3ECF8E;
+        cursor: pointer;
+    }
   }
 
   #tooltip {

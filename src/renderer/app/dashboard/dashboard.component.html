@@ -77,7 +77,7 @@
     <!-- Footer -->
     <footer>
         <div class="footer-sync">
-          <i (click)="refreshWorkSpace()" class="fa fa-fw fa-2x fa-refresh mr-1 clickable"></i>
+          <i (click)="refreshWorkSpace()" class="fa fa-fw fa-2x fa-refresh mr-1" [ngClass]="{'clickable': refresherTimeout }"></i>
           <div id="tooltip" class="pb-2 pt-1 px-2">
             Refresh Workspace
           </div>

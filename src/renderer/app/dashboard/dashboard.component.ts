@@ -58,6 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private reAssign: boolean = false;
     private showNotification: boolean = true;
     private IdleFrom: string;
+    public refresherTimeout: boolean = true;
 
     /**
      * Dashboard component constructor with added protection
@@ -358,8 +359,18 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      * refresh the last sync and everything
      */
     refreshWorkSpace() {
-      this.lastSynced = 'refresh';
-      ipcRenderer.send("resetTimer");
+      if(this.refresherTimeout){
+        this.lastSynced = 'refresh';
+        ipcRenderer.send("resetTimer");
+        this._refreshTimeoutTimer(); 
+      }
+    }
+
+    _refreshTimeoutTimer(){
+      this.refresherTimeout = false;
+      setTimeout(() => {
+        this.refresherTimeout = true;
+      }, CONSTANTS.REFRESH_BUTTON_TIMEOUT);
     }
 
     _refresher() {

@@ -5,8 +5,23 @@ import * as logger from "electron-log";
 import * as fs from "fs-extra";
 
 const path = require('path');
+const homedir = require('os').homedir();
 
-const appDir = app.getPath("userData");
+// in dev mode use production swapDir this requires desktop app with nativeMessages to be installed on th system
+const getNMswapDir = () => {
+    if(process.env.NODE_ENV !== "production"){
+        if(process.platform === 'darwin'){
+            return homedir + '/Library/Application Support/trackly-desktop';
+        }
+        if(process.platform === 'win32'){
+            return homedir + '\\AppData\\Roaming\\trackly-desktop';
+        }
+    }else{
+        return app.getPath("userData");
+    }
+}
+
+const appDir = getNMswapDir();
 const nativeMessagesDir = appDir + "/nativeMessages";
 let watch : any = null;
 // mac have the same event on creation and on file write so we are using the switch not to duplicae events

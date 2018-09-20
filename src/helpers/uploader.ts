@@ -38,6 +38,8 @@ export class Uploader {
           return;
         }
 
+        logger.log(fse.readFileSync(`${dir}/${file}`, 'utf8'));
+
         const data = {
           res: fse.createReadStream(`${dir}/${file}`)
         };

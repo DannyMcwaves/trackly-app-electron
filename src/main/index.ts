@@ -344,12 +344,15 @@ app.on("ready", () => {
       notificationWindow.close();
     }
     
-    if(appWindow) { appWindow.webContents.send("suspend"); }
+    //if(appWindow) { appWindow.webContents.send("suspend"); }
     
-    uploader.upload(() => {});
+    //uploader.upload(() => {});
   });
 
   powerMonitor.on('resume', () => {
+    if(notificationWindow) {
+      notificationWindow.close();
+    }
     if(appWindow) { appWindow.webContents.send("resetTimer"); }
   });
 

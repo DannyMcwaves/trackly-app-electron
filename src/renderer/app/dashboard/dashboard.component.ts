@@ -308,7 +308,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         if (!this.activeProject.id) {
           ipcRenderer.send("show:notification");
         }
-      }, 3600000)
+      }, CONSTANTS.TRACKING_OFF_NOTIFY_TRESHOLD)
     }
 
     /**

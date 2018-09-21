@@ -45,6 +45,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private baseProjectHeight = 60;
     private maxProjectsLength = 5;
     private nextInterval: any;
+    private trackingOffTimer: any;
 
     // idle stuff
     private idleDisplay: string = "none";
@@ -56,7 +57,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     private currentIdleProject: string = "Madison Square";
     private activeProjectCache: any = {};
     private reAssign: boolean = false;
-    private showNotification: boolean = true;
     private IdleFrom: string;
     public refresherTimeout: boolean = true;
 
@@ -132,6 +132,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         // before the window unloads clear the tracking next day interval
         window.onbeforeunload = (ev: any) => {
           clearInterval(this.nextInterval);
+          clearInterval(this.trackingOffTimer);
         };
 
         // Show update bar
@@ -302,6 +303,14 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
     }
 
+    trackingOffNotifyer(){
+      this.trackingOffTimer = setInterval(()=>{
+        if (!this.activeProject.id) {
+          ipcRenderer.send("show:notification");
+        }
+      }, 3600000)
+    }
+
     /**
      * check next day
      * */
@@ -309,11 +318,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
       this.nextInterval = setInterval(() => {
 
         let newDate = new Date();
-
-        if (newDate.getHours() === 9 && this.showNotification && !this.activeProject.id) {
-          ipcRenderer.send("show:notification");
-          this.showNotification = false;
-        }
 
         if (this.today !== newDate.getDate()) {
 
@@ -331,8 +335,6 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
           this.totalIimeTodayCached = 0;
 
-          this.showNotification = true;
-
           this.today = newDate.getDate();
 
           // if there is no active project, then do not refresh this workspace.
@@ -349,6 +351,10 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
           }
         }
       }, 10000);
+    }
+
+    fshowNotification(){
+      ipcRenderer.send("show:notification");
     }
     
     appRestart(){
@@ -635,6 +641,9 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
                 // keep track of the next day and get new projects
                 this.trackNextDay();
+
+                // display notification every hour
+                this.trackingOffNotifyer();
 
             }, error => {
                 this.logOut();

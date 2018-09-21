@@ -292,16 +292,16 @@ function createDialog(url: string, defaults: object = {}) {
 }
 
 function showNotification(title: string, body: string) {
-  if (process.platform === 'win32') {
-    if (appTray) {
-      appTray.displayBalloon({title, content: body});
-    }
-  } else {
+  // if (process.platform === 'win32') {
+  //   if (appTray) {
+  //     appTray.displayBalloon({title, content: body});
+  //   }
+  // } else {
     if (Notification.isSupported()) {
       let notes = new Notification({ title, body });
       notes.show();
     }
-  }
+  // }
 }
 
 function initializeStoreVars() {
@@ -344,8 +344,8 @@ app.on("ready", () => {
       notificationWindow.close();
     }
     
+    // there is no time to react
     //if(appWindow) { appWindow.webContents.send("suspend"); }
-    
     //uploader.upload(() => {});
   });
 
@@ -365,9 +365,6 @@ app.on("ready", () => {
   // check the comm with the browsers
   Utility.checkNativeMessaging();
   Utility.checkForExtensions();
-
-  // start listening for messages
-  NativeMessaging.start();
 
   // start the autoUpdater
   autoAppUpdater();

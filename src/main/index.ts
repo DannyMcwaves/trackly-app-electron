@@ -22,9 +22,6 @@ import {createPrefWindow} from "../helpers/pref";
 import { Utility } from "../helpers/utility";
 import { NativeMessaging } from "../helpers/native-messaging"
 
-//setup logger with version number, in dev mode this will log electron version
-logger.transports.file.format = `{y}-{m}-{d} {h}:{i}:{s}:{ms} ${app.getVersion()} {text}`;
-
 // Logger
 autoUpdater.logger = logger;
 
@@ -95,6 +92,7 @@ const trayMenuTemplate: MenuItemConstructorOptions[] = [
 const idler = new Idler(fscs, uploader);
 
 // setup file logger to contain all error logs from elctron-logger.
+// logger global setup moved here
 fscs.logger(logger);
 
 // Define application mode (production or development)
@@ -252,7 +250,7 @@ function autoAppUpdater() {
   });
 
   autoUpdater.on('error', (ev, err) => {
-    logger.log(err);
+    logger.error(err);
   });
 
   autoUpdater.on('download-progress', (ev, progressObj) => {});
@@ -338,8 +336,10 @@ app.on("activate", () => {
 
 // Create main BrowserWindow when electron is ready
 app.on("ready", () => {
+  logger.info("Application ready.");
 
   powerMonitor.on('suspend', () => {
+    logger.warn('System suspend detected');
     if(notificationWindow) {
       notificationWindow.close();
     }
@@ -353,6 +353,7 @@ app.on("ready", () => {
     if(notificationWindow) {
       notificationWindow.close();
     }
+    logger.warn('System resume detected');
     if(appWindow) { appWindow.webContents.send("resetTimer"); }
   });
 
@@ -512,7 +513,7 @@ ipcMain.on('checkUpdates', (event: any) => {
   });
 
   autoUpdater.on('update-available', (ev, info) => {
-    logger.log('Update available.');
+    logger.info('Update available.');
     const dialogOpts = {
       type: 'info',
       icon: image,
@@ -531,7 +532,7 @@ ipcMain.on('checkUpdates', (event: any) => {
   });
 
   autoUpdater.on('error', (ev, err) => {
-    logger.log(err);
+    logger.error(err);
   });
 
 });

@@ -8,6 +8,7 @@ import {UserService} from "../services/user.service";
 import {OnInit, AfterViewChecked} from "@angular/core/src/metadata/lifecycle_hooks";
 import {Router} from "@angular/router";
 import {HttpClient, HttpParams} from "@angular/common/http";
+import * as logger from "electron-log";
 import { CONSTANTS } from "../../../constants";
 
 import * as moment from "moment";
@@ -380,7 +381,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     }
 
     _refresher() {
-
+      logger.info('Refreshing Workspace...');
       // Load in the workspaces
       this.getWorkspaces().subscribe(response => {
 
@@ -585,7 +586,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
      * Load initial projects
      */
     ngOnInit() {
-
+      logger.info('Dashboard init...');
         // Load in the workspaces
         this.getWorkspaces().subscribe(response => {
             this.workspaces = response;
@@ -601,6 +602,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
               }
             }, error => {
+              logger.error(error);
               this.logOut();
             });
 
@@ -646,10 +648,12 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
                 this.trackingOffNotifyer();
 
             }, error => {
+                logger.error(error);
                 this.logOut();
             });
 
         }, error => {
+            logger.error(error);
             this.logOut();
         });
     }

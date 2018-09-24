@@ -17,7 +17,7 @@ export class Uploader {
   }
 
   public upload(callback: any) {
-    logger.log('Upload started');
+    logger.info('Upload started');
     setTimeout(() => {
       this.uploadActivities(() => {
         // this.uploadScreenshots();
@@ -38,7 +38,7 @@ export class Uploader {
           return;
         }
 
-        logger.log(fse.readFileSync(`${dir}/${file}`, 'utf8'));
+        logger.info(fse.readFileSync(`${dir}/${file}`, 'utf8'));
 
         const data = {
           res: fse.createReadStream(`${dir}/${file}`)
@@ -53,7 +53,7 @@ export class Uploader {
           } 
           if(res.statusCode == 200){
             fse.unlink(`${dir}/${file}`, () => { });
-            logger.log(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
+            logger.info(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
             callback();
           }else if(res.statusCode === 401) {
             this.checkUser();
@@ -92,7 +92,7 @@ export class Uploader {
           }
           if (res.statusCode == 200) {
             fse.unlink(`${dir}/${file}`, () => { });
-            logger.log(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
+            logger.info(`File ${file} uploaded to ${this.api.uploadScreenshotsURL()}: ${file}`);
           }else if(res.statusCode === 401){
             this.checkUser();
           }else {

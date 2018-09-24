@@ -77,9 +77,12 @@ export class Fscs {
    * let the log file be main point where console.log outputs it data.
    */
   public logger(logger: any) {
+    // this is global settings for logger
     this.logFile = `${this.reportsPath}/${Date.now()}.log`;
     logger.transports.file.file = this.logFile;
-    logger.transports.file.level = "error";
+    logger.transports.file.level = "info";
+    //setup logger with version number, in dev mode this will log electron version
+    logger.transports.file.format = `[{y}-{m}-{d} {h}:{i}:{s}:{ms}][v${app.getVersion()}][{level}] {text}`;
   }
 
   public get currentLogFile() {

@@ -110,6 +110,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
         // send idle timer signal to UI
         ipcRenderer.on("idler", (event: any) => {
+          logger.info('Idler start');
           this.isIdle = true;
           this.IdleFrom = moment().subtract(CONSTANTS.IDLE_TRESHOLD, "seconds").format("h:mm A");
           this.idleStartTime = moment().milliseconds(0);
@@ -307,6 +308,8 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
     trackingOffNotifyer(){
       this.trackingOffTimer = setInterval(()=>{
         if (!this.activeProject.id) {
+          logger.info('Track time notification');
+          logger.info(this.activeProject);
           ipcRenderer.send("show:notification");
         }
       }, CONSTANTS.TRACKING_OFF_NOTIFY_TRESHOLD)
@@ -321,6 +324,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
         let newDate = new Date();
 
         if (this.today !== newDate.getDate()) {
+          logger.info('New Day started...');
 
           ipcRenderer.send('checkUpdates');
 

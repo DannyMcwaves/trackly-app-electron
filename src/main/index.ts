@@ -169,7 +169,7 @@ function createApplicationWindow() {
     if(val === 'Minimize') {
       if (close !== "ya" && !forceQuit) {
         event.preventDefault();
-        windowFrame.minimize();
+        windowFrame.hide();
       } else if(forceQuit) {
         event.preventDefault();
         close = 'ya';
@@ -222,7 +222,7 @@ function systemTray() {
 
   tray.on('click', () => {
     if (appWindow) {
-      appWindow.focus();
+      appWindow.show();
     }
   });
 
@@ -343,7 +343,7 @@ app.on("ready", () => {
     if(notificationWindow) {
       notificationWindow.close();
     }
-    
+
     // there is no time to react
     //if(appWindow) { appWindow.webContents.send("suspend"); }
     //uploader.upload(() => {});
@@ -397,7 +397,7 @@ ipcMain.on('quit', (event: any, res: any) => {
     store.set("close", res.value);
   }
   if(res.value === 'Minimize') {
-    appWindow.minimize();
+    appWindow.hide();
   } else if(res.value === 'Quit') {
     close = 'ya';
     if (appWindow) {

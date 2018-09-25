@@ -151,7 +151,7 @@ export class DashboardComponent implements OnInit, AfterViewChecked {
 
          // idle time handeling from main index on sustem standby
          ipcRenderer.on("suspend", (event: any) => {
-          if( this.isIdle = true ) this.closeIdleTime();
+          if( this.isIdle === true ) this.closeIdleTime();
         });
     }
 

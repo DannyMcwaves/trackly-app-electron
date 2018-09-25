@@ -343,10 +343,8 @@ app.on("ready", () => {
     if(notificationWindow) {
       notificationWindow.close();
     }
-
-    // there is no time to react
-    //if(appWindow) { appWindow.webContents.send("suspend"); }
-    //uploader.upload(() => {});
+    if(appWindow) { appWindow.webContents.send("suspend"); }
+    uploader.upload(() => {});
   });
 
   powerMonitor.on('resume', () => {

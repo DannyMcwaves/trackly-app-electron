@@ -53,7 +53,7 @@ export class Uploader {
           } 
           if(res.statusCode == 200){
             fse.unlink(`${dir}/${file}`, () => { });
-            logger.info(`File ${file} uploaded to ${this.api.uploadActivitiesURL()}: ${file}`);
+            logger.info(`File ${file} uploaded to ${this.api.uploadActivitiesURL().slice(0,-78)}: ${file}`);
             callback();
           }else if(res.statusCode === 401) {
             this.checkUser();
